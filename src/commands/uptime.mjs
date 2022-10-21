@@ -1,4 +1,4 @@
-/** @type {import("../data/DeezCordTypes.mjs").CommandExport} */
+/** @type {import("../data/BotTypes.mjs").CommandExport} */
 export default {
     name: "uptime",
     description: "Shows the Bot's Uptime",

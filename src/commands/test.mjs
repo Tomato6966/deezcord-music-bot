@@ -1,4 +1,4 @@
-/** @type {import("../data/DeezCordTypes.mjs").CommandExport} */ 
+/** @type {import("../data/BotTypes.mjs").CommandExport} */ 
 export default {
     name: "test",
     description: "Tests",

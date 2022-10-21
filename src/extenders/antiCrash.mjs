@@ -16,19 +16,4 @@ export default (client) => {
         //console.log(' [antiCrash] :: Multiple Resolves');
         //console.log(type, promise, reason);
     });
-    process.on('SIGINT', () => process.exit());
-    process.on('SIGUSR1', () => process.exit());
-    process.on('SIGUSR2', () => process.exit());
-    process.on("exit", async () => {
-        console.log("\n\nEXITING and stopping all PLAYERS\n\n");
-        if(!client.deezCord) return console.error("No deezcord manager");
-        for (const guildId of client.deezCord.players.map(x => x.guild)) {
-            try {
-                client.deezCord.options.send(guildId, {"op":4,"d":{"self_deaf":false,"guild_id":guildId,"channel_id":null,"self_mute":false}});
-                //client.musicManager.nodes.each(node => node.send({"op": "destroy", guildId}));
-            } catch (e) {
-                console.error(e);
-            }
-        }
-    })
 }

@@ -22,10 +22,10 @@ export class BotClient extends Client {
         };
 
         this.allCommands = [];
-        this.logger = new Logger({ logLevel:0, prefix: "DEEZCORD" });
+        this.logger = new Logger({ logLevel:0, prefix: "Discord-Bot" });
         this.cluster = new ClusterClient(this);
 
-        this.DeezCache = {
+        this.botCache = {
             fetchedApplication: [],
         }
         this.init();
@@ -43,7 +43,7 @@ export class BotClient extends Client {
         this.logger.info(`Loading Extenders`);
         await this.loadExtenders();
 
-        return this.emit("DeezCordLoaded", this);
+        return this.emit("TomatoBot6966Loaded", this);
     }
     get guildsAndMembers() {
         return {
@@ -160,7 +160,7 @@ export class BotClient extends Client {
                                             this.buildOptions(command, Slash)
                                             return Slash;
                                         });
-                                        command.commandId = this.DeezCache.fetchedApplication?.find?.(c => c?.name == subSlash.name)?.permissions?.commandId ?? "commandId";
+                                        command.commandId = this.botCache.fetchedApplication?.find?.(c => c?.name == subSlash.name)?.permissions?.commandId ?? "commandId";
                                         command.slashCommandKey = `/${subSlash.name} ${Group.name} ${command.name}`
                                         command.mention = `<${command.slashCommandKey}:${command.commandId}>`
                                         // FOLDERSTRUCTURE: /commands/slash/XYZ/info/cmd.js
@@ -224,7 +224,7 @@ export class BotClient extends Client {
                         }
                     }
                     this.buildOptions(command, Slash);
-                    command.commandId = this.DeezCache?.fetchedApplication?.find?.(c => c?.name == command.name)?.permissions?.commandId ?? "commandId";
+                    command.commandId = this.botCache?.fetchedApplication?.find?.(c => c?.name == command.name)?.permissions?.commandId ?? "commandId";
                     command.slashCommandKey = `/${command.name}`
                     command.mention = `<${command.slashCommandKey}:${command.commandId}>`
                     // FOLDERSTRUCTURE: /commands/slash/cmd.js
@@ -258,7 +258,7 @@ export class BotClient extends Client {
         
         const allSlashs = await this.application.commands.fetch(undefined).then(x => [...x.values()]).catch(console.warn) || [...this.application.commands.cache.values()] || [];
         if(allSlashs?.length) {
-            this.DeezCache.fetchedApplication = allSlashs;
+            this.botCache.fetchedApplication = allSlashs;
             for(const [key, value] of [...this.commands.entries()]) {
                 if(!value.slashCommandKey) continue;
                 const Base = value.slashCommandKey.split(" ")[0].replace("/", "");

@@ -25,7 +25,7 @@ export async function statusUpdater(client) {
         return { guilds: 0, members: 0 }
     })
     for (let i = shardIds.length - 1; i >= 0; i--) {
-        const shardId = shardIds[i];
-        client.user.setActivity(`Deezer.com on shard #${shardId}`, { shardId, type: ActivityType.Listening })
+        const shardId = shardIds[i]; // Handler by Tomato6966
+        client.user.setActivity(`Discord Bot on shard #${shardId}`, { shardId, type: ActivityType.Listening })
     }
 }

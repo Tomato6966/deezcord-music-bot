@@ -1,5 +1,7 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 
+// for each folder inside of /commands, you need to define a dirSetup.
+// that's how to define permissions for all commands inside of that folder.
 export const dirSetup = [
     /*{
         Folder: "Info", // == FolderName
