@@ -1,14 +1,17 @@
 import { ActivityType } from "discord.js";
 import { Millisecond } from "../../utils/TimeUtils.mjs";
 
-export default (client) => {
+/** @param {import("../../structures/BotClient.mjs").BotClient} client */
+export default async (client) => {
     client.logger.info(`Discord Bot is ready as ${client.user.tag}`);
-
     // update status
     statusUpdater(client); setInterval(() => statusUpdater(client), Millisecond.Minute(30))
+
+    if(process.env.PUBLICSLASH === "true") await client.publishCommands(process.env.DEVGUILD || undefined);
+    client.prepareCommands();
 }
 
-
+/** @param {import("../../structures/BotClient.mjs").BotClient} client */
 export async function statusUpdater(client) {
     const shardIds = [...client.cluster.ids.keys()];
     // 8 .... 0
@@ -23,6 +26,6 @@ export async function statusUpdater(client) {
     })
     for (let i = shardIds.length - 1; i >= 0; i--) {
         const shardId = shardIds[i];
-        client.user.setActivity(`Deezer.com | ${guilds} Guilds | ${members} Members | On Cluster: ${client.cluster.id} (#${shardId})`, { shardId, type: ActivityType.Listening })
+        client.user.setActivity(`Deezer.com on shard #${shardId}`, { shardId, type: ActivityType.Listening })
     }
 }

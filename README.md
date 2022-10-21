@@ -29,13 +29,35 @@ Official Repository for the Community Deezer Music Power Bot.
 
 # Self-Hosting Guide
 
+### Preparation:
+
+**Software you need:**
+
+ - [nodejs v16+](https://nodejs.org/en/download/) | [Linux Installer](https://github.com/Tomato6966/Debian-Cheat-Sheet-Setup/wiki/3.1-Install-nodejs-and-npm)
+ - [Lavalink and thus java](https://github.com/Tomato6966/deezcord-music-bot/tree/LavalinkServer) with Deezer Setup (check the link for a tutorial)
+ - [postgresQL best with citusdata.com](https://docs.citusdata.com/en/v11.1/installation/single_node_debian.html)
+ 
+### Steps to get the Bot running
+
+*assuming, you have a lavalink Server running, as well as a postgresQL database.*
+
+0. [Download](https://github.com/Tomato6966/deezcord-music-bot/archive/refs/heads/main.zip) the repository or `git clone https://github.com/Tomato6966/deezcord-music-bot` it.
+
 1. Rename `example.env` -> `.env`
     - Then fill in the Values
+    - Make sure to pass the correct `LAVALINK_PORT`, `LAVALINK_HOST` and `LAVALINK_PASSWORD`
+    - Also make sure to pass the correct `DATABASE_URL`
+
+2. Install Packages
+    - Do it by running: `npm install` in a console in the project repository
     
-    
- 
- 
-    
+3. Initialize the Database
+    - By doing: `npx prisma migrate dev` and afterwards `npx prisma generate`
+
+4. Start it
+    - Just type: `npm run start` or `node ./src/index.mjs`;
+
+
 ## Todos
 
 ✖ Listen to Music from Deezer
