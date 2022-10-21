@@ -5,6 +5,7 @@ import { promises } from "fs";
 import { join, resolve } from "path";
 import { color_log, Logger } from "../utils/Logger.mjs";
 import { dirSetup } from "../data/SlashCommandDirSetup.mjs";
+import {APIClient} from "./APIClient.mjs";
 
 export class BotClient extends Client {
     constructor(options = {}) {
@@ -51,6 +52,11 @@ export class BotClient extends Client {
         await this.loadExtenders();
         this.logger.pure(`${"-=".repeat(40)}-\n`);
 
+        this.logger.pure(`\n${"-=".repeat(40)}-`);
+        this.logger.info(`Starting API`);
+        this.startAPI();
+        this.logger.pure(`${"-=".repeat(40)}-\n`);
+
         return this.emit("DeezCordLoaded", this);
     }
     get guildsAndMembers() {
@@ -58,6 +64,16 @@ export class BotClient extends Client {
             guilds: this.guilds.cache.size,
             members: this.guilds.cache.map(x => x.memberCount).reduce((a,b) => a+b,0)
         }
+    }
+    startAPI() {
+        const api = new APIClient({
+            port: process.env.APIPORT,
+            secret: process.env.SECRET,
+            redirect: process.env.REDIRECT,
+            appId: process.env.APPID,
+            client: this,
+        });
+        return api.init();
     }
     async loadExtenders() {
         try {
