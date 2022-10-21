@@ -1,7 +1,9 @@
 # Base discord.js v14 Command Handler
 
+- Official Repoistory: [Tomato6966/discord-js-v14-handler](https://github.com/Tomato6966/discord-js-v14-handler)
+
 Written by Tomato6966
-Made for [Deezcord](https://github.dev/Tomato6966/deezcord-music-bot)
+Made for [Deezcord](https://github.com/Tomato6966/deezcord-music-bot)
 
 
 # Features
