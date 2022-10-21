@@ -42,7 +42,7 @@ export class Logger {
     constructor(options = {}) {
         this.prefix = options.colorDefault ?? "INFO-LOG";
         this.dateEnabled = options.dateEnabled ?? true;
-        this.logLevel = options.logLevel ?? process.env.logLevel || 1;
+        this.logLevel = options.logLevel ?? (process.env.logLevel || 1);
     }
     debug(text) {
         if(this.logLevel > 0) return;
