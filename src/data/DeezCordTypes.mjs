@@ -4,6 +4,8 @@
  * @typedef {(client: import("../structures/BotClient.mjs").BotClient, interaction: import("discord.js").CommandInteraction) => Promise<any> } executeType
 */
 
+import { ApplicationCommandType, BitField } from "discord.js";
+
 /**
  * @typedef {Object} optionTypesType
  * @prop {string} attachment
@@ -28,19 +30,28 @@
  * @prop {executeType} execute
  * @prop {string} name
  * @prop {string} [description]
+ * @prop {BitField|string} defaultPermissions
  * @prop {boolean} [guildOnly]
  * @prop {{name: string[], description:string[]}[]} [localizations]
- * @prop {string} [slashCommandKey]
- * @prop {string[]} [aliases]
  * @prop {bigint[]} [allowedPermissions]
  * @prop {boolean} [allowSkipGroup]
- * @prop {optionsType[]} options
+ * @prop {optionsType[]} [options]
+ * @prop {string} [commandId] - set by the loader
+ * @prop {string} [slashCommandKey] - set by the loader
  */
 /**
- * @typedef {Object} preCommandsType
- * @prop {CommandExportType[]} [preCommands]
+ * @typedef {CommandExportType} CommandExport
  */
 /**
- * @typedef {CommandExportType & preCommandsType} CommandExport
+ * @typedef {Object} CommandExportType
+ * @prop {executeType} execute
+ * @prop {string} name
+ * @prop {ApplicationCommandType} type
+ * @prop {{name: string[]}[]} [localizations]
+ * @prop {BitField|string} defaultPermissions
+ * @prop {boolean} [isContext] - set by the loader
+ */
+/**
+ * @typedef {CommandExportType} CommandExpContextExportort
  */
 exports.unused = {}

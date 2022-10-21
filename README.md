@@ -29,6 +29,8 @@ Official Repository for the Community Deezer Music Power Bot.
 
 # Self-Hosting Guide
 
+- Note [here](https://github.com/Tomato6966/deezcord-music-bot/wiki) you can find a dedicated Wiki!
+
 ### Preparation:
 
 **Software you need:**
@@ -71,3 +73,7 @@ Official Repository for the Community Deezer Music Power Bot.
 ✖ Statistics
 
 ✖ Link your Account and do activities with it
+
+
+
+

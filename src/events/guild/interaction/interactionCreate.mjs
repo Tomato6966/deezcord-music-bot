@@ -1,4 +1,5 @@
 import { Collection, InteractionType } from "discord.js";
+import { contextMenuHandler } from "../../../handlers/ContextMenuHandler.mjs";
 import { slashCommandHandler } from "../../../handlers/SlashCommandHandler.mjs";
 
 /** 
@@ -13,6 +14,6 @@ export default async (client, interaction) => {
     interaction.attachments = new Collection();
         
     // here we can execute messageCreate functions...
-    // if(interaction.type === InteractionType.ApplicationCommandAutocomplete) return handleAutoComplete(client, interaction);
-    if(interaction.type === InteractionType.ApplicationCommand) return slashCommandHandler(client, interaction);
+    if(interaction.isUserContextMenuCommand() || interaction.isMessageContextMenuCommand()) return contextMenuHandler(client, interaction);
+    if(interaction.isCommand()) return slashCommandHandler(client, interaction);
 }

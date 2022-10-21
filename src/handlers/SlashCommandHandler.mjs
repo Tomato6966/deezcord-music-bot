@@ -37,7 +37,10 @@ export async function slashCommandHandler(client, interaction) {
 }
 
 /** @param {import("discord.js").CommandInteraction} interaction */
-export function parseSlashCommandKey(interaction) {
+export function parseSlashCommandKey(interaction, contextmenu) {
+    if(contextmenu) {
+        return `contextcmd_${interaction.commandName}`
+    }
     const keys = ["slashCmd", interaction.commandName];
     if(interaction.options._subcommand) { keys.push(`${interaction.options._subcommand}`); keys[0] = "subcmd"; }
     if(interaction.options._group) { keys.splice(1, 0, `${interaction.options._group}`); keys[0] = "groupcmd"; }
@@ -46,6 +49,18 @@ export function parseSlashCommandKey(interaction) {
 
 export async function checkCommand(client, command, ctx, ...extras) {
     const { dontCheckCooldown } = extras?.[0] || {};
+
+    if(command.guildOnly && !ctx.guild) {
+        return await ctx.reply({
+            ephemeral: true,
+            embeds: [
+                new EmbedBuilder()
+                    .setColor(resolveColor("#ff0000"))
+                    .setTitle("Guild Only")
+                    .setDescription(`>>> You can use this Command only in Guilds`)
+            ]
+        }).catch(() => null), false;
+    }
 
     if(command.mustPermissions?.length) {
         if(ctx.user.id !== ctx.guild?.ownerId && !ctx?.member?.permissions?.has?.(PermissionFlagsBits.Administrator) && command.mustPermissions.some(x => !ctx?.member?.permissions?.has?.(x)))  {
@@ -74,7 +89,6 @@ export async function checkCommand(client, command, ctx, ...extras) {
             }).catch(() => null), false;
         }
     }
-
     if(!dontCheckCooldown && isOnCooldown(client, command, ctx)) return false;
 
     return true;

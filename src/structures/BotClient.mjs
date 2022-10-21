@@ -31,17 +31,25 @@ export class BotClient extends Client {
         this.init();
     }
     async init() {
-        console.log(`\n${"-=".repeat(40)}-`);
+        this.logger.pure(`\n${"-=".repeat(40)}-`);
         this.logger.info(`Loading Events`);
         await this.loadEvents();
+        this.logger.pure(`${"-=".repeat(40)}-\n`);
 
-        console.log(`\n${"-=".repeat(40)}-`);
+        this.logger.pure(`\n${"-=".repeat(40)}-`);
         this.logger.info(`Loading Commands`);
-        await this.loadCommads();
+        await this.loadCommands();
+        this.logger.pure(`${"-=".repeat(40)}-\n`);
 
-        console.log(`\n${"-=".repeat(40)}-`);
+        this.logger.pure(`\n${"-=".repeat(40)}-`);
+        this.logger.info(`Loading ContextMenus`);
+        await this.loadContextMenu();
+        this.logger.pure(`${"-=".repeat(40)}-\n`);
+
+        this.logger.pure(`\n${"-=".repeat(40)}-`);
         this.logger.info(`Loading Extenders`);
         await this.loadExtenders();
+        this.logger.pure(`${"-=".repeat(40)}-\n`);
 
         return this.emit("DeezCordLoaded", this);
     }
@@ -85,7 +93,7 @@ export class BotClient extends Client {
         }
         return true;
     }
-    async loadCommads(path="/src/commands") {
+    async loadCommands(path="/src/commands") {
         try {
             this.allCommands = [];
             this.commands.clear();
@@ -103,9 +111,6 @@ export class BotClient extends Client {
                     
                     if(thisDirSetup.defaultPermissions) {
                         subSlash.setDefaultMemberPermissions(thisDirSetup.defaultPermissions);
-                    }
-                    if(thisDirSetup.dmPermissions) {
-                        subSlash.setDefaultMemberPermissions(thisDirSetup.dmPermissions);
                     }
                     if(thisDirSetup.localizations?.length) {
                         for(const localization of thisDirSetup.localizations) {
@@ -141,7 +146,6 @@ export class BotClient extends Client {
                                         }
                                     }
                                     // get all slashcommands inside of this group folder
-                                    console.log(slashCommands)
                                     for (let sFile of slashCommands) {
                                         const groupCurPath = `${groupPath}/${sFile}`;
                                         const command = commands[sFile];
@@ -163,10 +167,7 @@ export class BotClient extends Client {
                                         command.commandId = this.DeezCache.fetchedApplication?.find?.(c => c?.name == subSlash.name)?.permissions?.commandId ?? "commandId";
                                         command.slashCommandKey = `/${subSlash.name} ${Group.name} ${command.name}`
                                         command.mention = `<${command.slashCommandKey}:${command.commandId}>`
-                                        // FOLDERSTRUCTURE: /commands/slash/XYZ/info/cmd.js
-                                        //   CMDKEYEXAMPLE: groupcmd_xyz_info_cmd
-                                        // CMDKEYSTRUCTURE: groupcmd_groupName_subName_cmdName
-                                        this.logger.debug(`✅ Group Command Loaded: /${groupDirSetup.name} ${thisDirSetup.name} ${command.name}`);
+                                        this.logger.debug(`✅ Group Command Loaded: ${command.slashCommandKey}`);
                                         this.commands.set("groupcmd_" + String(groupDirSetup.name).toLowerCase() + "_" + String(thisDirSetup.name).toLowerCase() + "_" + command.name, command)
                                     }
                                     return Group;
@@ -194,10 +195,7 @@ export class BotClient extends Client {
                             command.commandId = cache?.fetchedApplication?.find?.(c => c?.name == subSlash.name)?.permissions?.commandId ?? "commandId";
                             command.slashCommandKey = `/${subSlash.name} ${command.name}`
                             command.mention = `<${command.slashCommandKey}:${command.commandId}>`
-                            // FOLDERSTRUCTURE: /commands/slash/XYZ/cmd.js
-                            //   CMDKEYEXAMPLE: subcmd_xyz_cmd
-                            // CMDKEYSTRUCTURE: subcmd_subName_cmdName
-                            this.logger.debug(`✅ Sub Command Loaded: /${thisDirSetup.name} ${command.name}`);
+                            this.logger.debug(`✅ Sub Command Loaded: ${command.slashCommandKey}`);
                             this.commands.set("subcmd_" + String(thisDirSetup.name).toLowerCase() + "_" + command.name, command)
                         }
                     }
@@ -214,9 +212,6 @@ export class BotClient extends Client {
                     if(command.defaultPermissions) {
                         Slash.setDefaultMemberPermissions(command.defaultPermissions);
                     }
-                    if(command.dmPermissions) {
-                        Slash.setDefaultMemberPermissions(command.dmPermissions);
-                    }
                     if(command.localizations?.length) {
                         for(const localization of command.localizations) {
                             if(localization.name) Slash.setNameLocalization(localization.name[0], localization.name[1]);
@@ -227,10 +222,7 @@ export class BotClient extends Client {
                     command.commandId = this.DeezCache?.fetchedApplication?.find?.(c => c?.name == command.name)?.permissions?.commandId ?? "commandId";
                     command.slashCommandKey = `/${command.name}`
                     command.mention = `<${command.slashCommandKey}:${command.commandId}>`
-                    // FOLDERSTRUCTURE: /commands/slash/cmd.js
-                    //   CMDKEYEXAMPLE: slashcmd_cmd
-                    // CMDKEYSTRUCTURE: slashcmd_cmdName
-                    this.logger.debug(`✅ Slash Command Loaded: /${command.name}`);
+                    this.logger.debug(`✅ Slash Command Loaded: ${command.slashCommandKey}`);
                     this.commands.set("slashcmd_" + command.name, command)
                     this.allCommands.push(Slash.toJSON());
                     continue;
@@ -244,7 +236,33 @@ export class BotClient extends Client {
     async loadContextMenu(path="/src/contextmenu/") {
         try {
             const paths = await walks(`${process.cwd()}${path}`);
-            for(const file of paths) {
+            if(!paths?.length) return this.logger.debug("No Context Menus")
+            for(const path of paths) {
+                const command = await import(resolve(path)).then(x => x.default);
+                if (!command.name) {
+                    this.logger.error(`${path} not containing a Context-Command-Name`);
+                    continue;
+                }
+                if (!command.type) { // ApplicationCommandType.User || ApplicationCommandType.Message
+                    this.logger.error(`${path} not containing a Context-Command-Type`);
+                    continue;
+                }
+                const Slash = new ContextMenuCommandBuilder().setName(command.name).setType(command.type)
+                if(command.defaultPermissions) Slash.setDefaultMemberPermissions(command.defaultPermissions);
+                
+                if(command.localizations?.length) {
+                    for(const localization of command.localizations) if(localization.name) Slash.setNameLocalization(localization.name[0], localization.name[1]);
+                }
+
+                command.isContext = true;
+                //command.commandId = this.DeezCache?.fetchedApplication?.find?.(c => c?.name == command.name)?.permissions?.commandId ?? "commandId";
+                //command.slashCommandKey = `/${command.name}`
+                //command.mention = `<${command.slashCommandKey}:${command.commandId}>`
+                
+                this.logger.debug(`✅ Context Command Loaded: /${command.name}`);
+                this.commands.set("contextcmd_" + command.name, command)
+                this.allCommands.push(Slash.toJSON());
+                continue;
             }
         } catch (e) {
             this.logger.error(e);

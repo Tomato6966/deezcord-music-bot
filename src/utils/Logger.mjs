@@ -38,7 +38,7 @@ export class Logger {
      * @param {{prefix: string|false, dateEnabled: boolean, logLevel: 0|1|2|3|4|5}} options - The options value.
      */
     constructor(options = {}) {
-        this.prefix = options.colorDefault ?? "INFO-LOG";
+        this.prefix = options.prefix ?? "INFO-LOG";
         this.dateEnabled = options.dateEnabled ?? true;
         this.logLevel = options.logLevel ?? (process.env.LOGLEVEL || 1);
     }
@@ -65,5 +65,8 @@ export class Logger {
     error(...text) {
         if(this.logLevel > 5) return;
         return color_log(["FgRed"], text, this.dateEnabled, this.prefix && typeof this.prefix === "string" ? `Error  - ${this.prefix}` : "Error")
+    }
+    pure(...text) {
+        return console.log(...text)
     }
 }
