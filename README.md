@@ -4,10 +4,15 @@ Official Repository for the Community Deezer Music Power Bot. Not affialiated wi
 # Features [Planned]
 
 ✔ Listen to Music from Deezer
+
 ✔ Latest Chart Playlists auto-player Command
+
 ✔ Fast and crisp Audio Quality
+
 ✔ Feature Rich and stable
+
 ✔ Statistics
+
 ✔ Link your Account and do activities with it
 
 
@@ -29,8 +34,13 @@ Official Repository for the Community Deezer Music Power Bot. Not affialiated wi
 ## Todos
 
 ✖ Listen to Music from Deezer
+
 ✖ Latest Chart Playlists auto-player Command
+
 ✖ Fast and crisp Audio Quality
+
 ✖ Feature Rich and stable
+
 ✖ Statistics
+
 ✖ Link your Account and do activities with it
