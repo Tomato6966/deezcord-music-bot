@@ -51,10 +51,13 @@ Official Repository for the Community Deezer Music Power Bot.
 2. Install Packages
     - Do it by running: `npm install` in a console in the project repository
     
-3. Start it
+3. Initialize the Database
+    - By doing: `npx prisma migrate dev` and afterwards `npx prisma generate`
+
+4. Start it
     - Just type: `npm run start` or `node ./src/index.mjs`;
- 
-     
+
+
 ## Todos
 
 ✖ Listen to Music from Deezer
