@@ -7,8 +7,7 @@ export default async (client) => {
     // update status
     statusUpdater(client); setInterval(() => statusUpdater(client), Millisecond.Minute(30))
 
-    
-    await client.publishCommands();
+    if(process.env.PUBLICSLASH === "true") await client.publishCommands(process.env.DEVGUILD || undefined);
     client.prepareCommands();
 }
 
@@ -27,6 +26,6 @@ export async function statusUpdater(client) {
     })
     for (let i = shardIds.length - 1; i >= 0; i--) {
         const shardId = shardIds[i];
-        client.user.setActivity(`Deezer.com | ${guilds} Guilds | ${members} Members | On Cluster: ${client.cluster.id} (#${shardId})`, { shardId, type: ActivityType.Listening })
+        client.user.setActivity(`Deezer.com on shard #${shardId}`, { shardId, type: ActivityType.Listening })
     }
 }

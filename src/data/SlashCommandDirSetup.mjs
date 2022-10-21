@@ -1,7 +1,7 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 
 export const dirSetup = [
-    {
+    /*{
         Folder: "Info", // == FolderName
         name: "info", // == CommandName 
         localizations: [
@@ -30,5 +30,5 @@ export const dirSetup = [
                 ],
             }
         ]
-    }
+    }*/
 ]

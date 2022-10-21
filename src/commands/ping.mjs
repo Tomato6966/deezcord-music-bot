@@ -1,4 +1,4 @@
-/** @type {import("../../../data/DeezCordTypes.mjs").CommandExport} */
+/** @type {import("../data/DeezCordTypes.mjs").CommandExport} */
 export default {
     name: "ping",
     description: "Shows the Bot's Ping",
