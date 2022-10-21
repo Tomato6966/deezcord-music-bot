@@ -1,10 +1,11 @@
-import { Client, GatewayIntentBits, Partials, ActivityType, PresenceUpdateStatus, Collection } from "js";
-import { getInfo } = from "discord-hybrid-sharding";
-import { Second } = from "../utils/TimeUtils"; 
-import { promises } = from "fs";
+import { Client, GatewayIntentBits, Partials, ActivityType, PresenceUpdateStatus, Collection, Options } from "discord.js";
+import { ClusterClient, getInfo } from "discord-hybrid-sharding";
+import { Second } from "../utils/TimeUtils.mjs"; 
+import { promises } from "fs";
 import { join, resolve } from "path";
+import { Logger } from "../utils/Logger.mjs";
 
-export class botClient extends Client {
+export class BotClient extends Client {
     constructor(options = {}) {
         super({
             ...getDefaultClientOptions(),
@@ -14,16 +15,22 @@ export class botClient extends Client {
         this.eventPaths = new Collection();
         this.allCommands = [];
         this.cooldowns = new Collection();
+        this.logger = new Logger({
+            prefix: "DEEZCORD",
+        })
+        this.loadEvents();
+        this.cluster = new ClusterClient(this);
     }
     async loadEvents() {
-        const paths = await walks(`${process.cwd()}/events`);
+        const paths = await walks(`${process.cwd()}/src/events`);
         await Promise.all(
             paths.map(async (path) => {
-                const event = await import(resolve(path));
+                const event = await import(resolve(path))
                 const splitted = resolve(path).split("/")
-                const eventName = splitted.reverse()[0].replace(".js", "");
+                const eventName = splitted.reverse()[0].replace(".mjs", "").replace(".js", "");
                 this.eventPaths.set(eventName, { eventName, path: resolve(path) });
-                this.on(eventName, event.bind(null, this));
+                this.logger.debug(`✅ Event Loaded: ${eventName}`);
+                this.on(eventName, event.default.bind(null, this));
             })
         );
         return true;
@@ -38,12 +45,19 @@ export class botClient extends Client {
             })
         );
     }
+    get guildsAndMembers() {
+        return {
+            guilds: this.guilds.cache.size,
+            members: this.guilds.cache.map(x => x.memberCount).reduce((a,b) => a+b,0)
+        }
+    }
 }
 
 export function getDefaultClientOptions() {
     return {
         shards: getInfo().SHARD_LIST, // An array of shards that will get spawned
         shardCount: getInfo().TOTAL_SHARDS, // Total number of shards
+
         partials: [
             //Partials.Channel,
             //Partials.Message,
@@ -55,7 +69,7 @@ export function getDefaultClientOptions() {
         ],
         intents: [ // Object.values(GatewayIntentBits).filter(x => !isNaN(x)).reduce((bit, next) => bit |= next, 0) // all bits
             GatewayIntentBits.Guilds, // for guild related things
-            GatewayIntentBits.GuildMembers, // for guild members related things
+            //GatewayIntentBits.GuildMembers, // for guild members related things
             //GatewayIntentBits.GuildBans, // for manage guild bans
             //GatewayIntentBits.GuildEmojisAndStickers, // for manage emojis and stickers
             //GatewayIntentBits.GuildIntegrations, // for discord Integrations
@@ -78,7 +92,7 @@ export function getDefaultClientOptions() {
                 }
             ],
             status: PresenceUpdateStatus.Online
-        }
+        },
         sweepers: {
             messages: {
                 interval: Second.Minute(5),
@@ -117,8 +131,16 @@ export function getDefaultClientOptions() {
                 maxSize: 0,
                 //keepOverLimit: (value, key, col) => value.client.user.id === value.author.id, // caching messages, which needs to be cached ourself
             },
-        })
-    }
+        }),
+        failIfNotExists: false,
+        allowedMentions: {
+            parse: [],
+            users: [],
+            roles: [],
+            repliedUser: true,
+        }
+        
+    };
 }
 
 

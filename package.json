@@ -1,3 +1,35 @@
 {
-    "main": "./src/Cluster.js"
+  "main": "./src/index.mjs",
+  "type": "module",
+  "name": "deezcord-music-bot",
+  "description": "Official Repository for the Community Deezer Music Power Bot.",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tomato6966/deezcord-music-bot.git"
+  },
+  "keywords": [
+    "Discord",
+    "Music",
+    "Bot",
+    "Deezer",
+    "DeezerMusicPower",
+    "Deezcord",
+    "Audio",
+    "Discordjs"
+  ],
+  "author": "Tomato6966 & fb-sean",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Tomato6966/deezcord-music-bot/issues"
+  },
+  "homepage": "https://github.com/Tomato6966/deezcord-music-bot#readme",
+  "dependencies": {
+    "discord-hybrid-sharding": "github:meister03/discord-hybrid-sharding",
+    "discord.js": "^14.6.0",
+    "dotenv": "^16.0.3"
+  }
 }

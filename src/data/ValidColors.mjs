@@ -1,4 +1,4 @@
-const validColors = {
+export const validColors = {
     Reset: "\x1b[0m",
     Bright: "\x1b[1m",
     Dim: "\x1b[2m",
@@ -25,5 +25,4 @@ const validColors = {
     BgCyan: "\x1b[46m",
     BgWhite: "\x1b[47m"
 };
-const validColorsStrings = Object.keys(validColors);
-export const colorDatas = { validColors, validColorsStrings }
+export const validColorsStrings = Object.keys(validColors);
