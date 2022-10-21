@@ -6,7 +6,15 @@
 export const delay = (time = 10) => {
     return new Promise((r, _) => setTimeout(() =>r(2), time))
 }
-
+/**
+ * Format duration to second
+ * @param {number} duration in ms 
+ * @returns {string} Formatted Time in Seconds
+ */
+export function onlySecondDuration(duration) {
+    const time = Math.floor(duration / 1000 * 100) / 100;
+    return `${time} Sec${time !== 1 ? "s" : ""}`
+}
 /**
  * Format a Second/Minute/Hour Timespan to double Digits
  * @param {number} n if not provied "00" will be returned 

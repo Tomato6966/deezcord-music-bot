@@ -1,14 +1,18 @@
 import { ActivityType } from "discord.js";
 import { Millisecond } from "../../utils/TimeUtils.mjs";
 
-export default (client) => {
+/** @param {import("../../structures/BotClient.mjs").BotClient} client */
+export default async (client) => {
     client.logger.info(`Discord Bot is ready as ${client.user.tag}`);
-
     // update status
     statusUpdater(client); setInterval(() => statusUpdater(client), Millisecond.Minute(30))
+
+    
+    await client.publishCommands();
+    client.prepareCommands();
 }
 
-
+/** @param {import("../../structures/BotClient.mjs").BotClient} client */
 export async function statusUpdater(client) {
     const shardIds = [...client.cluster.ids.keys()];
     // 8 .... 0
