@@ -1,8 +1,10 @@
-# deezer-music-power-bot
+# Deezercord | A Music Bot for Deezer
 
-Official Repository for the Community Deezer Music Power Bot. Not affialiated with deezer.com, but using deezer.com only!
+Official Repository for the Community Deezer Music Power Bot. 
 
-<a href="https://deezer.com"><img src="https://user-images.githubusercontent.com/68145571/197169083-60567cc3-245b-4a76-88d4-b2df1df9ddb8.jpeg"></a>
+*Not affialiated with deezer.com, but using deezer.com Features only!*
+
+<a href="https://deezer.com" target="_blank"><img src="https://user-images.githubusercontent.com/68145571/197169083-60567cc3-245b-4a76-88d4-b2df1df9ddb8.jpeg"></a>
 
 # Features [Planned]
 
