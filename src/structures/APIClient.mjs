@@ -6,7 +6,8 @@ export class APIClient {
     constructor(options = {}) {
         this.port = options.port ?? 3000
         this.secret = options.secret
-        this.redirect = options.redirect
+        this.domain = options.domain
+        if(this.domain?.endsWith("/")) this.domain = this.domain.substring(0, this.domain.length - 1)
         this.appId = options.appId
         /** @type {import("./BotClient.mjs").BotClient} */
         this.client = options.client
@@ -246,7 +247,7 @@ export class APIClient {
             });
     
             fastify.get('/login', (request, reply) => {
-                return reply.redirect(`https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.redirect}/callback&perms=basic_access,email,offline_access,manage_library, delete_library, listening_history`);
+                return reply.redirect(`https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.domain}/callback&perms=basic_access,email,offline_access,manage_library, delete_library, listening_history`);
             })
     
             fastify.get('/callback', async (request, reply) => {

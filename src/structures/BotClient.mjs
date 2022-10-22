@@ -71,14 +71,14 @@ export class BotClient extends Client {
         }
     }
     async startAPI() {
-        if(this.cluster.id !== 0) return;
         this.DeezApi = new APIClient({
             port: process.env.APIPORT,
             secret: process.env.SECRET,
-            redirect: process.env.REDIRECT,
+            domain: process.env.DOMAIN,
             appId: process.env.APPID,
             client: this,
         });
+        if(this.cluster.id !== 0) return;
         return await this.DeezApi.init();
     }
     async loadExtenders() {
