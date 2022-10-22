@@ -32,6 +32,7 @@ model UserData {
   songHistory    String[] @default([])
   commandHistory String[] @default([])
   deezerToken    String?
+  deezerId       String?
   // votedAt    String?
   // voteCounts Int     @default(0)
   extraData      Json? // can be anything inside a JSON.stringify({});

@@ -19,6 +19,7 @@ CREATE TABLE "UserData" (
     "songHistory" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "commandHistory" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "deezerToken" TEXT,
+    "deezerId" TEXT,
     "extraData" JSONB,
 
     CONSTRAINT "UserData_pkey" PRIMARY KEY ("userId")
