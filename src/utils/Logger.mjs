@@ -35,7 +35,7 @@ export const color_log = (Colordisplay = ["FgGreen"], text = "No Text added", da
 export class Logger {
     /**
      * Create a Logger with logLevels, default logLevel == 1, which means, no debugs.
-     * @param {{prefix: string|false, dateEnabled: boolean, logLevel: 0|1|2|3|4|5}} options - The options value.
+     * @param {{prefix: string}} options - The options value.
      */
     constructor(options = {}) {
         this.prefix = options.prefix ?? "INFO-LOG";

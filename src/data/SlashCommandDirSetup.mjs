@@ -29,5 +29,10 @@ export const dirSetup = [
                 ],
             }
         ]*/
+    },
+    {
+        Folder: 'Account',
+        name: 'account',
+        description: 'Manage your deezer account',
     }
 ]

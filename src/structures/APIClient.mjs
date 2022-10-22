@@ -1,35 +1,51 @@
 import Fastify from "fastify";
 import fetch from 'node-fetch';
-import { Logger } from "../utils/Logger.mjs";
+import {Logger} from "../utils/Logger.mjs";
+import {User} from 'discord.js';
 
 export class APIClient {
     constructor(options = {}) {
         this.port = options.port ?? 3000
         this.secret = options.secret
         this.domain = options.domain
-        if(this.domain?.endsWith("/")) this.domain = this.domain.substring(0, this.domain.length - 1)
+        if (this.domain?.endsWith("/")) this.domain = this.domain.substring(0, this.domain.length - 1)
         this.appId = options.appId
         /** @type {import("./BotClient.mjs").BotClient} */
         this.client = options.client
-        this.client.db.guildSettings.findFirst({
-            where: {
-                guildId: true,
-            },
-            select: {
-                language: true,
-            }
-        });
         this.BaseURL = "https://api.deezer.com"
-        this.logger = new Logger({ prefix: "DEEZAPI" });
+        this.logger = new Logger({prefix: "DEEZAPI"});
         this.searchLimit = 100;
         // https://developers.deezer.com/api/explorer
     }
+
     user = {
+        saveDeezerAccount: async (deezerData, discordUserId) => {
+            return await this.client.db.userData.upsert({
+                where: {
+                    userId: discordUserId
+                },
+                update: {
+                    deezerToken: deezerData.accessToken,
+                    deezerId: deezerData.id,
+                    deezerName: deezerData.name,
+                    deezerPictureMedium: deezerData.picture_medium,
+                    deezerTrackList: deezerData.tracklist,
+                },
+                create: {
+                    userId: discordUserId,
+                    deezerToken: deezerData.accessToken,
+                    deezerId: deezerData.id,
+                    deezerName: deezerData.name,
+                    deezerPictureMedium: deezerData.picture_medium,
+                    deezerTrackList: deezerData.tracklist,
+                }
+            })
+        },
         saveDeezerUserId: async (discordUserId) => {
             const data = this.accessTokenOfDB(discordUserId);
-            if(!data?.deezerToken) return console.error("No deezer Token saved yet");
+            if (!data?.deezerToken) return console.error("No deezer Token saved yet");
             const meData = await this.user.me(data.deezerToken);
-            if(!meData?.id) return console.error("No data found about myself"); 
+            if (!meData?.id) return console.error("No data found about myself");
             return await this.client.db.userData.update({
                 where: {
                     userId: discordUserId
@@ -50,8 +66,8 @@ export class APIClient {
             });
         },
         me: async (access_token) => {
-            if(!access_token) throw new Error("No access token provided");
-            if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+            if (!access_token) throw new Error("No access token provided");
+            if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
             return await this.makeRequest(`user/me?access_token=${access_token}`)
         },
         data: async (ID) => {
@@ -67,23 +83,23 @@ export class APIClient {
             return await this.makeRequest(`user/${ID}/followers`)
         },
         notifications: async (ID, access_token) => { // oauth
-            if(!access_token) throw new Error("No access token provided");
-            if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+            if (!access_token) throw new Error("No access token provided");
+            if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
             return await this.makeRequest(`user/${ID}/notifications?access_token=${access_token}`)
         },
         permissions: async (ID, access_token) => { // oauth
-            if(!access_token) throw new Error("No access token provided");
-            if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+            if (!access_token) throw new Error("No access token provided");
+            if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
             return await this.makeRequest(`user/${ID}/permissions?access_token=${access_token}`)
         },
         options: async (ID, access_token) => { // oauth
-            if(!access_token) throw new Error("No access token provided");
-            if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+            if (!access_token) throw new Error("No access token provided");
+            if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
             return await this.makeRequest(`user/${ID}/options?access_token=${access_token}`)
         },
         personalSongs: async (ID, access_token) => { // oauth
-            if(!access_token) throw new Error("No access token provided");
-            if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+            if (!access_token) throw new Error("No access token provided");
+            if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
             return await this.makeRequest(`user/${ID}/personal_songs?access_token=${access_token}`)
         },
         history: {
@@ -100,20 +116,20 @@ export class APIClient {
                 return await this.makeRequest(`user/${ID}/playlists`)
             },
             general: async (ID, access_token) => { // oauth
-                if(!access_token) throw new Error("No access token provided");
-                if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+                if (!access_token) throw new Error("No access token provided");
+                if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
                 return await this.makeRequest(`user/${ID}/history?access_token=${access_token}`)
             },
             search: async (query, access_token, limit) => {
-                if(!access_token) throw new Error("No access token provided");
-                if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+                if (!access_token) throw new Error("No access token provided");
+                if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
                 return await this.makeRequest(`search/history?q=${query.replaceAll(" ", "+")}&access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             }
         },
         recommendations: {
             all: async (ID, access_token, limit) => { // oauth
-                if(!access_token) throw new Error("No access token provided");
-                if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+                if (!access_token) throw new Error("No access token provided");
+                if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
                 return {
                     albums: await this.user.recommendations.albums(ID, access_token, limit),
                     releases: await this.user.recommendations.releases(ID, access_token, limit),
@@ -124,33 +140,33 @@ export class APIClient {
                 }
             },
             albums: async (ID, access_token, limit) => { // oauth
-                if(!access_token) throw new Error("No access token provided");
-                if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+                if (!access_token) throw new Error("No access token provided");
+                if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
                 return await this.makeRequest(`user/${ID}/recommendations/albums?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
             releases: async (ID, access_token, limit) => { // oauth
-                if(!access_token) throw new Error("No access token provided");
-                if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+                if (!access_token) throw new Error("No access token provided");
+                if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
                 return await this.makeRequest(`user/${ID}/recommendations/releases?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
             artists: async (ID, access_token, limit) => { // oauth
-                if(!access_token) throw new Error("No access token provided");
-                if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+                if (!access_token) throw new Error("No access token provided");
+                if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
                 return await this.makeRequest(`user/${ID}/recommendations/artists?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
             playlists: async (ID, access_token, limit) => { // oauth
-                if(!access_token) throw new Error("No access token provided");
-                if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+                if (!access_token) throw new Error("No access token provided");
+                if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
                 return await this.makeRequest(`user/${ID}/recommendations/playlists?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
             tracks: async (ID, access_token, limit) => { // oauth
-                if(!access_token) throw new Error("No access token provided");
-                if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+                if (!access_token) throw new Error("No access token provided");
+                if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
                 return await this.makeRequest(`user/${ID}/recommendations/tracks?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
             radios: async (ID, access_token, limit) => { // oauth
-                if(!access_token) throw new Error("No access token provided");
-                if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+                if (!access_token) throw new Error("No access token provided");
+                if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
                 return await this.makeRequest(`user/${ID}/recommendations/radios?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
         }
@@ -205,9 +221,9 @@ export class APIClient {
             },
             radioTracks: async (ID, limit) => {
                 const radioData = await this.makeRequest(`radio/${ID}`);
-                if(radioData.tracklist) {
+                if (radioData.tracklist) {
                     const tracks = await this.makeRequest(`radio/${ID}/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`, true).catch(() => []);
-                    return { radioInfo: radioData, tracks: tracks.map(createTrackResolveable) }
+                    return {radioInfo: radioData, tracks: tracks.map(createTrackResolveable)}
                 }
                 return bull
             },
@@ -215,7 +231,7 @@ export class APIClient {
                 return await this.makeRequest(`episode/${ID}`);
             },
         },
-        genres: { 
+        genres: {
             fetchAll: async () => {
                 return await this.makeRequest(`genre`);
             }
@@ -241,79 +257,132 @@ export class APIClient {
             }
         }
     }
-    
+
     async makeRequest(path) {
         const rawData = await fetch(`${this.BaseURL}/${path}`);
         return rawData ? await rawData.json() : null;
     }
-    
+
     async init() {
         return new Promise((PromiseResolve, PromiseReject) => {
             const fastify = Fastify({
                 logger: true,
                 trustProxy: true,
             });
-            fastify.get('/login:customCallback', (request, reply) => {
-                return reply.redirect(`https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.domain}/callback&perms=basic_access,email,offline_access,manage_library, delete_library, listening_history`);
+
+            fastify.get('/login/:randomString', (request, reply) => {
+                const randomString = request?.params?.randomString;
+                if (!randomString) {
+                    reply.type('application/json').code(429);
+                    return {
+                        Error: 'Please run the "/account login" command to get access to this link.',
+                    };
+                }
+
+                const userCache = this.client.DeezCache.loginCache.get(randomString);
+                if (!userCache) {
+                    reply.type('application/json').code(429);
+                    return {
+                        Error: 'Please run the "/account login" command to get access to this link.',
+                    };
+                }
+
+                if (userCache?.validUntil > Date.now()) {
+                    this.client.DeezCache.loginCache.delete(randomString);
+
+                    reply.type('application/json').code(429);
+                    return {
+                        Error: 'This link is not valid anymore. Run "/account login" again to get a new link.',
+                    };
+                }
+
+                // Redirect the user to the OAuth from deezer
+                return reply.redirect(`https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.domain}/callback/${randomString}&perms=basic_access,email,offline_access,manage_library, delete_library, listening_history`);
             })
-    
-            fastify.get('/callback', async (request, reply) => {
-                if (!request?.query?.code) return {
-                    Error: 'Didn\'t got the code for the authentication.',
-                };
-    
-                let deezerResponse = await fetch(`https://connect.deezer.com/oauth/access_token.php?app_id=${this.appId}&secret=${this.secret}&code=${request?.query?.code}`).catch(err => {
+
+            fastify.get('/callback/:randomString', async (request, reply) => {
+                const randomString = request?.params?.randomString;
+                if (!randomString) {
+                    throw new Error('Please run the "/account login" command to get access to this link.');
+                }
+
+                try {
+                    if (!request?.query?.code) {
+                        throw new Error('Didn\'t got the code for the authentication.');
+                    }
+
+                    const userCache = this.client.DeezCache.loginCache.get(randomString);
+                    if (!userCache) {
+                        throw new Error('This authentication is too old. Please run the "/account login" command again.');
+                    }
+
+                    let deezerResponse = await fetch(`https://connect.deezer.com/oauth/access_token.php?app_id=${this.appId}&secret=${this.secret}&code=${request?.query?.code}`).catch(err => {
+                        throw new Error(`${err}`);
+                    });
+
+                    if (!deezerResponse) {
+                        throw new Error('Didn\'t got the access token from deezer.');
+                    }
+
+                    const accessToken = await deezerResponse?.text();
+
+                    if (!accessToken) {
+                        throw new Error('Can\'t parse your access token from deezer.');
+                    }
+
+                    deezerResponse = await fetch(`https://api.deezer.com/user/me?${deezerResponse}`).catch(err => {
+                        throw new Error(`${err}`);
+                    });
+
+                    if (!deezerResponse) {
+                        throw new Error('User data from deezer.');
+                    }
+
+                    deezerResponse.accessToken = accessToken;
+
+                    deezerResponse = await deezerResponse?.json();
+
+                    if (!deezerResponse) {
+                        throw new Error('Can\'t parse your user data from deezer.');
+                    }
+
+                    const discordUser = await this.client.users.fetch(userCache?.userId).catch(err => {
+                    }) || {};
+
+                    /**
+                     *  Event to work with the authentication.
+                     *  @returns {deezerResponse} JSON object with the deezer api response
+                     *  @returns {User} The discord user behind this auth
+                     */
+                    this.client.emit('apiAuthentication', (deezerResponse, discordUser));
+
+                    this.logger.debug(`New Authentication from ${deezerResponse?.name ?? 'Unkown User'}`);
+
+                    this.client.DeezCache.loginCache.delete(randomString); // Delete the user from the cache
+
+                    reply.type('application/json').code(200)
+                    return {
+                        message: `Authentication done. Your account is now linked with the bot.`,
+                    };
+
+                } catch (err) {
+                    this.client.DeezCache.loginCache.delete(randomString); // Delete the user from the cache
+                    reply.type('application/json').code(500)
                     return {
                         Error: err,
+                        Info: 'If this happens often please report that to "Tomato#6966" or "fb_sean#1337\n"!'
                     };
-                });
-    
-                if(!deezerResponse) return {
-                    Error: 'Didn\'t got the access token from deezer.',
-                };
-    
-                deezerResponse = await deezerResponse?.text();
-    
-                if(!deezerResponse) return {
-                    Error: 'Can\'t parse your access token from deezer.',
-                };
-    
-                deezerResponse = await fetch(`https://api.deezer.com/user/me?${deezerResponse}`).catch(err => {
-                    return {
-                        Error: err,
-                    };
-                });
-    
-                if(!deezerResponse) return {
-                    Error: 'User data from deezer.',
-                };
-    
-                deezerResponse = await deezerResponse?.json();
-    
-                if(!deezerResponse) return {
-                    Error: 'Can\'t parse your user data from deezer.',
-                };
-    
-                /**
-                 *  Event to work with the authentication.
-                 *  @returns {deezerResponse} JSON object with the deezer api response
-                 */
-                this.client.emit('apiAuthentication', (deezerResponse));
-    
-                this.logger.debug(`New Authentication from ${deezerResponse?.name ?? 'Unkown User'}`);
-    
-                return {
-                    message: `Authentication done.`,
-                };
+                }
             });
-    
-            fastify.listen({ port: this.port, host: process.env.APIHOST || "localhost" }, (err, address) => {
+
+            fastify.listen({port: this.port, host: process.env.APIHOST || "localhost"}, (err, address) => {
                 if (err) return PromiseReject(err);
-                
-                this.logger.debug(`API online at ${address}`);
-                
+
+                this.logger.success(`API online at ${address}`);
+
                 return PromiseResolve(`API online at ${address}`);
             })
         })
+
     }
 }
