@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Languages {
+  en // English
+  de // German
+  fr // French
+}
+
+// Guild Data
+model GuildSettings {
+  guildId             String    @id
+  defaultvolume       Int       @default(100)
+  defaultautoplay     Boolean   @default(true)
+  language            Languages @default(en)
+  ephemeralNowPlaying Boolean   @default(true)
+  extraData           Json? // can be anything inside a JSON.stringify({});
+}
+
+// User Data (vote system?)
+model UserData {
+  userId         String   @id
+  songHistory    String[] @default([])
+  commandHistory String[] @default([])
+  deezerToken    String?
+  // votedAt    String?
+  // voteCounts Int     @default(0)
+  extraData      Json? // can be anything inside a JSON.stringify({});
+}
+
+// for saving lyrics in db
+model Lyrics {
+  trackId String @id
+  author  String
+  title   String
+  lyrics  String
+}
+
+// DJ Settings per Guild
+model DJSettings {
+  guildId        String   @id
+  enabled        Boolean  @default(false)
+  access         String[] @default([]) // roleIds
+  djonlycommands String[] @default(["bassboost", "bettermusiceq", "clearfilters", "echo", "karaoke", "lowpass", "nightcore", "pitch", "rate", "pop", "speed", "rotating", "resume", "rewind", "seek", "shuffle", "skip", "stop", "stoploop", "unshuffle", "volume", "autoplay", "clearqueue", "forward", "jump", "leave", "loop", "move", "pause", "playskip", "playtop", "removedupes", "replay", "tremolo"])
+  extraData      Json? // can be anything inside a JSON.stringify({});
+}
+
+// each guild can disable / enable Commands
+model DisabledCommands {
+  guildId       String   @id
+  commands      String[]
+  slashCommands String[]
+}

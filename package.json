@@ -2,6 +2,9 @@
   "main": "./src/index.mjs",
   "type": "module",
   "name": "deezcord-music-bot",
+  "prisma": {
+    "schema": "./src/data/prisma/schema.prisma"
+  },
   "description": "Official Repository for the Community Deezer Music Power Bot.",
   "version": "1.0.0",
   "scripts": {
@@ -30,8 +33,12 @@
   },
   "homepage": "https://github.com/Tomato6966/deezcord-music-bot#readme",
   "dependencies": {
+    "@prisma/client": "^4.5.0",
     "discord-hybrid-sharding": "github:meister03/discord-hybrid-sharding",
     "discord.js": "^14.6.0",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "fastify": "^4.9.2",
+    "node-fetch": "^3.2.10",
+    "prisma": "^4.5.0"
   }
 }

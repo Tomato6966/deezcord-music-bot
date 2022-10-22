@@ -2,8 +2,9 @@ import { Client, GatewayIntentBits, Partials, ActivityType, PresenceUpdateStatus
 import { ClusterClient, getInfo } from "discord-hybrid-sharding";
 import { Second } from "../utils/TimeUtils.mjs"; 
 import { promises } from "fs";
-import { join, resolve } from "path";
-import { color_log, Logger } from "../utils/Logger.mjs";
+import { resolve } from "path";
+import { PrismaClient } from "@prisma/client"
+import { Logger } from "../utils/Logger.mjs";
 import { dirSetup } from "../data/SlashCommandDirSetup.mjs";
 import {APIClient} from "./APIClient.mjs";
 
@@ -14,6 +15,10 @@ export class BotClient extends Client {
             ...options
         });
 
+        // interested in adding a cache layer? --> https://github.com/Tomato6966/dragonfly-redis-prisma-cache
+        this.db = new PrismaClient()
+
+        
         this.commands = new Collection();
         this.eventPaths = new Collection();
         this.cooldowns = {
