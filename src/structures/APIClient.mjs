@@ -57,24 +57,6 @@ export class APIClient {
         followers: async (ID) => {
             return await this.makeRequest(`user/${ID}/followers`)
         },
-        // user's history
-        lastAlbums: async (ID) => {
-            return await this.makeRequest(`user/${ID}/albums`)
-        },
-        lastArtists: async (ID) => {
-            return await this.makeRequest(`user/${ID}/artists`)
-        },
-        lastCharts: async (ID) => {
-            return await this.makeRequest(`user/${ID}/charts`)
-        },
-        lastPlaylists: async (ID) => {
-            return await this.makeRequest(`user/${ID}/playlists`)
-        },
-        history: async (ID, access_token) => { // oauth
-            if(!access_token) throw new Error("No access token provided");
-            if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-            return await this.makeRequest(`user/${ID}/history?access_token=${access_token}`)
-        },
         notifications: async (ID, access_token) => { // oauth
             if(!access_token) throw new Error("No access token provided");
             if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
@@ -94,6 +76,30 @@ export class APIClient {
             if(!access_token) throw new Error("No access token provided");
             if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
             return await this.makeRequest(`user/${ID}/personal_songs?access_token=${access_token}`)
+        },
+        history: {
+            albums: async (ID) => {
+                return await this.makeRequest(`user/${ID}/albums`)
+            },
+            artists: async (ID) => {
+                return await this.makeRequest(`user/${ID}/artists`)
+            },
+            charts: async (ID) => {
+                return await this.makeRequest(`user/${ID}/charts`)
+            },
+            playlsits: async (ID) => {
+                return await this.makeRequest(`user/${ID}/playlists`)
+            },
+            general: async (ID, access_token) => { // oauth
+                if(!access_token) throw new Error("No access token provided");
+                if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+                return await this.makeRequest(`user/${ID}/history?access_token=${access_token}`)
+            },
+            search: async (query, access_token, limit) => {
+                if(!access_token) throw new Error("No access token provided");
+                if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
+                return await this.makeRequest(`search/history?q=${query.replaceAll(" ", "+")}&access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+            }
         },
         recommendations: {
             all: async (ID, access_token, limit) => { // oauth
@@ -138,11 +144,6 @@ export class APIClient {
                 if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
                 return await this.makeRequest(`user/${ID}/recommendations/radios?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
-        },
-        searchHistories: async (query, access_token, limit) => {
-            if(!access_token) throw new Error("No access token provided");
-            if(typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-            return await this.makeRequest(`search/history?q=${query.replaceAll(" ", "+")}&access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
         }
     }
     deezer = {
