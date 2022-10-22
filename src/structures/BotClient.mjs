@@ -6,7 +6,7 @@ import { resolve } from "path";
 import { PrismaClient } from "@prisma/client"
 import { Logger } from "../utils/Logger.mjs";
 import { dirSetup } from "../data/SlashCommandDirSetup.mjs";
-import {APIClient} from "./APIClient.mjs";
+import { APIClient } from "./APIClient.mjs";
 
 export class BotClient extends Client {
     constructor(options = {}) {
@@ -18,7 +18,7 @@ export class BotClient extends Client {
         // interested in adding a cache layer? --> https://github.com/Tomato6966/dragonfly-redis-prisma-cache
         this.db = new PrismaClient()
 
-        
+
         this.commands = new Collection();
         this.eventPaths = new Collection();
         this.cooldowns = {
@@ -28,7 +28,7 @@ export class BotClient extends Client {
         };
 
         this.allCommands = [];
-        this.logger = new Logger({ logLevel:0, prefix: "DEEZCORD" });
+        this.logger = new Logger({ prefix: "DEEZCORD" });
         this.cluster = new ClusterClient(this);
 
         this.DeezCache = {
@@ -59,7 +59,7 @@ export class BotClient extends Client {
 
         this.logger.pure(`\n${"-=".repeat(40)}-`);
         this.logger.info(`Starting API`);
-        this.startAPI();
+        await this.startAPI();
         this.logger.pure(`${"-=".repeat(40)}-\n`);
 
         return this.emit("DeezCordLoaded", this);
@@ -70,15 +70,16 @@ export class BotClient extends Client {
             members: this.guilds.cache.map(x => x.memberCount).reduce((a,b) => a+b,0)
         }
     }
-    startAPI() {
-        const api = new APIClient({
+    async startAPI() {
+        if(this.cluster.id !== 0) return;
+        this.DeezApi = new APIClient({
             port: process.env.APIPORT,
             secret: process.env.SECRET,
             redirect: process.env.REDIRECT,
             appId: process.env.APPID,
             client: this,
         });
-        return api.init();
+        return await this.DeezApi.init();
     }
     async loadExtenders() {
         try {
