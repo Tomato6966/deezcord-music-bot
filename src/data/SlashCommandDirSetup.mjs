@@ -1,18 +1,17 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 
 export const dirSetup = [
-    /*{
+    {
         Folder: "Info", // == FolderName
         name: "info", // == CommandName 
         localizations: [
             {name: ["de", "info"], description: ["de", "Bekomme Information über Server/Nutzer/Bot"]}
         ],
-
         // defaultPermissions: new PermissionsBitField([PermissionFlagsBits.Administrator]).bitfield,
         // dmPermissions: new PermissionsBitField([PermissionFlagsBits.Administrator]).bitfield,
         
         description: "Get Information about Server/User/Bot/...",
-        groups: [
+        /*groups: [
             {
                 Folder: "User",
                 name: "user",
@@ -29,6 +28,6 @@ export const dirSetup = [
                     {name: ["de", "bot"], description: ["de", "Bot spezifische Informationen"]}
                 ],
             }
-        ]
-    }*/
+        ]*/
+    }
 ]

@@ -37,6 +37,7 @@
     "discord-hybrid-sharding": "github:meister03/discord-hybrid-sharding",
     "discord.js": "^14.6.0",
     "dotenv": "^16.0.3",
+    "erela.js": "github:Tomato6966/erela.js",
     "fastify": "^4.9.2",
     "node-fetch": "^3.2.10",
     "prisma": "^4.5.0"
