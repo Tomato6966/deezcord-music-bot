@@ -191,7 +191,7 @@ export class BotClient extends Client {
                                 this.buildOptions(command, Slash)
                                 return Slash;
                             });
-                            command.commandId = cache?.fetchedApplication?.find?.(c => c?.name == subSlash.name)?.permissions?.commandId ?? "commandId";
+                            command.commandId = this.botCache?.fetchedApplication?.find?.(c => c?.name == subSlash.name)?.permissions?.commandId ?? "commandId";
                             command.slashCommandKey = `/${subSlash.name} ${command.name}`
                             command.mention = `<${command.slashCommandKey}:${command.commandId}>`
                             // FOLDERSTRUCTURE: /commands/slash/XYZ/cmd.js
