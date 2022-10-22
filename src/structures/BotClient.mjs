@@ -18,7 +18,6 @@ export class BotClient extends Client {
         // interested in adding a cache layer? --> https://github.com/Tomato6966/dragonfly-redis-prisma-cache
         this.db = new PrismaClient()
 
-
         this.commands = new Collection();
         this.eventPaths = new Collection();
         this.cooldowns = {
@@ -30,10 +29,11 @@ export class BotClient extends Client {
         this.allCommands = [];
         this.logger = new Logger({ prefix: "DEEZCORD" });
         this.cluster = new ClusterClient(this);
-
         this.DeezCache = {
+            loginCache: new Collection(),
             fetchedApplication: [],
         }
+        
         this.init();
     }
     async init() {
@@ -78,8 +78,8 @@ export class BotClient extends Client {
             appId: process.env.APPID,
             client: this,
         });
-        if(this.cluster.id !== 0) return;
-        return await this.DeezApi.init();
+        if(this.cluster.id === 0) await this.DeezApi.init();
+        return
     }
     async loadExtenders() {
         try {

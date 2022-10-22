@@ -11,6 +11,14 @@ export class APIClient {
         this.appId = options.appId
         /** @type {import("./BotClient.mjs").BotClient} */
         this.client = options.client
+        this.client.db.guildSettings.findFirst({
+            where: {
+                guildId: true,
+            },
+            select: {
+                language: true,
+            }
+        });
         this.BaseURL = "https://api.deezer.com"
         this.logger = new Logger({ prefix: "DEEZAPI" });
         this.searchLimit = 100;
@@ -245,8 +253,7 @@ export class APIClient {
                 logger: true,
                 trustProxy: true,
             });
-    
-            fastify.get('/login', (request, reply) => {
+            fastify.get('/login:customCallback', (request, reply) => {
                 return reply.redirect(`https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.domain}/callback&perms=basic_access,email,offline_access,manage_library, delete_library, listening_history`);
             })
     
@@ -308,6 +315,5 @@ export class APIClient {
                 return PromiseResolve(`API online at ${address}`);
             })
         })
-        
     }
 }
