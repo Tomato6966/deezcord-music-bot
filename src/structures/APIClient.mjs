@@ -266,7 +266,7 @@ export class APIClient {
     async init() {
         return new Promise((PromiseResolve, PromiseReject) => {
             const fastify = Fastify({
-                logger: true,
+                logger: true, //@TODO add here own logger (ask tomato what exactly he mean)
                 trustProxy: true,
             });
 
