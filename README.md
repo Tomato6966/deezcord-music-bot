@@ -31,6 +31,10 @@ Official Repository for the Community Deezer Music Power Bot.
 
 - Note [here](https://github.com/Tomato6966/deezcord-music-bot/wiki) you can find a dedicated Wiki!
 
+## Tutorial Video:
+
+https://user-images.githubusercontent.com/68145571/197351293-bccfd84a-8e5b-41a9-9cde-f2a059f502ee.mp4
+
 ### Preparation:
 
 **Software you need:**
