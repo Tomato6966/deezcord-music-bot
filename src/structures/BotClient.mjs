@@ -1,5 +1,5 @@
 import { Client, GatewayIntentBits, Partials, ActivityType, PresenceUpdateStatus, Collection, Options, SlashCommandAssertions, PermissionsBitField, PermissionFlagsBits, ChannelType, SlashCommandBuilder, ShardClientUtil, ContextMenuCommandBuilder } from "discord.js";
-import { ClusterClient, getInfo } from "discord-hybrid-sharding";
+import { Cluster, ClusterClient, getInfo } from "discord-hybrid-sharding";
 import { Second } from "../utils/TimeUtils.mjs"; 
 import { promises } from "fs";
 import { resolve } from "path";
@@ -7,6 +7,7 @@ import { PrismaClient } from "@prisma/client"
 import { Logger } from "../utils/Logger.mjs";
 import { dirSetup } from "../data/SlashCommandDirSetup.mjs";
 import { APIClient } from "./APIClient.mjs";
+import { DeezCordClient } from "./MusicClient.mjs";
 
 export class BotClient extends Client {
     constructor(options = {}) {
@@ -15,8 +16,12 @@ export class BotClient extends Client {
             ...options
         });
 
+        /** @type {ClusterClient} */
+        this.cluster = new ClusterClient(this);
+        
         // interested in adding a cache layer? --> https://github.com/Tomato6966/dragonfly-redis-prisma-cache
         this.db = new PrismaClient()
+        this.deezCord = new DeezCordClient(this);
 
         this.commands = new Collection();
         this.eventPaths = new Collection();
@@ -28,7 +33,6 @@ export class BotClient extends Client {
 
         this.allCommands = [];
         this.logger = new Logger({ prefix: "DEEZCORD" });
-        this.cluster = new ClusterClient(this);
         this.DeezCache = {
             loginCache: new Collection(),
             fetchedApplication: [],
@@ -38,8 +42,8 @@ export class BotClient extends Client {
     }
     async init() {
         this.logger.pure(`\n${"-=".repeat(40)}-`);
-        this.logger.info(`Loading Events`);
-        await this.loadEvents();
+        this.logger.info(`Loading Extenders`);
+        await this.loadExtenders();
         this.logger.pure(`${"-=".repeat(40)}-\n`);
 
         this.logger.pure(`\n${"-=".repeat(40)}-`);
@@ -53,8 +57,8 @@ export class BotClient extends Client {
         this.logger.pure(`${"-=".repeat(40)}-\n`);
 
         this.logger.pure(`\n${"-=".repeat(40)}-`);
-        this.logger.info(`Loading Extenders`);
-        await this.loadExtenders();
+        this.logger.info(`Loading Events`);
+        await this.loadEvents();
         this.logger.pure(`${"-=".repeat(40)}-\n`);
 
         this.logger.pure(`\n${"-=".repeat(40)}-`);
@@ -64,11 +68,33 @@ export class BotClient extends Client {
 
         return this.emit("DeezCordLoaded", this);
     }
+
     get guildsAndMembers() {
         return {
             guilds: this.guilds.cache.size,
             members: this.guilds.cache.map(x => x.memberCount).reduce((a,b) => a+b,0)
         }
+    }
+    
+    async updateStatus() {
+        const shardIds = [...this.cluster.ids.keys()];
+        // 8 .... 0
+        /*
+            const { guilds, members } = await this.cluster.broadcastEval("this.guildsAndMembers").then(x => {
+                return {
+                    guilds: x.map(v => v.guilds || 0).reduce((a, b) => a + b, 0),
+                    members: x.map(v => v.members || 0).reduce((a, b) => a + b, 0)
+                }
+            }).catch((e) => {
+                this.logger.error(e);
+                return { guilds: 0, members: 0 }
+            })
+        */
+        for (let i = shardIds.length - 1; i >= 0; i--) {
+            const shardId = shardIds[i];
+            this.user.setActivity(`Deezer.com on shard #${shardId}`, { shardId, type: ActivityType.Listening })
+        }
+        return true;
     }
     async startAPI() {
         this.DeezApi = new APIClient({
@@ -107,6 +133,7 @@ export class BotClient extends Client {
                     const eventName = splitted.reverse()[0].replace(".mjs", "").replace(".js", "");
                     this.eventPaths.set(eventName, { eventName, path: resolve(path) });
                     this.logger.debug(`✅ Event Loaded: ${eventName}`);
+                    if(splitted.reverse()[1] === "Deezcord") return this.deezCord.on(eventName, event.bind(null, this));
                     return this.on(eventName, event.bind(null, this));
                 })
             );
@@ -214,7 +241,7 @@ export class BotClient extends Client {
                                 this.buildOptions(command, Slash)
                                 return Slash;
                             });
-                            command.commandId = cache?.fetchedApplication?.find?.(c => c?.name == subSlash.name)?.permissions?.commandId ?? "commandId";
+                            command.commandId = this.DeezCache?.fetchedApplication?.find?.(c => c?.name == subSlash.name)?.permissions?.commandId ?? "commandId";
                             command.slashCommandKey = `/${subSlash.name} ${command.name}`
                             command.mention = `<${command.slashCommandKey}:${command.commandId}>`
                             this.logger.debug(`✅ Sub Command Loaded: ${command.slashCommandKey}`);

@@ -1,12 +1,20 @@
 import { Manager} from "erela.js";
-export class DeezClient extends Manager {
-    constructor(options = { }) {
+export class DeezCordClient extends Manager {
+    /** @param {import("./BotClient.mjs").BotClient} client */
+    constructor(client) {
         super({
+            defaultSearchPlatform: "dzsearch",
+            validUnresolvedUris: ["deezer.com"],
+            volumeDecrementer: 0.75,
+            position_update_interval: 100,
+            allowedLinksRegexes: [
+                /((https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|playlist|album|artist)\/(\d+)|(https?:\/\/|)?(?:www\.)?deezer\.page\.link\/(\S+))/
+            ],
             nodes: [
                 {
                     identifier: "Deezcord-Node",
                     host: process.env.LAVALINK_HOST,
-                    port: process.env.LAVALINK_PORT,
+                    port: Number(process.env.LAVALINK_PORT),
                     password: process.env.LAVALINK_PASSWORD,
                     retryAmount: 10,
                     retryDelay: 7500,
@@ -14,11 +22,11 @@ export class DeezClient extends Manager {
                     secure: true,
                 }
             ],
-            shards: options.client.cluster.info.TOTAL_SHARDS,
+            shards: client.cluster.info.TOTAL_SHARDS,
             clientName: "Deezcord",
-            send: (i, p) => options.client?.guilds?.cache.get(i)?.shard?.send?.(p),
+            send: (i, p) => client?.guilds?.cache.get(i)?.shard?.send?.(p),
         });
-        /** @type {import("./BotClient.mjs").BotClient} */
-        this.client = options?.client;
+        this.client = client;
+        this.client.cluster
     }
 }

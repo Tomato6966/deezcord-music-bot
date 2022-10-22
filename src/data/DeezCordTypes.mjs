@@ -36,8 +36,11 @@ import { ApplicationCommandType, BitField } from "discord.js";
  * @prop {bigint[]} [allowedPermissions]
  * @prop {boolean} [allowSkipGroup]
  * @prop {optionsType[]} [options]
+ * @prop { { user?: number, guild?:number } } [cooldown]
+ * @prop {string} [category]
  * @prop {string} [commandId] - set by the loader
  * @prop {string} [slashCommandKey] - set by the loader
+ * @prop {string} [mention] - set by the loader
  */
 /**
  * @typedef {CommandExportType} CommandExport

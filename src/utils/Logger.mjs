@@ -6,27 +6,27 @@ import { getDateTimeString } from "./TimeUtils.mjs";
  * @param {boolean} dateEnabled If there should be a timestamp Log in Cyan
  */
 export const color_log = (Colordisplay = ["FgGreen"], text = "No Text added", dateEnabled = true, prefix) => { 
-    const color = Colordisplay.map(color => Object.keys(validColorsStrings).includes(color) ? validColors[color] : validColors.FgWhite).join(``); 
+    const color = Colordisplay.map(color => validColors[color] || validColors.FgWhite).join(` `); 
 
     if(!dateEnabled) {
         if(prefix) return console.log(
-            validColors.FgCyan, prefix, validColors.Reset,
-            validColors.FgRed, `[::]`, validColors.Reset, 
+            validColors.FgCyan, prefix, 
+            validColors.FgRed, `[::]`, 
             color, ...text, validColors.Reset
         );
         return console.log(color, ...text, validColors.Reset);
     }
 
     if(prefix) return console.log(
-        validColors.FgCyan, getDateTimeString(), validColors.Reset,
-        validColors.FgRed, `[::]`, validColors.Reset, 
-        validColors.FgCyan, prefix, validColors.Reset,
-        validColors.FgRed, `[::]`, validColors.Reset, 
+        validColors.FgCyan, getDateTimeString(), 
+        validColors.FgRed, `[::]`, 
+        validColors.FgCyan, prefix, 
+        validColors.FgRed, `[::]`, 
         color, ...text, validColors.Reset
     );
     return console.log(
-        validColors.FgCyan, getDateTimeString(), validColors.Reset,
-        validColors.FgRed, `[::]`, validColors.Reset, 
+        validColors.FgCyan, getDateTimeString(),
+        validColors.FgRed, `[::]`,
         color, ...text, validColors.Reset
     );
 }
@@ -44,11 +44,11 @@ export class Logger {
     }
     debug(...text) {
         if(this.logLevel > 0) return;
-        return color_log(["Dim"], text, this.dateEnabled, this.prefix && typeof this.prefix === "string" ? `Debug  - ${this.prefix}` : "Debug")
+        return color_log(["FgWhite", "Dim"], text, this.dateEnabled, this.prefix && typeof this.prefix === "string" ? `Debug  - ${this.prefix}` : "Debug")
     }
     info(...text) {
         if(this.logLevel > 1) return;
-        return color_log(["FgGreen"], text, this.dateEnabled, this.prefix && typeof this.prefix === "string" ? `Info   - ${this.prefix}` : "Info")
+        return color_log(["FgCyan", "Bright"], text, this.dateEnabled, this.prefix && typeof this.prefix === "string" ? `Info   - ${this.prefix}` : "Info")
     }
     log(...text) {
         if(this.logLevel > 2) return;
@@ -56,7 +56,7 @@ export class Logger {
     }
     success(...text) {
         if(this.logLevel > 3) return;
-        return color_log(["FgGreen", "Bright"], text, this.dateEnabled, this.prefix && typeof this.prefix === "string" ? `Success - ${this.prefix}` : "Success")
+        return color_log(["FgGreen", "Bright"], text, this.dateEnabled, this.prefix && typeof this.prefix === "string" ? `Success- ${this.prefix}` : "Success")
     }
     warn(...text) {
         if(this.logLevel > 4) return;

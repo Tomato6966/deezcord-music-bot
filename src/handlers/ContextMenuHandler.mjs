@@ -1,7 +1,5 @@
-import { EmbedBuilder } from "@discordjs/builders";
-import { Collection, resolveColor } from "discord.js";
-import { cooldownCategories, cooldownCategoriesHigh, cooldownCommands, cooldownCommandsHigh, defaultCooldownMs, defaultCooldownMsHigh, maximumCoolDownCommands } from "../data/Cooldowns.mjs";
-import { onlySecondDuration } from "../utils/TimeUtils.mjs";
+import { PermissionFlagsBits } from "discord.js";
+import { checkPerms } from "../utils/Permissions.mjs";
 import { checkCommand, parseSlashCommandKey } from "./SlashCommandHandler.mjs";
 
 /** 
@@ -12,12 +10,22 @@ export async function contextMenuHandler(client, interaction) {
 
     // SOON: Ensure Languags
 
-    // check permissions
-
+    if(!checkPerms(client, interaction.channel, [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel])) {
+        return interaction.reply({
+            ephemeral: true,
+            content: `❌ I can't view this channel, or I can't send messages in this channel`
+        });
+    }
     const contextCmd = client.commands.get(parseSlashCommandKey(interaction, true));
 
     // check perms for: - emojis, embed links etc.
-
+    if(!checkPerms(client, interaction.channel, [PermissionFlagsBits.EmbedLinks])) {
+        return interaction.reply({
+            ephemeral: true,
+            content: `❌ I need the Permission, to Embed-Links in this Channel`
+        });
+    }
+    
     if(contextCmd) {
         try {
             if(!(await checkCommand(client, contextCmd, interaction))) return;

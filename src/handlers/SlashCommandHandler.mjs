@@ -1,6 +1,7 @@
-import { EmbedBuilder } from "@discordjs/builders";
-import { Collection, resolveColor } from "discord.js";
+import { Collection, PermissionFlagsBits, resolveColor } from "discord.js";
 import { cooldownCategories, cooldownCategoriesHigh, cooldownCommands, cooldownCommandsHigh, defaultCooldownMs, defaultCooldownMsHigh, maximumCoolDownCommands } from "../data/Cooldowns.mjs";
+import { Embed } from "../structures/Embed.mjs";
+import { checkPerms } from "../utils/Permissions.mjs";
 import { onlySecondDuration } from "../utils/TimeUtils.mjs";
 
 /** 
@@ -11,11 +12,22 @@ export async function slashCommandHandler(client, interaction) {
 
     // SOON: Ensure Languags
 
-    // check permissions
-
+    if(!checkPerms(client, interaction.channel, [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel])) {
+        return interaction.reply({
+            ephemeral: true,
+            content: `❌ I can't view this channel, or I can't send messages in this channel`
+        });
+    }
+            
     const slashCmd = client.commands.get(parseSlashCommandKey(interaction));
 
     // check perms for: - emojis, embed links etc.
+    if(!checkPerms(client, interaction.channel, [PermissionFlagsBits.EmbedLinks])) {
+        return interaction.reply({
+            ephemeral: true,
+            content: `❌ I need the Permission, to Embed-Links in this Channel`
+        });
+    }
 
     if(slashCmd) {
         try {
@@ -41,7 +53,7 @@ export function parseSlashCommandKey(interaction, contextmenu) {
     if(contextmenu) {
         return `contextcmd_${interaction.commandName}`
     }
-    const keys = ["slashCmd", interaction.commandName];
+    const keys = ["slashcmd", interaction.commandName];
     if(interaction.options._subcommand) { keys.push(`${interaction.options._subcommand}`); keys[0] = "subcmd"; }
     if(interaction.options._group) { keys.splice(1, 0, `${interaction.options._group}`); keys[0] = "groupcmd"; }
     return keys.join("_");
@@ -54,7 +66,7 @@ export async function checkCommand(client, command, ctx, ...extras) {
         return await ctx.reply({
             ephemeral: true,
             embeds: [
-                new EmbedBuilder()
+                new Embed()
                     .setColor(resolveColor("#ff0000"))
                     .setTitle("Guild Only")
                     .setDescription(`>>> You can use this Command only in Guilds`)
@@ -67,7 +79,7 @@ export async function checkCommand(client, command, ctx, ...extras) {
             return await ctx.reply({
                 ephemeral: true,
                 embeds: [
-                    new EmbedBuilder()
+                    new Embed()
                         .setColor(resolveColor("#ff0000"))
                         .setTitle("You need __all__ those Permissions:")
                         .setDescription(`>>> ${new PermissionsBitField(command.mustPermissions).toArray().map(x => `\`${x}\``).join(", ")}`)
@@ -81,7 +93,7 @@ export async function checkCommand(client, command, ctx, ...extras) {
             return await ctx.reply({
                 ephemeral: true,
                 embeds: [
-                    new EmbedBuilder()
+                    new Embed()
                         .setColor(resolveColor("#ff0000"))
                         .setTitle("You need one of those Permissions:")
                         .setDescription(`>>> ${new PermissionsBitField(command.allowedPermissions).toArray().map(x => `\`${x}\``).join(", ")}`)
@@ -121,7 +133,9 @@ export function isOnCooldown(client, command, ctx) {
             return ctx.reply({
                 ephemeral: true,
                 embeds: [
-                    new ErrorEmbed(ctx).addField(`${Emoji(ctx).Cooldown.str} Ayo, Commandcooldown`, `> You can use this Command \`${onlySecondDuration(commandCooldown - Date.now())}\``)
+                    new Embed()
+                    .setColor(resolveColor("#ff0000"))
+                    .addField(`${Emoji(ctx).Cooldown.str} Ayo, Commandcooldown`, `> You can use this Command \`${onlySecondDuration(commandCooldown - Date.now())}\``)
                 ],
             }).catch(() => null), true;
         }
@@ -135,7 +149,9 @@ export function isOnCooldown(client, command, ctx) {
             return ctx.reply({
                 ephemeral: true,
                 embeds: [
-                    new ErrorEmbed(ctx).addField(`${Emoji(ctx).Cooldown.str} Ayo, Guildcooldown`, `> This Guild can use this Command \`${onlySecondDuration(commandCooldown - Date.now())}\``)
+                    new Embed()
+                    .setColor(resolveColor("#ff0000"))
+                    .addField(`${Emoji(ctx).Cooldown.str} Ayo, Guildcooldown`, `> This Guild can use this Command \`${onlySecondDuration(commandCooldown - Date.now())}\``)
                 ],
             }).catch(() => null), true;
         }
@@ -149,7 +165,9 @@ export function isOnCooldown(client, command, ctx) {
         return ctx.reply({
             ephemeral: true,
             embeds: [
-                new ErrorEmbed(ctx).addField(`${Emoji(ctx).Cooldown.str} Ayo, Slowdown`, `> You only get to use ${maximumCoolDownCommands.amount} Commands per ${maximumCoolDownCommands.time / 1000} Seconds`)
+                new Embed()
+                .setColor(resolveColor("#ff0000"))
+                .addField(`${Emoji(ctx).Cooldown.str} Ayo, Slowdown`, `> You only get to use ${maximumCoolDownCommands.amount} Commands per ${maximumCoolDownCommands.time / 1000} Seconds`)
             ],
         }).catch(() => null), true;
     }
