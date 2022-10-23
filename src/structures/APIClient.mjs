@@ -24,16 +24,17 @@ export class APIClient {
         this.searchLimit = 100;
         // https://developers.deezer.com/api/explorer
     }
-    async fetchAll(path) {
+    async fetchAll(path, maxLimit = 1000, maxLen=100) {
         const data = [];
         let tracks = await this.makeRequest(`${path}?limit=100&index=0`);
         if(tracks.data?.length) data.push(...tracks.data);
-        if(tracks.data.length < 100 || (tracks.total && tracks.total <= 100)) return data;
-        while(tracks.data?.length && tracks.data?.length === 100) {
+        if(tracks.data.length < maxLen || (tracks.total && tracks.total <= maxLen)) return data;
+        while(tracks.data?.length && tracks.data?.length === maxLen && maxLimit > data.length) {
             tracks = await this.makeRequest(`${path}?limit=100&index=${data.length}`);
             if(tracks.data?.length) data.push(...tracks.data);
             else break;
         }
+        if(data.length > maxLimit) data.splice(maxLimit, data.length);
         return data;
     }
     user = {
@@ -255,7 +256,6 @@ export class APIClient {
                 const tracks = await this.makeRequest(`radio/${ID}/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`, true).catch(() => []);
                 return tracks
             },
-
             episode: async (ID) => {
                 return await this.makeRequest(`episode/${ID}`);
             },
@@ -266,22 +266,28 @@ export class APIClient {
             }
         },
         charts: { // charts
-            getAll: async (limit) => {
+            all: async (limit) => {
+                if(limit > 100) return await this.fetchAll("chart/0", limit, 99);
                 return await this.makeRequest(`chart/0?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
             },
-            getTracks: async (limit) => {
+            tracks: async (limit) => {
+                if(limit > 100) return await this.fetchAll("chart/0/tracks", limit, 99);
                 return await this.makeRequest(`chart/0/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
             },
-            getAlbums: async (limit) => {
+            albums: async (limit) => {
+                if(limit > 100) return await this.fetchAll("chart/0/albums", limit, 99);
                 return await this.makeRequest(`chart/0/albums?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
             },
-            getArtists: async (limit) => {
+            artists: async (limit) => {
+                if(limit > 100) return await this.fetchAll("chart/0/artists", limit, 99);
                 return await this.makeRequest(`chart/0/artists?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
             },
-            getPlaylists: async (limit) => {
+            playlists: async (limit) => {
+                if(limit > 100) return await this.fetchAll("chart/0/playlists", limit, 99);
                 return await this.makeRequest(`chart/0/playlists?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
             },
-            getPodcasts: async (limit) => {
+            podcasts: async (limit) => {
+                if(limit > 100) return await this.fetchAll("chart/0/podcasts", limit, 99);
                 return await this.makeRequest(`chart/0/podcasts?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
             }
         }

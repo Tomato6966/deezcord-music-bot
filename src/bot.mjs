@@ -8,7 +8,7 @@ client.on("DeezCordLoaded", async () => {
     client.logger.info("Now starting the bot");
     
     // Test locales:
-    // console.log(inlineLocale("en-US", `play.description`))
+    // console.log(inlineLocale("EnglishUS", `play.description`))
     // console.log(i18n.getLocales().map(locale => inlineLocalization(locale, "query", "play.options.query")))
    
     client.login(process.env.DISCORD_TOKEN)
