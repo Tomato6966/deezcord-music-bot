@@ -1,0 +1,4 @@
+{
+  "name": "DeezCord",
+  "script": "./src/index.mjs"
+}
