@@ -1,6 +1,7 @@
 import { ActionRowBuilder, SelectMenuBuilder } from "@discordjs/builders";
 import { TrackUtils } from "erela.js";
 import { optionTypes } from "../structures/BotClient.mjs";
+import { i18n, inlineLocale, inlineLocalization } from "../structures/i18n.mjs";
 
 const loadTypes = {
     "artist": "ARTIST_LOADED",
@@ -17,24 +18,28 @@ const searchFilterMethods = {
 /** @type {import("../data/DeezCordTypes.mjs").CommandExport} */ 
 export default {
     name: "play",
-    description: "Play a song / query inside your Voice-Channel",
+    description: inlineLocale("en-US", `play.description`),
+    localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "play", "play.description")),
     options: [
         {
             name: "query",
-            description: "Song/Playlist Name/Link",
+            description: inlineLocale("en-US", `play.options.query`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "query", "play.options.query")),
             required: true,
             type: optionTypes.string,
             // autocomplete: true,
         },
         {
             name: "file",
-            description: "Play a file instead (overrides query)",
+            description: inlineLocale("en-US", `play.options.file`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "file", "play.options.file")),
             required: false,
             type: optionTypes.attachment,
         },
         {
             name: "queueaction",
-            description: "Any extra Queue Actions wanted?",
+            description: inlineLocale("en-US", `play.options.queueaction`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "queueaction", "play.options.queueaction")),
             required: false,
             type: optionTypes.stringchoices,
             choices: [
@@ -44,7 +49,8 @@ export default {
         }, 
         {
             name: "query_search_filter",
-            description: "Wanna filter Search Results?",
+            description: inlineLocale("en-US", `play.options.query_search_filter`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "query_search_filter", "play.options.query_search_filter")),
             required: false,
             type: optionTypes.stringchoices,
             choices: [
@@ -128,8 +134,8 @@ export default {
                                     // emoji
                                 }
                                 if(v.description?.length) o.description = v.description.substring(0, 100);
-                                else if(v.nb_fan) o.description = `${v.nb_fan} Fans with ${v.nb_album} Albums`;
-                                else if(v.nb_tracks) o.description = `${v.nb_tracks} Tracks${v.user?.name ? ` by ${v.user?.name}` : v.artist?.name ? ` by ${v.artist.name}` : ``}${v.creation_date ? ` - ${v.creation_date}` : ``}`
+                                else if(v.nb_fan) o.description = `${client.DeezUtils.number.dotter(v.nb_fan)} Fans with ${client.DeezUtils.number.dotter(v.nb_album)} Albums`;
+                                else if(v.nb_tracks) o.description = `${client.DeezUtils.number.dotter(v.nb_tracks)} Tracks${v.user?.name ? ` by ${v.user?.name}` : v.artist?.name ? ` by ${v.artist.name}` : ``}${v.creation_date ? ` - ${v.creation_date}` : ``}`
                                 return o;
                             }).slice(0, 25))
                     ])

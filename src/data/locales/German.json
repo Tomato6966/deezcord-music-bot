@@ -1,0 +1,17 @@
+{
+    "ping": {
+        "description": "Zeige meine Latenz zu Discord an",
+        "execute": {
+            "pong": "🏓 Meine Latenz nach Discord ist: `{{wsPing}}ms`"
+        }
+    },
+    "play": {
+        "description": "Spiele einen Song / Suchanfrage in deinem Sprachkanal",
+        "options": {
+            "query": "Song, Playlist oder eine Suchanfrage",
+            "query_search_filter": "Willst du die Suchanfragen filtern?",
+            "queueaction": "Aktionen welche auf die Warteschlange ausgeführt werden sollen?",
+            "file": "Spiele eine Datei statt einer Query ab (query wird überschrieben)"
+        }
+    }
+}

@@ -13,4 +13,11 @@ export default async (client) => {
         clientName: "Deezcord",
         clientId: client.user.id, 
     });
+
+    // ensure languages
+    await client.db.guildSettings.findMany({
+        select: { guildId: true, language: true }
+    }).then(x => {
+        x.filter(v => client.guilds.cache.has(v.guildId)).forEach(v => client.DeezCache.locales.set(v.guildId, v.language || client.locales.German));
+    });
 }
