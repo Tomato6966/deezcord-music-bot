@@ -23,7 +23,7 @@ export class DeezCordTrackUtils {
     }
     /** @param {import("discord.js").User|string} requester */
     getRequesterString(requester) {
-        return requester?.tag || requester.username || requester?.id || requester || "Requester";
+        return requester?.tag || requester?.username || requester?.id || requester || "Requester";
     }
     /**
      * @typedef {{line:string|null, lrc_timestamp?:string, milliseconds?:string, duration?:string}} lyricsSincObject
@@ -40,12 +40,14 @@ export class DeezCordTrackUtils {
                 args: ['--no-sandbox']
             });
             const page = await browser.newPage();
-            await page.goto(`https://www.deezer.com/de/track/${identifier}`);
+            await page.goto(`https://deezer.com/track/${identifier}`, {  
+              waitUntil: 'networkidle0',
+              timeout: 5000,
+            });
             const songData = await page.evaluate("__DZR_APP_STATE__");
             await browser.close();
             const lyrics = songData.LYRICS;
             if(!lyrics) return null;
-
 
             let JSONSTRING = "";
             try {
@@ -53,7 +55,6 @@ export class DeezCordTrackUtils {
             } catch(e) {
                 JSONSTRING = JSON.stringify(["no-data"]);
             }
-            return lyrics;
             await this.client.db.deezerLyrics.upsert({
                 where: { trackId: String(identifier), },
                 update: { 
@@ -93,6 +94,7 @@ export class DeezCordTrackUtils {
             const res = await this.client.lyrics.songs.search(`${author ?? ""} ${this.keepLetters(this.modifyTitle(title))}`.trim()).then(async x => {
                 return x?.length ? await x[0].lyrics().catch(() => null) : null;
             }).catch(() => null);
+            if(!res) console.error("found nothing on genius for:", `${author ?? ""} ${this.keepLetters(this.modifyTitle(title))}`.trim())
             if(res && typeof res === "string") {
                 await this.client.db.lyrics.upsert({
                     where: {

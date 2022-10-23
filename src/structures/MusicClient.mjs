@@ -6,9 +6,10 @@ export class DeezCordClient extends Manager {
             defaultSearchPlatform: "dzsearch",
             validUnresolvedUris: ["deezer.com"],
             volumeDecrementer: 0.75,
+            useUnresolvedData: true,
             position_update_interval: 100,
             allowedLinksRegexes: [
-                /((https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|playlist|album|artist)\/(\d+)|(https?:\/\/|)?(?:www\.)?deezer\.page\.link\/(\S+))/
+                client.DeezRegex
             ],
             nodes: [
                 {
@@ -19,7 +20,7 @@ export class DeezCordClient extends Manager {
                     retryAmount: 10,
                     retryDelay: 7500,
                     requestTimeout: 5000,
-                    secure: true,
+                    secure: false,
                 }
             ],
             shards: client.cluster.info.TOTAL_SHARDS,

@@ -75,12 +75,12 @@ export class DeezCordPermissionUtils {
 
     /**
      * @param {import("discord.js").Channel} channel 
-     * @param {bigint[]} PermissionFlagsBits 
+     * @param {bigint[]} PermissionFlagsBitsProvided 
      * @returns {import("discord.js").PermissionsBitField} permissions
      */
-    checkPerms(channel, ...PermissionFlagsBits) {
+    checkPerms(channel, ...PermissionFlagsBitsProvided) {
         if(channel?.guild?.members?.me?.permissions?.has(PermissionFlagsBits.Administrator)) return true;
-        if(channel?.guild?.members?.me) return this.checkPermOverwrites(channel, ...PermissionFlagsBits);
-        return channel?.permissionsFor?.(this.client.user.id)?.has?.([...PermissionFlagsBits.flat()]);
+        if(channel?.guild?.members?.me) return this.checkPermOverwrites(channel, ...PermissionFlagsBitsProvided);
+        return channel?.permissionsFor?.(this.client.user.id)?.has?.([...PermissionFlagsBitsProvided.flat()]);
     }
 }

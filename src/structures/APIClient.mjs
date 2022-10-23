@@ -24,6 +24,18 @@ export class APIClient {
         this.searchLimit = 100;
         // https://developers.deezer.com/api/explorer
     }
+    async fetchAll(path) {
+        const data = [];
+        let tracks = await this.makeRequest(`${path}?limit=100&index=0`);
+        if(tracks.data?.length) data.push(...tracks.data);
+        if(tracks.data.length < 100 || (tracks.total && tracks.total <= 100)) return data;
+        while(tracks.data?.length && tracks.data?.length === 100) {
+            tracks = await this.makeRequest(`${path}?limit=100&index=${data.length}`);
+            if(tracks.data?.length) data.push(...tracks.data);
+            else break;
+        }
+        return data;
+    }
     user = {
         saveDeezerUserId: async (discordUserId) => {
             const data = this.accessTokenOfDB(discordUserId);
@@ -185,32 +197,65 @@ export class APIClient {
         },
         fetch: {
             // get deezer datas
-            album: async (ID) => {
-                return await this.makeRequest(`album/${ID}`);
+            album: async (ID, all = true) => {
+                const res = await this.makeRequest(`album/${ID}`);
+                if(all && res?.tracks?.length < 100) {
+                    const allTracks = await this.deezer.fetch.albumTracks(ID, 100, true);
+                    if(allTracks?.length >= res?.tracks.length) res.tracks = allTracks; 
+                }
+                return res;
             },
-            artist: async (ID) => {
-                return await this.makeRequest(`artist/${ID}`);
+            albumTracks: async (ID, limit, all = true) => {
+                if(all) return await this.fetchAll(`album/${ID}/tracks`);
+                return await this.makeRequest(`album/${ID}/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
             },
+
+            artist: async (ID, all = true) => {
+                const res = await this.makeRequest(`artist/${ID}`);
+                if(all && res?.tracks?.length < 100) {
+                    const allTracks = await this.deezer.fetch.artistTracks(ID, 100, true);
+                    if(allTracks?.length >= res?.tracks.length) res.tracks = allTracks; 
+                }
+                return res;
+            },
+            artistTracks: async (ID, limit, all = true) => {
+                if(all) return await this.fetchAll(`artist/${ID}/top`);
+                return await this.makeRequest(`artist/${ID}/top?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
+            },
+
             track: async (ID) => {
                 return await this.makeRequest(`track/${ID}`);
             },
-            playlist: async (ID) => {
-                return await this.makeRequest(`playlist/${ID}`);
+
+            playlist: async (ID, all = true) => {
+                const res = await this.makeRequest(`playlist/${ID}`);
+                if(all && res?.tracks?.length < 100) {
+                    const allTracks = await this.deezer.fetch.playlistTracks(ID, 100, true);
+                    if(allTracks?.length >= res?.tracks.length) res.tracks = allTracks; 
+                }
+                return res;
+            },
+            playlistTracks: async (ID, limit, all = true) => {
+                if(all) return await this.fetchAll(`playlist/${ID}/tracks`);
+                return await this.makeRequest(`playlist/${ID}/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
             },
             podcast: async (ID) => {
                 return await this.makeRequest(`podcast/${ID}`);
             },
-            radio: async (ID) => {
-                return await this.makeRequest(`radio/${ID}`);
-            },
-            radioTracks: async (ID, limit) => {
-                const radioData = await this.makeRequest(`radio/${ID}`);
-                if(radioData.tracklist) {
-                    const tracks = await this.makeRequest(`radio/${ID}/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`, true).catch(() => []);
-                    return { radioInfo: radioData, tracks: tracks.map(createTrackResolveable) }
+            radio: async (ID, all = true) => {
+                const res = await this.makeRequest(`radio/${ID}`);
+                if(all && res?.tracks?.length < 100) {
+                    const allTracks = await this.deezer.fetch.radioTracks(ID, 100, true);
+                    if(allTracks?.length >= res?.tracks.length) res.tracks = allTracks; 
                 }
-                return bull
+                return res;
             },
+            radioTracks: async (ID, limit, all = true) => {
+                if(all) return await this.fetchAll(`radio/${ID}/tracks`);
+                const tracks = await this.makeRequest(`radio/${ID}/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`, true).catch(() => []);
+                return tracks
+            },
+
             episode: async (ID) => {
                 return await this.makeRequest(`episode/${ID}`);
             },

@@ -17,6 +17,8 @@ export class BotClient extends Client {
             ...options
         });
 
+        this.DeezRegex = /((https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|playlist|album|artist)\/(\d+)|(https?:\/\/|)?(?:www\.)?deezer\.page\.link\/(\S+))/;
+
         /** @type {ClusterClient} */
         this.cluster = new ClusterClient(this);
         
@@ -28,7 +30,7 @@ export class BotClient extends Client {
         /** @type {Genius.Client} */
         this.lyrics = new Genius.Client(process.env.GENIUSTOKEN || undefined);
         
-        
+
         this.commands = new Collection();
         this.eventPaths = new Collection();
         this.cooldowns = {
@@ -74,6 +76,20 @@ export class BotClient extends Client {
 
         return this.emit("DeezCordLoaded", this);
     }
+
+    createUnresolvedData(v) {
+        return {
+            isrc: v.isrc || undefined,
+            title: v.title,
+            author: v.artist?.name,
+            authorUri: v.artist?.link ?? v.artist?.share ?? v.artist?.id ? `https://www.deezer.com/artist/${v.artist.id}` : undefined,
+            authorImage: v.artist?.picture_big ?? v.artist?.picture_medium ?? v.artist?.picture_small ?? v.artist.picture,
+            thumbnail: v.md5_image ? `https://cdns-images.dzcdn.net/images/cover/${v.md5_image}/500x500.jpg` : undefined,
+            uri: v.link,
+            identifier: v.id,
+            duration: v.duration * 1000,
+        }
+    } 
 
     get guildsAndMembers() {
         return {
@@ -132,19 +148,28 @@ export class BotClient extends Client {
         try {
             this.eventPaths.clear();
             const paths = await walks(`${process.cwd()}/src/events`);
+            const DeezCords = paths.filter(x => x.includes("/Deezcord/"))
+            const BotEvents = paths.filter(x => !x.includes("/Deezcord/"))
             await Promise.all(
-                paths.map(async (path) => {
+                BotEvents.map(async (path) => {
                     const event = await import(resolve(path)).then(x => x.default)
                     const splitted = resolve(path).split("/")
                     const eventName = splitted.reverse()[0].replace(".mjs", "").replace(".js", "");
                     this.eventPaths.set(eventName, { eventName, path: resolve(path) });
                     
-                    if(splitted.reverse()[1] === "Deezcord") {
-                        this.logger.debug(`✅ Deezcord-Event Loaded: ${eventName}`);
-                        return this.DeezCord.on(eventName, event.bind(null, this));
-                    }
                     this.logger.debug(`✅ Event Loaded: ${eventName}`);
                     return this.on(eventName, event.bind(null, this));
+                })
+            );
+            await Promise.all(
+                DeezCords.map(async (path) => {
+                    const event = await import(resolve(path)).then(x => x.default)
+                    const splitted = resolve(path).split("/")
+                    const eventName = splitted.reverse()[0].replace(".mjs", "").replace(".js", "");
+                    this.eventPaths.set(eventName, { eventName, path: resolve(path) });
+                    
+                    this.logger.debug(`✅ Deezcord-Event Loaded: ${eventName}`);
+                    return this.DeezCord.on(eventName, event.bind(null, this));
                 })
             );
         } catch (e) {

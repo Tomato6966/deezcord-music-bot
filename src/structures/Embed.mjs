@@ -3,9 +3,9 @@ import { resolveColor } from "discord.js";
 
 export class Embed extends EmbedBuilder {
     constructor(data={}) {
-        super(...data);
+        super({ ...data });
         this.setAuthor({
-            name: "Deezcord",
+            name: "© Deezcord",
             url: "https://discord.com/oauth2/authorize?client_id=1032998523123290182&scope=bot&permissions=279218310144",
             iconURL: "https://cdn.discordapp.com/avatars/1032998523123290182/8cff58eb2a86f4eb692f137596ae44f5.webp?size=256",
         });

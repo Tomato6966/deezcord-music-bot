@@ -8,7 +8,7 @@
 export default async (client, player, track, error) => {
     const guild = client.guilds.cache.get(player.guild);
     if(!guild) return palyer.destroy();
-    client.logger.debug(`Track errored in ${guild.name}`, error);
+    client.logger.error(`Track errored in ${guild.name}`, error);
     client.DeezUtils.track.handleEnd(player, track);
     
     // skip the track

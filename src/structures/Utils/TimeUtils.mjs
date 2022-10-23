@@ -38,7 +38,7 @@ export class DeezCordTimeUtils {
      */
     formatMS(n) {
         if(!n) return "000"; // Returning so it doesn't crash
-        return n + (Number(n) < 100 ? '0' : ''); 
+        return n + (Number(n) < 10 ? '00' : Number(n) < 100 ? '0' : ''); 
     }
 
     /**
