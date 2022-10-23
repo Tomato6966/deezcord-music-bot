@@ -28,5 +28,12 @@
             "queueaction": "Any extra Queue Actions wanted?",
             "file": "Play a file instead (overrides query)"
         }
+    },
+    "charts": {
+        "description": "Play the current Charts (Hit-Songs)",
+        "options": {
+            "query_search_filter": "Wanna filter Search Results?",
+            "limit": "How many songs? (10 <= limit <= 200 | default: 100)"
+        }
     }
 }

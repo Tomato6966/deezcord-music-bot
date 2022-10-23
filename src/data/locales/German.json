@@ -28,5 +28,12 @@
             "queueaction": "Aktionen welche auf die Warteschlange ausgeführt werden sollen?",
             "file": "Spiele eine Datei statt einer Query ab (query wird überschrieben)"
         }
+    },
+    "charts": {
+        "description": "Play the current Charts (Hit-Songs)",
+        "options": {
+            "query_search_filter": "Wanna filter Search Results?",
+            "limit": "How many songs? (10 <= limit <= 200 | default: 100)"
+        }
     }
 }

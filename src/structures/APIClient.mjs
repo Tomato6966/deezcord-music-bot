@@ -18,6 +18,19 @@ export class APIClient {
         // https://developers.deezer.com/api/explorer
     }
 
+    async fetchAll(path, maxLimit = 1000, maxLen=100) {
+        const data = [];
+        let tracks = await this.makeRequest(`${path}?limit=100&index=0`);
+        if(tracks.data?.length) data.push(...tracks.data);
+        if(tracks.data.length < maxLen || (tracks.total && tracks.total <= maxLen)) return data;
+        while(tracks.data?.length && tracks.data?.length === maxLen && maxLimit > data.length) {
+            tracks = await this.makeRequest(`${path}?limit=100&index=${data.length}`);
+            if(tracks.data?.length) data.push(...tracks.data);
+            else break;
+        }
+        if(data.length > maxLimit) data.splice(maxLimit, data.length);
+        return data;
+    }
     user = {
         resetDeezerAccount: async (discordUserId) => {
             return await this.client.db.userData.update({
