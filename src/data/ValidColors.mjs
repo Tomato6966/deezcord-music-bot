@@ -25,4 +25,3 @@ export const validColors = {
     BgCyan: "\x1b[46m",
     BgWhite: "\x1b[47m"
 };
-export const validColorsStrings = Object.keys(validColors);

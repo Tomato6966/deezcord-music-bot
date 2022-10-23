@@ -1,13 +1,20 @@
-import { Client, GatewayIntentBits, Partials, ActivityType, PresenceUpdateStatus, Collection, Options, SlashCommandAssertions, PermissionsBitField, PermissionFlagsBits, ChannelType, SlashCommandBuilder, ShardClientUtil, ContextMenuCommandBuilder } from "discord.js";
+import { BaseGuild, Guild, Client, GatewayIntentBits, Partials, ActivityType, PresenceUpdateStatus, Collection, Options, SlashCommandAssertions, PermissionsBitField, PermissionFlagsBits, ChannelType, SlashCommandBuilder, ShardClientUtil, ContextMenuCommandBuilder } from "discord.js";
 import { Cluster, ClusterClient, getInfo } from "discord-hybrid-sharding";
-import { Second } from "../utils/TimeUtils.mjs"; 
 import { promises } from "fs";
 import { resolve } from "path";
-import { PrismaClient } from "@prisma/client"
-import { Logger } from "../utils/Logger.mjs";
+import { Languages, PrismaClient } from "@prisma/client"
+import Genius from "genius-lyrics";
+import { Logger } from "./Utils/Logger.mjs";
 import { dirSetup } from "../data/SlashCommandDirSetup.mjs";
 import { APIClient } from "./APIClient.mjs";
 import { DeezCordClient } from "./MusicClient.mjs";
+import { DeezCordUtils } from "./Utils.mjs";
+import { init as initLanguage, inlineLocale } from "./i18n.mjs";
+
+/** @type {import("@prisma/client").Languages} */
+BaseGuild.prototype.language = "EnglishUS";
+/** @type {import("@prisma/client").Languages} */
+Guild.prototype.language = "EnglishUS";
 
 export class BotClient extends Client {
     constructor(options = {}) {
@@ -15,13 +22,21 @@ export class BotClient extends Client {
             ...getDefaultClientOptions(),
             ...options
         });
+        initLanguage();
+
+        this.DeezRegex = /((https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|playlist|album|artist)\/(\d+)|(https?:\/\/|)?(?:www\.)?deezer\.page\.link\/(\S+))/;
 
         /** @type {ClusterClient} */
         this.cluster = new ClusterClient(this);
         
         // interested in adding a cache layer? --> https://github.com/Tomato6966/dragonfly-redis-prisma-cache
         this.db = new PrismaClient()
-        this.deezCord = new DeezCordClient(this);
+        this.DeezCord = new DeezCordClient(this);
+        this.DeezUtils = new DeezCordUtils(this);
+
+        /** @type {Genius.Client} */
+        this.lyrics = new Genius.Client(process.env.GENIUSTOKEN || undefined);
+        
 
         this.commands = new Collection();
         this.eventPaths = new Collection();
@@ -36,8 +51,40 @@ export class BotClient extends Client {
         this.DeezCache = {
             loginCache: new Collection(),
             fetchedApplication: [],
+            locales: new Collection(),
         }
-        
+        this.locales = {
+            "EnglishUS":"EnglishUS",
+            "EnglishGB":"EnglishGB",
+            "German" :"German" ,
+            "Bulgarian":"Bulgarian",
+            "ChineseCN":"ChineseCN",
+            "ChineseTW":"ChineseTW",
+            "Croatian":"Croatian",
+            "Czech":"Czech",
+            "Danish" :"Danish" ,
+            "Dutch":"Dutch",
+            "Finnish" :"Finnish" ,
+            "French" :"French" ,
+            "Greek":"Greek",
+            "Hindi" :"Hindi" ,
+            "Hungarian":"Hungarian",
+            "Italian" :"Italian" ,
+            "Japanese" :"Japanese" ,
+            "Korean":"Korean",
+            "Lithuanian":"Lithuanian",
+            "Norwegian":"Norwegian",
+            "Polish":"Polish",
+            "PortugueseBR":"PortugueseBR",
+            "Romanian":"Romanian",
+            "Russian":"Russian",
+            "SpanishE":"SpanishE",
+            "Swedish":"Swedish",
+            "Thai":"Thai",
+            "Turkish":"Turkish",
+            "Ukrainian":"Ukrainian",
+            "Vietnamese":"Vietnamese",
+        };
         this.init();
     }
     async init() {
@@ -68,6 +115,36 @@ export class BotClient extends Client {
 
         return this.emit("DeezCordLoaded", this);
     }
+    /** @param {Guild} guild */
+    getGuildLocale(guild) {
+        if(this.DeezCache.locales.has(guild.id)) return this.DeezCache.locales.get(guild.id);
+        // if not in cache, set it from db in cache, and then return default ("EnglishUS");  
+        return this.db.guildSettings.findFirst({
+            where: { guildId: guild.id }, select: { language: true }
+        }).then(x => { 
+            this.DeezCache.locales.set(guild.id, x?.language || this.locales.EnglishUS)
+            return this.locales.EnglishUS
+        }).catch(() => { 
+            this.DeezCache.locales.set(guild.id, this.locales.EnglishUS)
+            return this.locales.EnglishUS
+        }), this.locales.EnglishUS;
+    }
+    translate (locale, text, ...params) {
+        return inlineLocale(locale, text, ...params);
+    } 
+    createUnresolvedData(v) {
+        return {
+            isrc: v.isrc || undefined,
+            title: v.title,
+            author: v.artist?.name,
+            authorUri: v.artist?.link ?? v.artist?.share ?? v.artist?.id ? `https://www.deezer.com/artist/${v.artist.id}` : undefined,
+            authorImage: v.artist?.picture_big ?? v.artist?.picture_medium ?? v.artist?.picture_small ?? v.artist.picture,
+            thumbnail: v.md5_image ? `https://cdns-images.dzcdn.net/images/cover/${v.md5_image}/500x500.jpg` : undefined,
+            uri: v.link,
+            identifier: v.id,
+            duration: v.duration * 1000,
+        }
+    } 
 
     get guildsAndMembers() {
         return {
@@ -126,15 +203,28 @@ export class BotClient extends Client {
         try {
             this.eventPaths.clear();
             const paths = await walks(`${process.cwd()}/src/events`);
+            const DeezCords = paths.filter(x => x.includes("/Deezcord/"))
+            const BotEvents = paths.filter(x => !x.includes("/Deezcord/"))
             await Promise.all(
-                paths.map(async (path) => {
+                BotEvents.map(async (path) => {
                     const event = await import(resolve(path)).then(x => x.default)
                     const splitted = resolve(path).split("/")
                     const eventName = splitted.reverse()[0].replace(".mjs", "").replace(".js", "");
                     this.eventPaths.set(eventName, { eventName, path: resolve(path) });
+                    
                     this.logger.debug(`✅ Event Loaded: ${eventName}`);
-                    if(splitted.reverse()[1] === "Deezcord") return this.deezCord.on(eventName, event.bind(null, this));
                     return this.on(eventName, event.bind(null, this));
+                })
+            );
+            await Promise.all(
+                DeezCords.map(async (path) => {
+                    const event = await import(resolve(path)).then(x => x.default)
+                    const splitted = resolve(path).split("/")
+                    const eventName = splitted.reverse()[0].replace(".mjs", "").replace(".js", "");
+                    this.eventPaths.set(eventName, { eventName, path: resolve(path) });
+                    
+                    this.logger.debug(`✅ Deezcord-Event Loaded: ${eventName}`);
+                    return this.DeezCord.on(eventName, event.bind(null, this));
                 })
             );
         } catch (e) {
@@ -253,7 +343,7 @@ export class BotClient extends Client {
                 else {
                     const curPath = `${process.cwd()}${path}/${dir}`;
                     const command = await import(curPath).then(x => x.default);
-                    if (!command.name) {
+                    if (!command?.name) {
                         this.logger.error(`${curPath} not containing a Command-Name`);
                         continue;
                     }
@@ -356,6 +446,12 @@ export class BotClient extends Client {
             this.application.commands.set([]);
         }).catch(this.logger.error);
     }
+    /**
+     * 
+     * @param {*} command 
+     * @param {SlashCommandBuilder} Slash 
+     * @returns 
+     */
     buildOptions(command, Slash) {
         if (command.options?.length) {
             /*
@@ -541,8 +637,8 @@ export function getDefaultClientOptions() {
         },
         sweepers: {
             messages: {
-                interval: Second.Minute(5),
-                lifetime: Second.Hour(1),
+                interval: 5 * 60 * 1000,
+                lifetime: 1 * 60 * 60 * 1000,
             }
         },
         makeCache: Options.cacheWithLimits({
