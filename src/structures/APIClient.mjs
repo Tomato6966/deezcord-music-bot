@@ -199,9 +199,9 @@ export class APIClient {
             // get deezer datas
             album: async (ID, all = true) => {
                 const res = await this.makeRequest(`album/${ID}`);
-                if(all && res?.tracks?.length < 100) {
+                if(all && (!(res?.tracks||res?.tracks?.data||[])?.length || (res?.tracks||res?.tracks?.data||[]).length < 100)) {
                     const allTracks = await this.deezer.fetch.albumTracks(ID, 100, true);
-                    if(allTracks?.length >= res?.tracks.length) res.tracks = allTracks; 
+                    if(allTracks?.length) res.tracks = allTracks; 
                 }
                 return res;
             },
@@ -212,9 +212,9 @@ export class APIClient {
 
             artist: async (ID, all = true) => {
                 const res = await this.makeRequest(`artist/${ID}`);
-                if(all && res?.tracks?.length < 100) {
+                if(all && (!(res?.tracks||res?.tracks?.data||[])?.length || (res?.tracks||res?.tracks?.data||[]).length < 100)) {
                     const allTracks = await this.deezer.fetch.artistTracks(ID, 100, true);
-                    if(allTracks?.length >= res?.tracks.length) res.tracks = allTracks; 
+                    if(allTracks?.length) res.tracks = allTracks; 
                 }
                 return res;
             },
@@ -229,9 +229,9 @@ export class APIClient {
 
             playlist: async (ID, all = true) => {
                 const res = await this.makeRequest(`playlist/${ID}`);
-                if(all && res?.tracks?.length < 100) {
+                if(all && (!(res?.tracks||res?.tracks?.data||[])?.length || (res?.tracks||res?.tracks?.data||[]).length < 100)) {
                     const allTracks = await this.deezer.fetch.playlistTracks(ID, 100, true);
-                    if(allTracks?.length >= res?.tracks.length) res.tracks = allTracks; 
+                    if(allTracks?.length) res.tracks = allTracks; 
                 }
                 return res;
             },
@@ -244,9 +244,9 @@ export class APIClient {
             },
             radio: async (ID, all = true) => {
                 const res = await this.makeRequest(`radio/${ID}`);
-                if(all && res?.tracks?.length < 100) {
+                if(all && (!(res?.tracks||res?.tracks?.data||[])?.length || (res?.tracks||res?.tracks?.data||[]).length < 100)) {
                     const allTracks = await this.deezer.fetch.radioTracks(ID, 100, true);
-                    if(allTracks?.length >= res?.tracks.length) res.tracks = allTracks; 
+                    if(allTracks?.length) res.tracks = allTracks; 
                 }
                 return res;
             },
