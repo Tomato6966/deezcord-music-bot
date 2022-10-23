@@ -6,4 +6,5 @@ client.on("DeezCordLoaded", () => {
     client.logger.info("Now starting the bot");
     
     client.login(process.env.DISCORD_TOKEN)
+    
 })

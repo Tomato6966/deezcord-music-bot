@@ -21,10 +21,10 @@ export default (client) => {
     process.on('SIGUSR2', () => process.exit());
     process.on("exit", async () => {
         console.log("\n\nEXITING and stopping all PLAYERS\n\n");
-        if(!client.deezCord) return console.error("No deezcord manager");
-        for (const guildId of client.deezCord.players.map(x => x.guild)) {
+        if(!client.DeezCord) return console.error("No deezcord manager");
+        for (const guildId of client.DeezCord.players.map(x => x.guild)) {
             try {
-                client.deezCord.options.send(guildId, {"op":4,"d":{"self_deaf":false,"guild_id":guildId,"channel_id":null,"self_mute":false}});
+                client.DeezCord.options.send(guildId, {"op":4,"d":{"self_deaf":false,"guild_id":guildId,"channel_id":null,"self_mute":false}});
                 //client.musicManager.nodes.each(node => node.send({"op": "destroy", guildId}));
             } catch (e) {
                 console.error(e);

@@ -1,13 +1,14 @@
 import { Client, GatewayIntentBits, Partials, ActivityType, PresenceUpdateStatus, Collection, Options, SlashCommandAssertions, PermissionsBitField, PermissionFlagsBits, ChannelType, SlashCommandBuilder, ShardClientUtil, ContextMenuCommandBuilder } from "discord.js";
 import { Cluster, ClusterClient, getInfo } from "discord-hybrid-sharding";
-import { Second } from "../utils/TimeUtils.mjs"; 
 import { promises } from "fs";
 import { resolve } from "path";
 import { PrismaClient } from "@prisma/client"
-import { Logger } from "../utils/Logger.mjs";
+import Genius from "genius-lyrics";
+import { Logger } from "./Utils/Logger.mjs";
 import { dirSetup } from "../data/SlashCommandDirSetup.mjs";
 import { APIClient } from "./APIClient.mjs";
 import { DeezCordClient } from "./MusicClient.mjs";
+import { DeezCordUtils } from "./Utils.mjs";
 
 export class BotClient extends Client {
     constructor(options = {}) {
@@ -21,8 +22,13 @@ export class BotClient extends Client {
         
         // interested in adding a cache layer? --> https://github.com/Tomato6966/dragonfly-redis-prisma-cache
         this.db = new PrismaClient()
-        this.deezCord = new DeezCordClient(this);
+        this.DeezCord = new DeezCordClient(this);
+        this.DeezUtils = new DeezCordUtils(this);
 
+        /** @type {Genius.Client} */
+        this.lyrics = new Genius.Client(process.env.GENIUSTOKEN || undefined);
+        
+        
         this.commands = new Collection();
         this.eventPaths = new Collection();
         this.cooldowns = {
@@ -132,8 +138,12 @@ export class BotClient extends Client {
                     const splitted = resolve(path).split("/")
                     const eventName = splitted.reverse()[0].replace(".mjs", "").replace(".js", "");
                     this.eventPaths.set(eventName, { eventName, path: resolve(path) });
+                    
+                    if(splitted.reverse()[1] === "Deezcord") {
+                        this.logger.debug(`✅ Deezcord-Event Loaded: ${eventName}`);
+                        return this.DeezCord.on(eventName, event.bind(null, this));
+                    }
                     this.logger.debug(`✅ Event Loaded: ${eventName}`);
-                    if(splitted.reverse()[1] === "Deezcord") return this.deezCord.on(eventName, event.bind(null, this));
                     return this.on(eventName, event.bind(null, this));
                 })
             );
@@ -541,8 +551,8 @@ export function getDefaultClientOptions() {
         },
         sweepers: {
             messages: {
-                interval: Second.Minute(5),
-                lifetime: Second.Hour(1),
+                interval: 5 * 60 * 1000,
+                lifetime: 1 * 60 * 60 * 1000,
             }
         },
         makeCache: Options.cacheWithLimits({

@@ -1,5 +1,4 @@
 import { PermissionFlagsBits } from "discord.js";
-import { checkPerms } from "../utils/Permissions.mjs";
 import { checkCommand, parseSlashCommandKey } from "./SlashCommandHandler.mjs";
 
 /** 
@@ -10,7 +9,7 @@ export async function contextMenuHandler(client, interaction) {
 
     // SOON: Ensure Languags
 
-    if(!checkPerms(client, interaction.channel, [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel])) {
+    if(!client.DeezUtils.perms.checkPerms(client, interaction.channel, [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel])) {
         return interaction.reply({
             ephemeral: true,
             content: `❌ I can't view this channel, or I can't send messages in this channel`
@@ -19,7 +18,7 @@ export async function contextMenuHandler(client, interaction) {
     const contextCmd = client.commands.get(parseSlashCommandKey(interaction, true));
 
     // check perms for: - emojis, embed links etc.
-    if(!checkPerms(client, interaction.channel, [PermissionFlagsBits.EmbedLinks])) {
+    if(!client.DeezUtils.perms.checkPerms(client, interaction.channel, [PermissionFlagsBits.EmbedLinks])) {
         return interaction.reply({
             ephemeral: true,
             content: `❌ I need the Permission, to Embed-Links in this Channel`

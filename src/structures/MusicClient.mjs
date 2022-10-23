@@ -27,6 +27,6 @@ export class DeezCordClient extends Manager {
             send: (i, p) => client?.guilds?.cache.get(i)?.shard?.send?.(p),
         });
         this.client = client;
-        this.client.cluster
+        this.createOptions = { ...this.options };  
     }
 }

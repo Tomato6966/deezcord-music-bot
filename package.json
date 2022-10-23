@@ -39,6 +39,7 @@
     "dotenv": "^16.0.3",
     "erela.js": "github:Tomato6966/erela.js",
     "fastify": "^4.9.2",
+    "genius-lyrics": "^4.4.0",
     "node-fetch": "^3.2.10",
     "prisma": "^4.5.0"
   }

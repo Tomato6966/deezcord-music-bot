@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import fetch from 'node-fetch';
-import { Logger } from "../utils/Logger.mjs";
+import { Logger } from "./Utils/Logger.mjs";
 
 export class APIClient {
     constructor(options = {}) {

@@ -1,8 +1,6 @@
 import { Collection, PermissionFlagsBits, resolveColor } from "discord.js";
 import { cooldownCategories, cooldownCategoriesHigh, cooldownCommands, cooldownCommandsHigh, defaultCooldownMs, defaultCooldownMsHigh, maximumCoolDownCommands } from "../data/Cooldowns.mjs";
 import { Embed } from "../structures/Embed.mjs";
-import { checkPerms } from "../utils/Permissions.mjs";
-import { onlySecondDuration } from "../utils/TimeUtils.mjs";
 
 /** 
  * @param {import("../structures/BotClient.mjs").BotClient} client
@@ -12,7 +10,7 @@ export async function slashCommandHandler(client, interaction) {
 
     // SOON: Ensure Languags
 
-    if(!checkPerms(client, interaction.channel, [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel])) {
+    if(!client.DeezUtils.perms.checkPerms(client, interaction.channel, [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel])) {
         return interaction.reply({
             ephemeral: true,
             content: `❌ I can't view this channel, or I can't send messages in this channel`
@@ -22,7 +20,7 @@ export async function slashCommandHandler(client, interaction) {
     const slashCmd = client.commands.get(parseSlashCommandKey(interaction));
 
     // check perms for: - emojis, embed links etc.
-    if(!checkPerms(client, interaction.channel, [PermissionFlagsBits.EmbedLinks])) {
+    if(!client.DeezUtils.perms.checkPerms(client, interaction.channel, [PermissionFlagsBits.EmbedLinks])) {
         return interaction.reply({
             ephemeral: true,
             content: `❌ I need the Permission, to Embed-Links in this Channel`
@@ -135,7 +133,7 @@ export function isOnCooldown(client, command, ctx) {
                 embeds: [
                     new Embed()
                     .setColor(resolveColor("#ff0000"))
-                    .addField(`${Emoji(ctx).Cooldown.str} Ayo, Commandcooldown`, `> You can use this Command \`${onlySecondDuration(commandCooldown - Date.now())}\``)
+                    .addField(`${Emoji(ctx).Cooldown.str} Ayo, Commandcooldown`, `> You can use this Command \`${client.DeezUtils.time.onlySecondDuration(commandCooldown - Date.now())}\``)
                 ],
             }).catch(() => null), true;
         }
@@ -151,7 +149,7 @@ export function isOnCooldown(client, command, ctx) {
                 embeds: [
                     new Embed()
                     .setColor(resolveColor("#ff0000"))
-                    .addField(`${Emoji(ctx).Cooldown.str} Ayo, Guildcooldown`, `> This Guild can use this Command \`${onlySecondDuration(commandCooldown - Date.now())}\``)
+                    .addField(`${Emoji(ctx).Cooldown.str} Ayo, Guildcooldown`, `> This Guild can use this Command \`${client.DeezUtils.time.onlySecondDuration(commandCooldown - Date.now())}\``)
                 ],
             }).catch(() => null), true;
         }

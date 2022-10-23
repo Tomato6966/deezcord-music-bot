@@ -1,5 +1,7 @@
-import { validColors, validColorsStrings } from "../data/ValidColors.mjs";
-import { getDateTimeString } from "./TimeUtils.mjs";
+import { validColors } from "../../data/ValidColors.mjs";
+import { DeezCordTimeUtils } from "./TimeUtils.mjs";
+const TimeUtils = new DeezCordTimeUtils(undefined);
+
 /**
  * @param {validColors} Colordisplay Valid Color for the Console
  * @param {string} text Text to log and display
@@ -16,16 +18,15 @@ export const color_log = (Colordisplay = ["FgGreen"], text = "No Text added", da
         );
         return console.log(color, ...text, validColors.Reset);
     }
-
     if(prefix) return console.log(
-        validColors.FgCyan, getDateTimeString(), 
+        validColors.FgCyan, TimeUtils.getDateTimeString(), 
         validColors.FgRed, `[::]`, 
         validColors.FgCyan, prefix, 
         validColors.FgRed, `[::]`, 
         color, ...text, validColors.Reset
     );
     return console.log(
-        validColors.FgCyan, getDateTimeString(),
+        validColors.FgCyan, TimeUtils.getDateTimeString(),
         validColors.FgRed, `[::]`,
         color, ...text, validColors.Reset
     );
