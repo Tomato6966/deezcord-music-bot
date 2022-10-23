@@ -3,7 +3,7 @@ import { i18n, inlineLocale } from "../../structures/i18n.mjs";
 /** @type {import("../../data/DeezCordTypes.mjs").CommandExport} */
 export default {
     name: "ping",
-    description: inlineLocale("en-US", `ping.description`),
+    description: inlineLocale("EnglishUS", `ping.description`),
     localizations: i18n.getLocales().map(locale => [
         { name: [locale, "ping"], description: [ locale,`ping.description` ] }
     ]),

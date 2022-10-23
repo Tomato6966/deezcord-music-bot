@@ -3,38 +3,21 @@ import { TrackUtils } from "erela.js";
 import { optionTypes } from "../structures/BotClient.mjs";
 import { i18n, inlineLocale, inlineLocalization } from "../structures/i18n.mjs";
 
-const loadTypes = {
-    "artist": "ARTIST_LOADED",
-    "playlist": "PLAYLIST_LOADED",
-    "album": "ALBUM_LOADED",
-    "radio": "RADIO_LOADED"
-}
-const searchFilterMethods = {
-    "artist": "artists",
-    "playlist": "playlists",
-    "album": "albums",
-    "radio": "radios"
-}
+/** @type
 /** @type {import("../data/DeezCordTypes.mjs").CommandExport} */ 
 export default {
-    name: "play",
-    description: inlineLocale("EnglishUS", `play.description`),
-    localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "play", "play.description")),
+    name: "charts",
+    description: inlineLocale("EnglishUS", `charts.description`),
+    localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "charts", "charts.description")),
     options: [
         {
-            name: "query",
-            description: inlineLocale("EnglishUS", `play.options.query`),
-            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "query", "play.options.query")),
-            required: true,
-            type: optionTypes.string,
-            // autocomplete: true,
-        },
-        {
-            name: "file",
-            description: inlineLocale("EnglishUS", `play.options.file`),
-            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "file", "play.options.file")),
+            name: "limit",
+            description: inlineLocale("EnglishUS", `charts.options.limit`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "limit", "charts.options.limit")),
             required: false,
-            type: optionTypes.attachment,
+            type: optionTypes.number,
+            max: 200,
+            min: 10,
         },
         {
             name: "queueaction",
@@ -49,19 +32,20 @@ export default {
         }, 
         {
             name: "query_search_filter",
-            description: inlineLocale("EnglishUS", `play.options.query_search_filter`),
-            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "query_search_filter", "play.options.query_search_filter")),
+            description: inlineLocale("EnglishUS", `charts.options.query_search_filter`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "query_search_filter", "charts.options.query_search_filter")),
             required: false,
             type: optionTypes.stringchoices,
             choices: [
-                {name: "track", value: "track" },
-                {name: "artist", value: "artist" },
-                {name: "playlist", value: "playlist" },
-                {name: "album", value: "album" },
-                {name: "radio", value: "radio" },
+                {name: "tracks", value: "tracks" },
+                {name: "artists", value: "artists" },
+                {name: "albums", value: "albums" },
+                {name: "playlists", value: "playlists" },
+                {name: "podcasts", value: "podcasts" },
             ]
         }
     ],
+    /** @param {import("../structures/BotClient.mjs").BotClient} client */
     async execute(client, interaction) {
         let player = client.DeezCord.players.get(interaction.guildId);
         const created = !player;
@@ -82,32 +66,25 @@ export default {
             for(const node of notConnectedNodes) await node.connect();
             await client.DeezUtils.time.delay(500 * notConnectedNodes.length);
         }
-        /*
-            const login = client.db.userData.findFirst({
-                where: { userId: interaction.user.id },
-                select: {
-                    deezerId: true, deezerToken: true
-                }
-            });
-            if(!login || !login.deezerToken) return interaction.reply({
-                ephemeral: true,
-                content: `❌ You have to be logged in to Deezer, do it with: ${client.commands.get("login")?.mention || "`/login`"}`
-            });
-        */
-        const query = interaction.options.getString("query");
+        const searchFilter = interaction.options.getString("query_search_filter");
+        
+        const limit = interaction.options.getNumber("limit") && isNaN(interaction.options.getNumber("limit")) ? Number(interaction.options.getNumber("limit")) : 100;
         await interaction.reply({
             ephemeral: true,
-            content: `Now searching for: ${query}`
+            content: `Now searching the charts${searchFilter ? `for \`${searchFilter}\`` : ``}`
         });
-        const finishFetcher = x => {
-            const data = { ...x };
-            data.tracks = (x?.tracks?.data||x?.tracks||[]).filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user));
-            return data;
-        }
-        // if(link) extractId and search for right query
-        let searchingTracks = null;
-        let loadType = "TRACKS_FOUND";
-
+        /*
+        const login = client.db.userData.findFirst({
+            where: { userId: interaction.user.id },
+            select: {
+                deezerId: true, deezerToken: true
+            }
+        });
+        if(!login || !login.deezerToken) return interaction.reply({
+            ephemeral: true,
+            content: `❌ You have to be logged in to Deezer, do it with: ${client.commands.get("login")?.mention || "`/login`"}`
+        });*/
+        let searchingTracks = [];
         const handleResSearchFilter = async (res, type) => {
             const sorted = res?.data?.filter?.(x => x.public === true || typeof x.public  === "undefined")?.sort?.((a,b ) => {
                 if(a.type === "artist") {
@@ -118,7 +95,7 @@ export default {
             });
             if(!sorted?.length) return interaction.editReply({
                 ephemeral: true,
-                content: `❌ Nothing found for the RadioStation: \`${query}\``.substring(0, 1000)
+                content: `❌ Nothing found for the Charts`.substring(0, 1000)
             })
             await interaction.editReply({
                 components: [
@@ -216,47 +193,23 @@ export default {
             })
         }
 
-        // fetch urls
-        if(query.match(client.DeezRegex)) {
-            const [,,,type,id] = query.match(client.DeezRegex);
-            if(type === "track") {
-                searchingTracks = {
-                    tracks: [
-                        await client.DeezApi.deezer.fetch.track(id).then(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user)).catch((e) => {console.warn(e); return null;})
-                    ]
-                };
-                if(searchingTracks.tracks?.[0]?.readable === false) {
-                    return await interaction.editReply({
-                        content: `❌ Found Track: ${searchingTracks.tracks[0].link} but it's not playable`
-                    })
-                }
-            } else if(loadTypes[type]) { // https://api.deezer.com/playlist/8282573142
-                loadType = loadTypes[type];
-                searchingTracks = await client.DeezApi.deezer.fetch[type](id, true).then(finishFetcher).catch((e) => {console.warn(e); return null;});
-            } else {
-                searchingTracks = null;
-            }
+        if(searchFilter && searchFilter === "tracks") {
+            searchingTracks = { tracks: await client.DeezApi.deezer.charts.tracks(limit).then(x => {
+                return (x?.data || []).filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user))       
+            })};
         }
-        // else search
+        else if(searchFilter) {
+            const res = await client.DeezApi.deezer.charts[searchFilter](limit);
+            return handleResSearchFilter(res, searchFilter)
+        }
         else {
-            const searchFilter = interaction.options.getString("query_search_filter");
-            if(searchFilter && searchFilter === "track") {
-                searchingTracks = { tracks: await client.DeezApi.deezer.search.tracks(query).then(x => {
-                    return (x?.data || []).filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user))       
-                })};
-            }
-            else if(searchFilter && searchFilterMethods[searchFilter]) {
-                const res = await client.DeezApi.deezer.search[`${searchFilterMethods[searchFilter]}`](query);
-                return handleResSearchFilter(res, searchFilter)
-            }
-            else {
-                // search all ?
-                searchingTracks = { tracks: await client.DeezApi.deezer.search.tracks(query).then(x => {
-                    return (x?.data || []).filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user))       
-                })};
-            }
+            // search all ?
+            searchingTracks = { tracks: await client.DeezApi.deezer.charts.tracks(limit).then(x => {
+                return (x?.data || []).filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user))       
+            })};
         }
-        const response = searchingTracks ? { data: searchingTracks, loadType, tracks: searchingTracks?.tracks || searchingTracks } : await client.DeezCord.search(query, interaction.user, player.node);
+
+        const response = searchingTracks ? { data: searchingTracks, loadType: `TRACKS_LOADED`, tracks: searchingTracks?.tracks || searchingTracks } : null;
         if(!response.tracks?.length) return interaction.editReply({
             ephemeral: true,
             content: `❌ No Tracks found`
@@ -279,20 +232,10 @@ export default {
             //if(!player.queue.current.uri && contentURL) player.queue.current.uri = contentURL;
             if(!player.paused && !player.playing) player.pause(false);
 
-            if(response.loadType = "PLAYLIST_LOADED") {
-                
-            } else if(response.loadType = "ARTIST_LOADED")  {
-                
-            } else if(response.loadType = "ALBUM_LOADED")  {
-                
-            } else if(response.loadType = "RADIO_LOADED")  {
-                
-            } else {
-                interaction.editReply({
-                    ephemeral: true,
-                    content: `Found the Track: \`${response.tracks[0].title}\` by \`${response.tracks[0].author}\``
-                });
-            }
+            interaction.editReply({
+                ephemeral: true,
+                content: `Found the Track: \`${response.tracks[0].title}\` by \`${response.tracks[0].author}\``
+            });
             //if (loadAllTracks) return await playlistMessage(client, response.playlist?.name || `No-Playlist-Name`, response.tracks, msg, contentURL ? contentURL : undefined, undefined, player.textChannel !== message.channel.id ? player.textChannel : null)
             //else return await nowPlayingMessage(client, response.tracks[0], msg, player.textChannel !== message.channel.id ? player.textChannel : null);
         } else {

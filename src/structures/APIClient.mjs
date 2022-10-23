@@ -17,7 +17,6 @@ export class APIClient {
         this.searchLimit = 100;
         // https://developers.deezer.com/api/explorer
     }
-
     async fetchAll(path, maxLimit = 1000, maxLen=100) {
         const data = [];
         let tracks = await this.makeRequest(`${path}?limit=100&index=0`);
@@ -264,22 +263,28 @@ export class APIClient {
             }
         },
         charts: { // charts
-            getAll: async (limit) => {
+            all: async (limit) => {
+                if(limit > 100) return await this.fetchAll("chart/0", limit, 99);
                 return await this.makeRequest(`chart/0?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
             },
-            getTracks: async (limit) => {
+            tracks: async (limit) => {
+                if(limit > 100) return await this.fetchAll("chart/0/tracks", limit, 99);
                 return await this.makeRequest(`chart/0/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
             },
-            getAlbums: async (limit) => {
+            albums: async (limit) => {
+                if(limit > 100) return await this.fetchAll("chart/0/albums", limit, 99);
                 return await this.makeRequest(`chart/0/albums?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
             },
-            getArtists: async (limit) => {
+            artists: async (limit) => {
+                if(limit > 100) return await this.fetchAll("chart/0/artists", limit, 99);
                 return await this.makeRequest(`chart/0/artists?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
             },
-            getPlaylists: async (limit) => {
+            playlists: async (limit) => {
+                if(limit > 100) return await this.fetchAll("chart/0/playlists", limit, 99);
                 return await this.makeRequest(`chart/0/playlists?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
             },
-            getPodcasts: async (limit) => {
+            podcasts: async (limit) => {
+                if(limit > 100) return await this.fetchAll("chart/0/podcasts", limit, 99);
                 return await this.makeRequest(`chart/0/podcasts?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
             }
         }

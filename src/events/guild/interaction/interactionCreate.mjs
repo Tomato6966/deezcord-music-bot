@@ -14,7 +14,6 @@ export default async (client, interaction) => {
     interaction.member = interaction.member ?? interaction.guild.members.cache.get(interaction.user.id) ?? await interaction.guild.members.fetch(interaction.user.id).catch(() => null)
     interaction.attachments = new Collection();
         
-
     // here we can execute messageCreate functions...
     if(interaction.isUserContextMenuCommand() || interaction.isMessageContextMenuCommand()) return contextMenuHandler(client, interaction);
     if(interaction.isCommand()) return slashCommandHandler(client, interaction);
