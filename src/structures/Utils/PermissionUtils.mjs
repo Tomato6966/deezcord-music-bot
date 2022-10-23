@@ -1,11 +1,11 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 
 export class DeezCordPermissionUtils {
-    /** @param {import("./BotClient.mjs").BotClient} client */
+    /** @param {import("../BotClient.mjs").BotClient} client */
     constructor(client) {
         this.client = client;
     }
-    
+
     /**
      * 
      * @param {import("discord.js").GuildMember} me 

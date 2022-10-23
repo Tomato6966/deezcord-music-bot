@@ -1,5 +1,5 @@
 export class DeezCordTimeUtils {
-    /** @param {import("./BotClient.mjs").BotClient} client */
+    /** @param {import("../BotClient.mjs").BotClient} client */
     constructor(client) {
         this.client = client;
     }

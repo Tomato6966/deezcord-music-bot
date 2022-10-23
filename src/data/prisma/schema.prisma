@@ -45,6 +45,16 @@ model Lyrics {
   title   String
   lyrics  String
 }
+model DeezerLyrics {
+  trackId String @id
+  author  String
+  title   String
+  LYRICS_ID String
+  LYRICS_TEXT String
+  LYRICS_WRITERS String
+  LYRICS_COPYRIGHTS String
+  LYRICS_SYNC_JSON Json
+}
 
 // DJ Settings per Guild
 model DJSettings {

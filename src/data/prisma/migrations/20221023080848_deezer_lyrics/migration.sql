@@ -1,0 +1,13 @@
+-- CreateTable
+CREATE TABLE "DeezerLyrics" (
+    "trackId" TEXT NOT NULL,
+    "author" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "LYRICS_ID" TEXT NOT NULL,
+    "LYRICS_TEXT" TEXT NOT NULL,
+    "LYRICS_WRITERS" TEXT NOT NULL,
+    "LYRICS_COPYRIGHTS" TEXT NOT NULL,
+    "LYRICS_SYNC_JSON" JSONB NOT NULL,
+
+    CONSTRAINT "DeezerLyrics_pkey" PRIMARY KEY ("trackId")
+);
