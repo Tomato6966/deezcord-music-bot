@@ -1,4 +1,19 @@
 {
+    "login": {
+        "description": "Verbinde deinen Account mit diesem Bot",
+        "execute": {
+            "embedTitle": "Einloggen",
+            "embedDescription": "Um mit Titeln, Wiedergabelisten, Künstlern und Radios interagieren zu können, müssen Sie sich anmelden.",
+            "embedFooter": "Teilen Sie diesen Link nicht mit jemandem!"
+        }
+    },
+    "logout": {
+        "description": "Trenne dein deezer-Konto mit diesem Bot",
+        "execute": {
+            "embedTitle": "Abmeldung",
+            "embedDescription": "Wir haben deine Verbindung entfernt, aber vergiss das nicht. \nUm mit Titeln, Wiedergabelisten, Künstlern und Radios interagieren zu können, müssen Sie angemeldet sein."
+        }
+    },
     "ping": {
         "description": "Zeige meine Latenz zu Discord an",
         "execute": {

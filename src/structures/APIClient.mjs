@@ -19,6 +19,20 @@ export class APIClient {
     }
 
     user = {
+        resetDeezerAccount: async (discordUserId) => {
+            return await this.client.db.userData.update({
+                where: {
+                    userId: discordUserId
+                },
+                data: {
+                    deezerToken: null,
+                    deezerId: null,
+                    deezerName: null,
+                    deezerPictureMedium: null,
+                    deezerTrackList: null,
+                }
+            })
+        },
         saveDeezerAccount: async (deezerData, discordUserId) => {
             return await this.client.db.userData.upsert({
                 where: {
@@ -297,7 +311,7 @@ export class APIClient {
                 }
 
                 // Redirect the user to the OAuth from deezer
-                return reply.redirect(`https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.domain}/callback/${randomString}&perms=basic_access,email,offline_access,manage_library, delete_library, listening_history`);
+                return reply.redirect(`https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.domain}/callback/${randomString}&perms=basic_access,offline_access,manage_library, delete_library, listening_history`);
             })
 
             fastify.get('/callback/:randomString', async (request, reply) => {

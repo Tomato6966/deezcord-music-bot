@@ -1,4 +1,19 @@
 {
+    "login": {
+        "description": "Connect your deezer account with this bot",
+        "execute": {
+            "embedTitle": "Login",
+            "embedDescription": "In order to interact with tracks, playlists, artists and radios you have to logged.",
+            "embedFooter": "Don't share this link with someone!"
+        }
+    },
+    "logout": {
+        "description": "Disconnect your deezer account with this bot",
+        "execute": {
+            "embedTitle": "Logout",
+            "embedDescription": "We removed your connection but dont forget. \nIn order to interact with tracks, playlists, artists and radios you have to logged."
+        }
+    },
     "ping": {
         "description": "Show my Latency to Discord.",
         "execute": {
