@@ -233,21 +233,10 @@ export default {
             //if(!player.queue.current.uri && contentURL) player.queue.current.uri = contentURL;
             if(!player.paused && !player.playing) player.pause(false);
 
-            if(response.loadType = "PLAYLIST_LOADED") {
-                
-            } 
-            else if(response.loadType = "ARTIST_LOADED")  {
-                
-            } else if(response.loadType = "ALBUM_LOADED")  {
-                
-            } else if(response.loadType = "RADIO_LOADED")  {
-                
-            } else {
-                interaction.editReply({
-                    ephemeral: true,
-                    content: `Found the Track: \`${response.tracks[0].title}\` by \`${response.tracks[0].author}\``
-                });
-            }
+            interaction.editReply({
+                ephemeral: true,
+                content: `Found the Track: \`${response.tracks[0].title}\` by \`${response.tracks[0].author}\``
+            });
             //if (loadAllTracks) return await playlistMessage(client, response.playlist?.name || `No-Playlist-Name`, response.tracks, msg, contentURL ? contentURL : undefined, undefined, player.textChannel !== message.channel.id ? player.textChannel : null)
             //else return await nowPlayingMessage(client, response.tracks[0], msg, player.textChannel !== message.channel.id ? player.textChannel : null);
         } else {

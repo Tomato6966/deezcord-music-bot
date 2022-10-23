@@ -83,16 +83,17 @@ export default {
             await client.DeezUtils.time.delay(500 * notConnectedNodes.length);
         }
         /*
-        const login = client.db.userData.findFirst({
-            where: { userId: interaction.user.id },
-            select: {
-                deezerId: true, deezerToken: true
-            }
-        });
-        if(!login || !login.deezerToken) return interaction.reply({
-            ephemeral: true,
-            content: `❌ You have to be logged in to Deezer, do it with: ${client.commands.get("login")?.mention || "`/login`"}`
-        });*/
+            const login = client.db.userData.findFirst({
+                where: { userId: interaction.user.id },
+                select: {
+                    deezerId: true, deezerToken: true
+                }
+            });
+            if(!login || !login.deezerToken) return interaction.reply({
+                ephemeral: true,
+                content: `❌ You have to be logged in to Deezer, do it with: ${client.commands.get("login")?.mention || "`/login`"}`
+            });
+        */
         const query = interaction.options.getString("query");
         await interaction.reply({
             ephemeral: true,
@@ -103,7 +104,7 @@ export default {
             data.tracks = (x?.tracks?.data||x?.tracks||[]).filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user));
             return data;
         }
-        // if(link) extractId and search for right query  
+        // if(link) extractId and search for right query
         let searchingTracks = null;
         let loadType = "TRACKS_FOUND";
 
@@ -222,7 +223,7 @@ export default {
                 searchingTracks = {
                     tracks: [
                         await client.DeezApi.deezer.fetch.track(id).then(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user)).catch((e) => {console.warn(e); return null;})
-                    ] 
+                    ]
                 };
                 if(searchingTracks.tracks?.[0]?.readable === false) {
                     return await interaction.editReply({
@@ -235,7 +236,7 @@ export default {
             } else {
                 searchingTracks = null;
             }
-        } 
+        }
         // else search
         else {
             const searchFilter = interaction.options.getString("query_search_filter");

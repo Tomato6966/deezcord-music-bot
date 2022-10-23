@@ -78,7 +78,7 @@ export class DeezCordTimeUtils {
 
     /**
      * Parse Time in Millisecond with util Functions
-     */
+     */ 
     Millisecond = {
         /** @param {number} time */
         Second: (time = 1) => time * 1000,
@@ -129,3 +129,4 @@ export class DeezCordTimeUtils {
         }, []).filter(Boolean).map(v => `${v < 10 ? `0${v}` : v}`).join(":");
     }
 }
+
