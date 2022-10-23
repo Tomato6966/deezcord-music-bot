@@ -195,7 +195,6 @@ export default {
 
         if(searchFilter && searchFilter === "tracks") {
             searchingTracks = { tracks: await client.DeezApi.deezer.charts.tracks(limit).then(x => {
-                console.log(x);
                 return (x?.data || []).filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user))       
             })};
         }
@@ -211,7 +210,7 @@ export default {
         }
 
         const response = searchingTracks ? { data: searchingTracks, loadType: `TRACKS_LOADED`, tracks: searchingTracks?.tracks || searchingTracks } : null;
-        if(!response.tracks) return interaction.editReply({
+        if(!response.tracks?.length) return interaction.editReply({
             ephemeral: true,
             content: `❌ No Tracks found`
         });

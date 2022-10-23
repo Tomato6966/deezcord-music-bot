@@ -257,7 +257,7 @@ export default {
             }
         }
         const response = searchingTracks ? { data: searchingTracks, loadType, tracks: searchingTracks?.tracks || searchingTracks } : await client.DeezCord.search(query, interaction.user, player.node);
-        if(!response.tracks) return interaction.editReply({
+        if(!response.tracks?.length) return interaction.editReply({
             ephemeral: true,
             content: `❌ No Tracks found`
         });
