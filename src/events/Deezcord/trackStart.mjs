@@ -50,6 +50,6 @@ export default async (client, track, player) => {
                 track.geniusLyrics = lyrics;
             }
         }
-        // Edit now playing message that embeds are available
+        // Edit now playing message that lyrics are available
     }
 }

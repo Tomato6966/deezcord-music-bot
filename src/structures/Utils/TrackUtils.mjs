@@ -5,7 +5,22 @@ export class DeezCordTrackUtils {
     constructor(client) {
         this.client = client;
     }
-
+    /**
+     * 
+     * @param {import("erela.js").Player} player 
+     * @param {import("erela.js").Track} track 
+     * @returns 
+     */
+    handleEnd(player, track) {
+        if(!player.get("previous")) player.set("previous", [])
+        const previousTracks = player.get("previous");
+        if(!player.get("previousPlay") && (!previousTracks[0] || previousTracks[0]?.identifier !== track.identifier)) {
+            previousTracks.unshift(track);
+            if(previousTracks.length > 25) previousTracks.pop(); // limit the previous Tracks amount
+            player.set("previous", previousTracks);
+        }
+        return player.set("previousPlay", undefined);
+    }
     /** @param {import("discord.js").User|string} requester */
     getRequesterString(requester) {
         return requester?.tag || requester.username || requester?.id || requester || "Requester";
