@@ -1,7 +1,6 @@
 import Fastify from "fastify";
 import fetch from 'node-fetch';
-import {Logger} from "../utils/Logger.mjs";
-import {User} from 'discord.js';
+import { Logger } from "./Utils/Logger.mjs";
 
 export class APIClient {
     constructor(options = {}) {
@@ -301,6 +300,11 @@ export class APIClient {
                 logger: true, //@TODO add here own logger (ask tomato what exactly he mean)
                 trustProxy: true,
             });
+            
+            // 1. login with discord
+                // browser session
+            // -> deezer/login
+                // session discord nutzername
 
             fastify.get('/login/:randomString', (request, reply) => {
                 const randomString = request?.params?.randomString;
@@ -319,7 +323,7 @@ export class APIClient {
                     };
                 }
 
-                if (userCache?.validUntil > Date.now()) {
+                if (userCache?.validUntil <= Date.now()) {
                     this.client.DeezCache.loginCache.delete(randomString);
 
                     reply.type('application/json').code(429);
@@ -384,7 +388,7 @@ export class APIClient {
                     /**
                      *  Event to work with the authentication.
                      *  @returns {deezerResponse} JSON object with the deezer api response
-                     *  @returns {User} The discord user behind this auth
+                     *  @returns {import("discord.js").User} The discord user behind this auth
                      */
                     this.client.emit('apiAuthentication', (deezerResponse, discordUser));
 
