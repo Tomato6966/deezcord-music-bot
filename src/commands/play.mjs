@@ -2,6 +2,7 @@ import { ActionRowBuilder, SelectMenuBuilder } from "@discordjs/builders";
 import { TrackUtils } from "erela.js";
 import { optionTypes } from "../structures/BotClient.mjs";
 import { i18n, inlineLocale, inlineLocalization } from "../structures/i18n.mjs";
+import { Embed } from "../structures/Embed.mjs";
 
 const loadTypes = {
     "artist": "ARTIST_LOADED",
@@ -155,10 +156,34 @@ export default {
                 });
                 const data = await client.DeezApi.deezer.fetch[type](id, true);
                 if(data.tracks.length) {
-                    i.editReply({
-                        content: `Found the **${type.substring(0, 1).toUpperCase() + type.substring(1, type.length)}**: \`${data.title || data.name}\` with \`${data.tracks.length} Tracks\`\n> ${data.link || data.share}`,
-                        components: [],
-                    });
+                    const responsedTracks = data.tracks.filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user));
+                    if(type === "playlist") {
+                        const plName = data?.name || data?.title || "No-Title";
+                        const plLink = data?.link || "https://deezer.com";
+                        const plAuthorData = response.playlist?.authorData || await client.fetchAuthorData(data?.artist || responsedTracks?.filter?.(v => v?.authorData)?.[0]?.authorData);
+                        interaction.editReply({
+                            ephemeral: true,
+                            embeds: [
+                                new Embed().setAuthor({
+                                    name: plAuthorData?.name ? `${plAuthorData?.name} - © Deezcord` : `© Deezcord`,
+                                    iconURL: plAuthorData?.image ? `${plAuthorData?.image}` : "https://cdn.discordapp.com/avatars/1032998523123290182/8cff58eb2a86f4eb692f137596ae44f5.webp?size=256",
+                                    url: plAuthorData?.link ? `${plAuthorData?.link}` : "https://cdn.discordapp.com/avatars/1032998523123290182/8cff58eb2a86f4eb692f137596ae44f5.webp?size=256"
+                                })
+                                .setTitle(`📑 Playlist Loaded: **${plName}**`)
+                                .addField(`Tracks-Amount:`, `> \`${responsedTracks.length} Tracks\``)
+                            ],
+                            components: [
+                                new ActionRowBuilder().addComponents([
+                                    new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("PL-Link").setURL(plLink)
+                                ])
+                            ]
+                        })
+                    } else {
+                        i.editReply({
+                            content: `Found the **${type.substring(0, 1).toUpperCase() + type.substring(1, type.length)}**: \`${data.title || data.name}\` with \`${data.tracks.length} Tracks\`\n> ${data.link || data.share}`,
+                            components: [],
+                        });
+                    }
                     let player = client.DeezCord.players.get(interaction.guildId);
                     const created = !player;
                     let previousQueue = player?.queue?.totalSize ?? 0;
@@ -178,7 +203,6 @@ export default {
                         for(const node of notConnectedNodes) await node.connect();
                         await client.DeezUtils.time.delay(500 * notConnectedNodes.length);
                     }
-                    const responsedTracks = data.tracks.filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user));
                     if (created || previousQueue === 0) {
                         player.queue.add(responsedTracks);
                         player.play({
@@ -280,13 +304,41 @@ export default {
             if(!player.paused && !player.playing) player.pause(false);
 
             if(response.loadType = "PLAYLIST_LOADED") {
-                
+                const plName = response.playlist?.name || response.data?.name || response.data?.title || "No-Title";
+                const plLink = response.playlist?.uri || response.data?.link || "https://deezer.com";
+                const plAuthorData = response.playlist?.authorData || await client.fetchAuthorData(response.data?.artist || response?.tracks?.filter?.(v => v?.authorData)?.[0]?.authorData);
+                interaction.editReply({
+                    ephemeral: true,
+                    embeds: [
+                        new Embed().setAuthor({
+                            name: plAuthorData?.name ? `${plAuthorData?.name} - © Deezcord` : `© Deezcord`,
+                            iconURL: plAuthorData?.image ? `${plAuthorData?.image}` : "https://cdn.discordapp.com/avatars/1032998523123290182/8cff58eb2a86f4eb692f137596ae44f5.webp?size=256",
+                            url: plAuthorData?.link ? `${plAuthorData?.link}` : "https://cdn.discordapp.com/avatars/1032998523123290182/8cff58eb2a86f4eb692f137596ae44f5.webp?size=256"
+                        })
+                        .setTitle(`📑 Playlist Loaded: **${plName}**`)
+                        .addField(`Tracks-Amount:`, `> \`${response.tracks.length} Tracks\``)
+                    ],
+                    components: [
+                        new ActionRowBuilder().addComponents([
+                            new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("PL-Link").setURL(plLink)
+                        ])
+                    ]
+                })
             } else if(response.loadType = "ARTIST_LOADED")  {
-                
+                interaction.editReply({
+                    ephemeral: true,
+                    content: `${response.loadType}`
+                })
             } else if(response.loadType = "ALBUM_LOADED")  {
-                
+                interaction.editReply({
+                    ephemeral: true,
+                    content: `${response.loadType}`
+                })
             } else if(response.loadType = "RADIO_LOADED")  {
-                
+                interaction.editReply({
+                    ephemeral: true,
+                    content: `${response.loadType}`
+                })
             } else {
                 interaction.editReply({
                     ephemeral: true,

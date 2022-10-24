@@ -133,18 +133,92 @@ export class BotClient extends Client {
         return inlineLocale(locale, text, ...params);
     } 
     createUnresolvedData(v) {
+        const author = this.parseAuthorData(v);
         return {
             isrc: v.isrc || undefined,
             title: v.title,
-            author: v.artist?.name,
-            authorUri: v.artist?.link ?? v.artist?.share ?? v.artist?.id ? `https://www.deezer.com/artist/${v.artist.id}` : undefined,
-            authorImage: v.artist?.picture_big ?? v.artist?.picture_medium ?? v.artist?.picture_small ?? v.artist.picture,
+            author: author.name,
+            authorData: {
+                id: author.id, 
+                name: author.name, 
+                link: author.link, 
+                image: author.image, 
+                nb_album: author.albums,
+                nb_fan: author.fans
+            },
             thumbnail: v.md5_image ? `https://cdns-images.dzcdn.net/images/cover/${v.md5_image}/500x500.jpg` : undefined,
             uri: v.link,
             identifier: v.id,
             duration: v.duration * 1000,
         }
-    } 
+    }
+    async fetchAuthorData(v) {
+        if(typeof v === "string" && isNaN(v)) return { id: null, name: v, link: null, image: null, albums: null, fans: null }
+        const res = this.parseAuthorData(v);
+        if(res.name && res.link && res.image) return res;
+        
+        const authorId = res?.id || v.artist?.id || v.contributors?.[0]?.id;
+        const author = await this.DeezApi.deezer.fetch.artist(authorId, false);
+        return this.parseAuthorData(Object.assign(res, author));
+    }
+    parseAuthorData(v) {
+        if(typeof v === "string" && isNaN(v)) return { id: null, name: v, link: null, image: null, albums: null, fans: null }
+        let id = null;
+        let name = null;
+        let image = null;
+        let link = null;
+        let albums = null;
+        let fans = null;
+        if(!v) return { id, name, link, image, albums, fans }
+
+        if(v?.artist) {
+            if(!id && v.artist.id) id = v.artist.id;
+            
+            if(!name && v.artist.name?.length) name = v.artist.name;
+            else if(!name && v.artist.title?.length) name = v.artist.title;
+
+
+            if(!link && v.artist.link?.length) link = v.artist.link;
+            else if(!link && v.artist.share?.length) link = v.artist.share;
+
+            if(!image && v.artist.picture_medium?.length) image = v.artist.picture_medium;
+            else if(!image && v.artist.picture_big?.length) image = v.artist.picture_big;
+            else if(!image && v.artist.picture_small?.length) image = v.artist.picture_small;
+            else if(!image && v.artist.picture_xl?.length) image = v.artist.picture_xl;
+            else if(!image && v.artist.picture?.length) image = v.artist.picture;
+
+            if(!albums && v.artist.nb_album) albums = v.artist.nb_album;
+
+            if(!fans && v.artist.nb_fan) fans = v.artist.nb_fan;
+        }
+
+        if((!name || !image || !link) && v?.contributors?.length) {
+            let thecontributer = v?.contributors[0];
+            if(id || v.artist) thecontributer = v?.contributors?.find?.(x => x?.id == id || x?.id == v.artist?.id) || thecontributer;
+
+            if(v.thecontributer) id = v.thecontributer;
+            
+            if(!name && thecontributer.name?.length) name = thecontributer.name;
+            else if(!name && thecontributer.title?.length) name = thecontributer.title;
+
+            if(!link && thecontributer.link?.length) link = thecontributer.link;
+            else if(!link && thecontributer.share?.length) link = thecontributer.share;
+
+            if(!image && thecontributer.picture_medium?.length) image = thecontributer.picture_medium;
+            else if(!image && thecontributer.picture_big?.length) image = thecontributer.picture_big;
+            else if(!image && thecontributer.picture_small?.length) image = thecontributer.picture_small;
+            else if(!image && thecontributer.picture_xl?.length) image = thecontributer.picture_xl;
+            else if(!image && thecontributer.picture?.length) image = thecontributer.picture;
+
+            if(!albums && thecontributer.nb_album) albums = thecontributer.nb_album;
+
+            if(!fans && thecontributer.nb_fan) fans = thecontributer.nb_fan;
+        }
+
+        if(!link && id) return `https://www.deezer.com/artist/${v.artist.id}`;
+
+        return { name, link, image, albums, fans };
+    }
 
     get guildsAndMembers() {
         return {
