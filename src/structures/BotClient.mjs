@@ -163,12 +163,7 @@ export class BotClient extends Client {
     }
     parseAuthorData(v) {
         if(typeof v === "string" && isNaN(v)) return { id: null, name: v, link: null, image: null, albums: null, fans: null }
-        let id = null;
-        let name = null;
-        let image = null;
-        let link = null;
-        let albums = null;
-        let fans = null;
+        let [ id, name, link, image, albums, fans ] = new Array(6).fill(null);
         if(!v) return { id, name, link, image, albums, fans }
 
         if(v?.artist) {
