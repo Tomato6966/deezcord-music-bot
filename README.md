@@ -1,12 +1,16 @@
-<a href="https://discord.gg/7KJnTDKQ8N" target="_blank"><img src="https://discord.com/api/guilds/1034415148263297045/widget.png?style=shield" /></a>
-
+<center>
+ <a href="https://discord.gg/7KJnTDKQ8N" target="_blank"><img src="https://discord.com/api/guilds/1034415148263297045/widget.png?style=shield" /></a>
+ <a href="https://deezer.com" target="_blank"><img src="https://img.shields.io/badge/Deezer-FEAA2D?style=for-the-badge&logo=deezer&logoColor=white"/></a>
+ <a href="https://www.postgresql.org" target="_blank"><img src="[https://img.shields.io/badge/Deezer-FEAA2D?style=for-the-badge&logo=deezer&logoColor=white](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)"/></a>
+ <a href="https://discord.gg/7KJnTDKQ8N" target="_blank"><img src="https://discord.com/api/guilds/1034415148263297045/widget.png?style=shield" /></a>
+ <a href="https://www.fastify.io/" target="_blank"><img src="https://img.shields.io/badge/fastify-%23000000.svg?style=for-the-badge&logo=fastify&logoColor=white" /></a>
+ <a href="https://discord.gg/7KJnTDKQ8N" target="_blank"><img src="https://raster.shields.io/badge/maintenance-actively--developed-brightgreen.png" /></a>
+</center>
 # Deezercord | A Music Bot for Deezer
 
 Official Repository for the Community Deezer Music Power Bot. 
 
 *Not affialiated with deezer.com, but using deezer.com Features only!*
-
-<a href="https://deezer.com" target="_blank"><img src="https://user-images.githubusercontent.com/68145571/197169083-60567cc3-245b-4a76-88d4-b2df1df9ddb8.jpeg" /></a>
 
 # Features [Planned]
 
@@ -25,7 +29,11 @@ Official Repository for the Community Deezer Music Power Bot.
 
 # Public Bot
 
-- [Check it out: Invite @Deezcord#2386](https://discord.com/oauth2/authorize?client_id=1032998523123290182&scope=bot&permissions=279218310144)
+- Check it out: [Invite @Deezcord#2386](https://discord.com/oauth2/authorize?client_id=1032998523123290182&scope=bot&permissions=279218310144)
+
+- Hosted 24/7 on: [bero-host](https://bero.milrato.dev) (#AD *Use code: `milrato` to save 20% permamently*)
+
+- Coded by [@Tomato6966](https://github.com/Tomato6966) & [@fb-sean](https://github.com/fb-sean)
 
 ## Support & Updates Server
 
