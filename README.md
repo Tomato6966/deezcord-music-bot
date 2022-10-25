@@ -1,11 +1,14 @@
-<center>
+<html>
+ <center>
  <a href="https://discord.gg/7KJnTDKQ8N" target="_blank"><img src="https://discord.com/api/guilds/1034415148263297045/widget.png?style=shield" /></a>
  <a href="https://deezer.com" target="_blank"><img src="https://img.shields.io/badge/Deezer-FEAA2D?style=for-the-badge&logo=deezer&logoColor=white"/></a>
  <a href="https://www.postgresql.org" target="_blank"><img src="[https://img.shields.io/badge/Deezer-FEAA2D?style=for-the-badge&logo=deezer&logoColor=white](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)"/></a>
  <a href="https://discord.gg/7KJnTDKQ8N" target="_blank"><img src="https://discord.com/api/guilds/1034415148263297045/widget.png?style=shield" /></a>
  <a href="https://www.fastify.io/" target="_blank"><img src="https://img.shields.io/badge/fastify-%23000000.svg?style=for-the-badge&logo=fastify&logoColor=white" /></a>
  <a href="https://discord.gg/7KJnTDKQ8N" target="_blank"><img src="https://raster.shields.io/badge/maintenance-actively--developed-brightgreen.png" /></a>
-</center>
+  </center>
+</html>
+
 # Deezercord | A Music Bot for Deezer
 
 Official Repository for the Community Deezer Music Power Bot. 
