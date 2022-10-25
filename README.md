@@ -23,7 +23,12 @@ Official Repository for the Community Deezer Music Power Bot.
 
 # Public Bot
 
-- Check it out
+- [Check it out: Invite @Deezcord#2386](https://discord.com/oauth2/authorize?client_id=1032998523123290182&scope=bot&permissions=279218310144)
+
+## Support & Updates Server
+
+<iframe src="https://discord.com/widget?id=1034415148263297045&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+
 
 
 
