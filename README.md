@@ -1,10 +1,12 @@
+<a href="https://discord.gg/7KJnTDKQ8N" target="_blank"><img src="https://discord.com/api/guilds/1034415148263297045/widget.png?style=shield" /></a>
+
 # Deezercord | A Music Bot for Deezer
 
 Official Repository for the Community Deezer Music Power Bot. 
 
 *Not affialiated with deezer.com, but using deezer.com Features only!*
 
-<a href="https://deezer.com" target="_blank"><img src="https://user-images.githubusercontent.com/68145571/197169083-60567cc3-245b-4a76-88d4-b2df1df9ddb8.jpeg"></a>
+<a href="https://deezer.com" target="_blank"><img src="https://user-images.githubusercontent.com/68145571/197169083-60567cc3-245b-4a76-88d4-b2df1df9ddb8.jpeg" /></a>
 
 # Features [Planned]
 
@@ -27,7 +29,7 @@ Official Repository for the Community Deezer Music Power Bot.
 
 ## Support & Updates Server
 
-<iframe src="https://discord.com/widget?id=1034415148263297045&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+<a href="https://discord.gg/7KJnTDKQ8N" target="_blank"><img src="https://discord.com/api/guilds/1034415148263297045/widget.png?style=banner4" /></a>
 
 
 
