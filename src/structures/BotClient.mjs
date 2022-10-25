@@ -9,8 +9,8 @@ import { dirSetup } from "../data/SlashCommandDirSetup.mjs";
 import { APIClient } from "./APIClient.mjs";
 import { DeezCordClient } from "./MusicClient.mjs";
 import { DeezCordUtils } from "./Utils.mjs";
-import DeezConfigData from "../data/ConfigData.mjs";
-import Locales from "../data/Locales.mjs";
+import * as DeezConfigData from "../data/ConfigData.mjs";
+import * as Locales from "../data/Locales.mjs";
 import { init as initLanguage, inlineLocale } from "./i18n.mjs";
 
 /** @type {import("@prisma/client").Languages} */
@@ -35,7 +35,7 @@ export class BotClient extends Client {
         this.db = new PrismaClient()
         this.DeezCord = new DeezCordClient(this);
         this.DeezUtils = new DeezCordUtils(this);
-        this.configData = new DeezConfigData(this);
+        this.configData = DeezConfigData;
 
         /** @type {Genius.Client} */
         this.lyrics = new Genius.Client(process.env.GENIUSTOKEN || undefined);
@@ -139,18 +139,18 @@ export class BotClient extends Client {
         return inlineLocale(locale, text, ...params);
     }
     createUnresolvedData(v) {
-        const author = this.parseAuthorData(v);
+        const artist = this.parseAuthorData(v);
         return {
             isrc: v.isrc || undefined,
             title: v.title,
-            author: author.name,
+            author: artist.name,
             authorData: {
-                id: author.id, 
-                name: author.name, 
-                link: author.link, 
-                image: author.image, 
-                nb_album: author.albums,
-                nb_fan: author.fans
+                id: artist.id, 
+                name: artist.name, 
+                link: artist.link, 
+                image: artist.image, 
+                nb_album: artist.albums,
+                nb_fan: artist.fans
             },
             thumbnail: v.md5_image ? `https://cdns-images.dzcdn.net/images/cover/${v.md5_image}/500x500.jpg` : undefined,
             uri: v.link,
@@ -159,13 +159,13 @@ export class BotClient extends Client {
         }
     }
     async fetchAuthorData(v) {
+        if(!v) return { id: null, name: null, link: null, image: null, albums: null, fans: null }
         if(typeof v === "string" && isNaN(v)) return { id: null, name: v, link: null, image: null, albums: null, fans: null }
-        const res = this.parseAuthorData(v);
-        if(res.name && res.link && res.image) return res;
-        
-        const authorId = res?.id || v.artist?.id || v.contributors?.[0]?.id;
+        const res = this.parseAuthorData({ artist: v });
+        if(!Object.values(res).filter(x => !x).length) return res;
+        const authorId = res?.id || v?.artist?.id || v?.contributors?.[0]?.id;
         const author = await this.DeezApi.deezer.fetch.artist(authorId, false);
-        return this.parseAuthorData(Object.assign(res, author));
+        return this.parseAuthorData({ artist: Object.assign({}, res, author) });
     }
     parseAuthorData(v) {
         if(typeof v === "string" && isNaN(v)) return { id: null, name: v, link: null, image: null, albums: null, fans: null }
@@ -197,7 +197,7 @@ export class BotClient extends Client {
             let thecontributer = v?.contributors[0];
             if(id || v.artist) thecontributer = v?.contributors?.find?.(x => x?.id == id || x?.id == v.artist?.id) || thecontributer;
 
-            if(v.thecontributer) id = v.thecontributer;
+            if(v.thecontributer.id && (!id || v.thecontributer.id !== id)) id = v.thecontributer.id;
             
             if(!name && thecontributer.name?.length) name = thecontributer.name;
             else if(!name && thecontributer.title?.length) name = thecontributer.title;
@@ -218,7 +218,7 @@ export class BotClient extends Client {
 
         if(!link && id) return `https://www.deezer.com/artist/${v.artist.id}`;
 
-        return { name, link, image, albums, fans };
+        return { id, name, link, image, albums, fans };
     }
 
     get guildsAndMembers() {

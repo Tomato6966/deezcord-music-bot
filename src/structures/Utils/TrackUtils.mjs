@@ -22,19 +22,19 @@ export class DeezCordTrackUtils {
             ephemeral: true, embeds: [ new ErrorEmbed().addField(`Not in same VC`, `> We are not in the same Voice Channel\n> I'm in <#${player.voiceChannel}>`) ]
         }).catch(console.warn), { player: null };
         // check perm for seeing
-        if (!player && !missingPerms?.includes?.("ViewChannel")) return interaction.reply({
-            ephemeral: true, embeds: [ new ErrorEmbed().addField(`Not Viewable`, `> I can't see your Voice Channel <#${interaction.changed.id}>`) ]
+        if (!player && missingPerms?.includes?.("ViewChannel")) return interaction.reply({
+            ephemeral: true, embeds: [ new ErrorEmbed().addField(`Not Viewable`, `> I can't see your Voice Channel <#${interaction.channel.id}>`) ]
         }).catch(console.warn), { player: null };
         // check perm for connecting
-        if (!player && !missingPerms?.includes?.("Connect")) return interaction.reply({
-            ephemeral: true, embeds: [ new ErrorEmbed().addField(`Not Connectable`, `> I can't join your Voice Channel <#${interaction.changed.id}>`) ]
+        if (!player && missingPerms?.includes?.("Connect")) return interaction.reply({
+            ephemeral: true, embeds: [ new ErrorEmbed().addField(`Not Connectable`, `> I can't join your Voice Channel <#${interaction.channel.id}>`) ]
         }).catch(console.warn), { player: null };
         // check perm for speaking
-        if (!player && !missingPerms?.includes?.("Speak")) return interaction.reply({
-            ephemeral: true, embeds: [ new ErrorEmbed().addField(`Not Speakable`, `> I can't speak in your Voice Channel <#${interaction.changed.id}>`) ]
+        if (!player && missingPerms?.includes?.("Speak")) return interaction.reply({
+            ephemeral: true, embeds: [ new ErrorEmbed().addField(`Not Speakable`, `> I can't speak in your Voice Channel <#${interaction.channel.id}>`) ]
         }).catch(console.warn), { player: null };
         // check for if the channel is full
-        if (!player && interaction.channel.full && !(missingPerms?.includes?.("Administrator") || missingPerms?.includes?.("MoveMembers"))) return interaction.reply({
+        if (!player && interaction.channel.full && !missingPerms?.includes?.("Administrator") && !missingPerms?.includes?.("MoveMembers")) return interaction.reply({
             ephemeral: true, embeds: [ new ErrorEmbed().addField(`Vc is full`, `> There is no space left in your Voice Channel`) ]
         }).catch(console.warn), { player: null };
 

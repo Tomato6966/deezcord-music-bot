@@ -1,32 +1,30 @@
-export default {
-     EnglishUS: "EnglishUS",
-     EnglishGB: "EnglishGB",
-     German: "German" ,
-     Bulgarian: "Bulgarian",
-     ChineseCN: "ChineseCN",
-     ChineseTW: "ChineseTW",
-     Croatian: "Croatian",
-     Czech: "Czech",
-     Danish: "Danish" ,
-     Dutch: "Dutch",
-     Finnish: "Finnish" ,
-     French: "French" ,
-     Greek: "Greek",
-     Hindi: "Hindi" ,
-     Hungarian: "Hungarian",
-     Italian: "Italian" ,
-     Japanese: "Japanese" ,
-     Korean: "Korean",
-     Lithuanian: "Lithuanian",
-     Norwegian: "Norwegian",
-     Polish: "Polish",
-     PortugueseBR: "PortugueseBR",
-     Romanian: "Romanian",
-     Russian: "Russian",
-     SpanishE: "SpanishE",
-     Swedish: "Swedish",
-     Thai: "Thai",
-     Turkish: "Turkish",
-     Ukrainian: "Ukrainian",
-     Vietnamese: "Vietnamese",
-};
+export const EnglishUS = "EnglishUS";
+export const EnglishGB = "EnglishGB";
+export const German = "German";
+export const Bulgarian = "Bulgarian";
+export const ChineseCN = "ChineseCN";
+export const ChineseTW = "ChineseTW";
+export const Croatian = "Croatian";
+export const Czech = "Czech";
+export const Danish = "Danish";
+export const Dutch = "Dutch";
+export const Finnish = "Finnish";
+export const French = "French";
+export const Greek = "Greek";
+export const Hindi = "Hindi";
+export const Hungarian = "Hungarian";
+export const Italian = "Italian";
+export const Japanese = "Japanese";
+export const Korean = "Korean";
+export const Lithuanian = "Lithuanian";
+export const Norwegian = "Norwegian";
+export const Polish = "Polish";
+export const PortugueseBR = "PortugueseBR";
+export const Romanian = "Romanian";
+export const Russian = "Russian";
+export const SpanishE = "SpanishE";
+export const Swedish = "Swedish";
+export const Thai = "Thai";
+export const Turkish = "Turkish";
+export const Ukrainian = "Ukrainian";
+export const Vietnamese = "Vietnamese";

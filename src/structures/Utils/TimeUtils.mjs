@@ -98,35 +98,42 @@ export class DeezCordTimeUtils {
      * @param {number} value time in Sconds/ms
      * @param {boolean} inputAsMs if the value is in milliseconds
      * @returns {string} formatted duration time
+     * @param {boolean} displayMs if milliseconds should be displayed (inputAsMs must be true too)
      */
-    formatDuration(value, inputAsMs) {
+    formatDuration(value, inputAsMs, displayMs) {
         let times = [86400, 3600, 60, 1];
         if(inputAsMs) times = [...times.map(x => x * 1000), 1] 
-        return times.reduce((acc, cur) => {
+        return this.client.DeezUtils.array.keepStrings(times.reduce((acc, cur) => {
             const res = ~~(value / cur);
             value -= res * cur;
             return [...acc, res];
-        }, []).map((x, i) => {
+        }, []).map((x, i, a) => {
             if(!x) return undefined; 
             const text = ["Day", "Hr", "Min", "Sec", "ms"][i];
-            return `${x} ${text}${i <= 3 && x !== 1 ? "s" : ""}`
-        }).filter(Boolean);
+            if(inputAsMs && !displayMs && i == a.length - 1) return undefined;
+            return `${x} ${text}${i !== a.length - 1 && x !== 1 ? "s" : ""}`
+        }));
     }
 
     /**
      * Format a second-duration to HH:MM:SS
      * @param {number} value
      * @param {boolean} inputAsMs if the value is in milliseconds
+     * @param {boolean} displayMs if milliseconds should be displayed (inputAsMs must be true too)
      * @returns {string} formatted duration
      */
-    durationFormatted(value, inputAsMs) {
+    durationFormatted(value, inputAsMs, displayMs) {
         let times = [86400, 3600, 60, 1];
         if(inputAsMs) times = [...times.map(x => x * 1000), 1] 
-        return times.reduce((acc, cur) => {
+        return this.client.DeezUtils.array.keepStrings(this.client.DeezUtils.array.removeUntil(times.reduce((acc, cur) => {
             let res = ~~(value / cur);
             value -= res * cur;
             return [...acc, res];
-        }, []).filter(Boolean).map(v => `${v < 10 ? `0${v}` : v}`).join(":");
+        }, []), x => x > 0).map((v, i, a) => {
+            if(inputAsMs && !displayMs && i === a.length - 1) return undefined
+            return `${v < 10 ? `0${v}` : v}`;
+        })).join(":");
     }
+    
 }
 

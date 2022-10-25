@@ -1,6 +1,5 @@
 import { EmbedBuilder } from "@discordjs/builders";
-import { resolveColor } from "discord.js";
-import { mainColor, name, iconURL, inviteURL } from "../data/ConfigData.mjs";
+import { mainColor, name, iconURL, inviteURL, errorColor } from "../data/ConfigData.mjs";
 
 export class Embed extends EmbedBuilder {
     constructor(data={}) {
@@ -18,12 +17,12 @@ export class Embed extends EmbedBuilder {
 }
 export class ErrorEmbed extends EmbedBuilder {
     constructor(data={}){
+        super({...data});
         this.setAuthor({
             name: `Error - ${name}`,
             url: inviteURL,
             iconURL: iconURL,
         });
-        super({...data});
         this.setColor(errorColor)
     }
     addField(name, value, inline) {

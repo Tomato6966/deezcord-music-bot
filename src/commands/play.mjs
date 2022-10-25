@@ -3,6 +3,7 @@ import { TrackUtils } from "erela.js";
 import { optionTypes } from "../structures/BotClient.mjs";
 import { i18n, inlineLocale, inlineLocalization } from "../structures/i18n.mjs";
 import { Embed } from "../structures/Embed.mjs";
+import { ButtonBuilder, ButtonStyle, parseEmoji } from "discord.js";
 
 const loadTypes = {
     "artist": "ARTIST_LOADED",
@@ -236,16 +237,17 @@ export default {
                 searchingTracks = { tracks: await client.DeezApi.deezer.search.tracks(query).then(x => {
                     return (x?.data || []).filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user))       
                 })};
+                loadType = "TRACKS_FOUND";
             }
             else if(searchFilter && searchFilterMethods[searchFilter]) {
                 const res = await client.DeezApi.deezer.search[`${searchFilterMethods[searchFilter]}`](query);
                 return handleResSearchFilter(res, searchFilter)
             }
             else {
-                // search all ?
                 searchingTracks = { tracks: await client.DeezApi.deezer.search.tracks(query).then(x => {
                     return (x?.data || []).filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user))       
                 })};
+                loadType = "TRACKS_FOUND";
             }
         }
         const response = searchingTracks ? { data: searchingTracks, loadType, tracks: searchingTracks?.tracks || searchingTracks } : await client.DeezCord.search(query, interaction.user, player.node);
@@ -271,7 +273,7 @@ export default {
             //if(!player.queue.current.uri && contentURL) player.queue.current.uri = contentURL;
             if(!player.paused && !player.playing) player.pause(false);
 
-            if(response.loadType = "PLAYLIST_LOADED") {
+            if(response.loadType == "PLAYLIST_LOADED") {
                 const plName = response.playlist?.name || response.data?.name || response.data?.title || "No-Title";
                 const plLink = response.playlist?.uri || response.data?.link || "https://deezer.com";
                 const plAuthorData = response.playlist?.authorData || await client.fetchAuthorData(response.data?.artist || response?.tracks?.filter?.(v => v?.authorData)?.[0]?.authorData);
@@ -292,17 +294,17 @@ export default {
                         ])
                     ]
                 })
-            } else if(response.loadType = "ARTIST_LOADED")  {
+            } else if(response.loadType == "ARTIST_LOADED")  {
                 interaction.editReply({
                     ephemeral: true,
                     content: `${response.loadType}`
                 })
-            } else if(response.loadType = "ALBUM_LOADED")  {
+            } else if(response.loadType == "ALBUM_LOADED")  {
                 interaction.editReply({
                     ephemeral: true,
                     content: `${response.loadType}`
                 })
-            } else if(response.loadType = "RADIO_LOADED")  {
+            } else if(response.loadType == "RADIO_LOADED")  {
                 interaction.editReply({
                     ephemeral: true,
                     content: `${response.loadType}`
