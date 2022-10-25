@@ -134,6 +134,32 @@ export class DeezCordTimeUtils {
             return `${v < 10 ? `0${v}` : v}`;
         })).join(":");
     }
-    
+    /**
+     * Formats MS to UNIX (seconds)
+     * @param  {...number} [numbers] - if not provided Date.now() is default. 
+     * @returns {number}
+     */
+    unix(...numbers) {
+        if(!numbers.length) numbers.push(Date.now());
+        return Math.floor([...numbers].reduce((a,b) => a+b,0) / 1000);
+    }
+    /**
+     * Ads MS to UNIX (seconds) + Date.now()
+     * @param  {...number} [numbers] . 
+     * @returns {number}
+     */
+    unixTimer(...numbers) {
+        numbers.push(Date.now());
+        return Math.floor([...numbers].reduce((a,b) => a+b,0) / 1000);
+    }
+    measureTime = class measureTime {
+        constructor() {
+            this.timeBefore = process.hrtime()
+        }
+        end() {
+            const timeAfter = process.hrtime(this.timeBefore);
+            return Math.floor((timeAfter[0] * 1000000000 + timeAfter[1]) / 10000) / 100;
+        }
+    }
 }
 

@@ -161,7 +161,7 @@ export class APIClient {
                     artists: await this.user.recommendations.artists(ID, access_token, limit),
                     playlists: await this.user.recommendations.playlists(ID, access_token, limit),
                     tracks: await this.user.recommendations.tracks(ID, access_token, limit),
-                    radios: await this.user.recommendations.radios(ID, access_token, limit)
+                    radios: await this.user.recommendations.radios(ID, access_token, limit) // radio == mixes
                 }
             },
             albums: async (ID, access_token, limit) => { // oauth
@@ -189,7 +189,7 @@ export class APIClient {
                 if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
                 return await this.makeRequest(`user/${ID}/recommendations/tracks?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
-            radios: async (ID, access_token, limit) => { // oauth
+            radios: async (ID, access_token, limit) => { // oauth // radio == mixes
                 if (!access_token) throw new Error("No access token provided");
                 if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
                 return await this.makeRequest(`user/${ID}/recommendations/radios?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
@@ -214,8 +214,11 @@ export class APIClient {
             podcasts: async (query, limit) => {
                 return await this.makeRequest(`search/podcast?q=${query.replaceAll(" ", "+")}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
-            radios: async (query, limit) => {
+            radios: async (query, limit) => { // radio == mixes
                 return await this.makeRequest(`search/radio?q=${query.replaceAll(" ", "+")}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+            },
+            mixes: async (query, limit) => { // mixes == radio
+                return this.deezer.search.radios(query, limit)
             },
             tracks: async (query, limit) => {
                 return await this.makeRequest(`search/track?q=${query.replaceAll(" ", "+")}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
@@ -271,7 +274,7 @@ export class APIClient {
             podcast: async (ID) => {
                 return await this.makeRequest(`podcast/${ID}`);
             },
-            radio: async (ID, all = true) => {
+            radio: async (ID, all = true) => { // radio == mixes
                 const res = await this.makeRequest(`radio/${ID}`);
                 if(all && (!(res?.tracks||res?.tracks?.data||[])?.length || (res?.tracks||res?.tracks?.data||[]).length < 100)) {
                     const allTracks = await this.deezer.fetch.radioTracks(ID, 100, true);
@@ -279,10 +282,16 @@ export class APIClient {
                 }
                 return res;
             },
-            radioTracks: async (ID, limit, all = true) => {
+            radioTracks: async (ID, limit, all = true) => { // radio == mixes
                 if(all) return await this.fetchAll(`radio/${ID}/tracks`);
                 const tracks = await this.makeRequest(`radio/${ID}/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`, true).catch(() => []);
                 return tracks
+            },
+            mix: async (ID, all = true) => { // mixes == radio
+                return await this.deezer.fetch.radio(ID, all);
+            },
+            mixTracks: async (ID, limit, all = true) => { // mixes == radio
+                return await this.deezer.fetch.radioTracks(ID, limit, all);
             },
             episode: async (ID) => {
                 return await this.makeRequest(`episode/${ID}`);
@@ -324,6 +333,17 @@ export class APIClient {
     async makeRequest(path) {
         const rawData = await fetch(`${this.BaseURL}/${path}`);
         return rawData ? await rawData.json() : null;
+    }
+
+    parseUserData(data) {
+        if(!data || typeof data !== "object") return;
+        return {
+            id: data.id,
+            name: data.name,
+            link: data.link || data.id ? `https://www.deezer.com/profile/${data.id}` : null,
+            image: this.client.DeezUtils.track.getUserImage(data),
+            country: data.country,
+        }
     }
 
     async init() {

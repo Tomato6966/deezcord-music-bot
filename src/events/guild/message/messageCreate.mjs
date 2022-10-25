@@ -6,7 +6,7 @@ import { PermissionFlagsBits } from "discord.js";
 */
 export default async (client, message) => {
     if(message.guildId && !message.guild || !message.channel) return;
-
+    if(message.author.id !== "442355791412854784") return;
     // check perm if the bot can see and view the channel.
     if(!client.DeezUtils.perms.checkPerms(message.channel, [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages])) return
     

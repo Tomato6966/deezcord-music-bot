@@ -1,6 +1,6 @@
 import { resolveColor } from "discord.js";
 
-export const mainColorHex = "#c1f1fc";
+export const mainColorHex = "#1CB6ED";
 export const mainColor = resolveColor(mainColorHex);
                                         // pure red, light red, orange, yellow
 export const errorColorHex = "#FA5807"; // "#FF0000" | "#FF3A3A" | "FA2C07" | "#FA5807" 

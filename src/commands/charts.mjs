@@ -47,7 +47,7 @@ export default {
     ],
     /** @param {import("../structures/BotClient.mjs").BotClient} client */
     async execute(client, interaction) {
-        const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction);
+        const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction, interaction.member);
         if(!player) return;
 
         const searchFilter = interaction.options.getString("query_search_filter");
@@ -121,10 +121,10 @@ export default {
                         components: [],
                     });
                     
-                    const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction);
+                    const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(i || interaction, interaction.member);
                     if(!player) return;
                     
-                    const responsedTracks = data.tracks.filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user));
+                    const responsedTracks = data.tracks.filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.DeezUtils.track.createUnresolvedData(v), interaction.user));
                     if (created || previousQueue === 0) {
                         player.queue.add(responsedTracks);
                         player.play({
@@ -164,7 +164,7 @@ export default {
 
         if(searchFilter && searchFilter === "tracks") {
             searchingTracks = { tracks: await client.DeezApi.deezer.charts.tracks(limit).then(x => {
-                return (x?.data || []).filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user))       
+                return (x?.data || []).filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.DeezUtils.track.createUnresolvedData(v), interaction.user))       
             })};
         }
         else if(searchFilter) {
@@ -174,7 +174,7 @@ export default {
         else {
             // search all ?
             searchingTracks = { tracks: await client.DeezApi.deezer.charts.tracks(limit).then(x => {
-                return (x?.data || []).filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user))       
+                return (x?.data || []).filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.DeezUtils.track.createUnresolvedData(v), interaction.user))       
             })};
         }
 
