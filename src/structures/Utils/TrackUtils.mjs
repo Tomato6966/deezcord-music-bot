@@ -15,7 +15,7 @@ export class DeezCordTrackUtils {
         let player = this.client.DeezCord.players.get(interaction.guildId);
 
         // get the missing perms.
-        const missingPerms = client.DeezUtils.perms.getMissingPerms(this.client, interaction.channel, [PermissionFlagsBits.ViewChannel,  PermissionFlagsBits.Connect, PermissionFlagsBits.Speak, PermissionFlagsBits.MoveMembers, PermissionFlagsBits.Administrator])
+        const missingPerms = this.client.DeezUtils.perms.getMissingPerms(this.client, interaction.channel, [PermissionFlagsBits.ViewChannel,  PermissionFlagsBits.Connect, PermissionFlagsBits.Speak, PermissionFlagsBits.MoveMembers, PermissionFlagsBits.Administrator])
         
         // check for if not in the same voice channel
         if (player && interaction.channel.id !== player.voiceChannel) return interaction.reply({ 
@@ -58,7 +58,7 @@ export class DeezCordTrackUtils {
         const notConnectedNodes = this.client.DeezCord.nodes.filter(n => n.connected);
         if(notConnectedNodes.length) {
             for(const node of notConnectedNodes) await node.connect();
-            await client.DeezUtils.time.delay(500 * notConnectedNodes.length);
+            await this.client.DeezUtils.time.delay(500 * notConnectedNodes.length);
         }
 
         // return the datas
