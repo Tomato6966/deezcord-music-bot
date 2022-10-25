@@ -29,7 +29,7 @@ Official Repository for the Community Deezer Music Power Bot.
 ✔ Link your Account and do activities with it
 
 
-<img align="left" width="80" height="80" src="https://media.discordapp.net/attachments/1034419117853257738/1034421249356603482/Logo_cropped.png" alt="Deezcord Logo">
+<img align="left" width="40" height="40" src="https://media.discordapp.net/attachments/1034419117853257738/1034421249356603482/Logo_cropped.png" alt="Deezcord Logo">
 
 ## Deezcord | Public Bot
 
