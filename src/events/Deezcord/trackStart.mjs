@@ -43,14 +43,14 @@ export default async (client, player, track) => {
             .setThumbnail(track.thumbnail)
         /*NpEmbed.setFooter({
             text: "© Deezcord",
-            iconURL: "https://cdn.discordapp.com/avatars/1032998523123290182/8cff58eb2a86f4eb692f137596ae44f5.webp?size=256",
+            iconURL: "https://cdn.discordapp.com/avatars/1032998523123290182/83b2c200dbc11dd5e0a96dc83d600b17.webp?size=256",
         })*/
         NpEmbed.addField(`🎶 **${track.title}**`, `>>> **Duration:** \` ${client.DeezUtils.time.durationFormatted(track.duration, true)} \`\n**Requester:** <@${track.requester.id ?? track.requester}>`)
         const authorData = await client.fetchAuthorData(track.authorData);
         NpEmbed.setAuthor({
             name: authorData?.name ? `${authorData?.name} - © Deezcord` : `© Deezcord`,
-            iconURL: authorData?.image ? `${authorData?.image}` : "https://cdn.discordapp.com/avatars/1032998523123290182/8cff58eb2a86f4eb692f137596ae44f5.webp?size=256",
-            url: authorData?.link ? `${authorData?.link}` : "https://cdn.discordapp.com/avatars/1032998523123290182/8cff58eb2a86f4eb692f137596ae44f5.webp?size=256"
+            iconURL: authorData?.image ? `${authorData?.image}` : "https://cdn.discordapp.com/avatars/1032998523123290182/83b2c200dbc11dd5e0a96dc83d600b17.webp?size=256",
+            url: authorData?.link ? `${authorData?.link}` : "https://cdn.discordapp.com/avatars/1032998523123290182/83b2c200dbc11dd5e0a96dc83d600b17.webp?size=256"
         })
         //NpEmbed.setDescription(`🎶 [**${track.title}**](${track.uri})\n> **Duration:** \` ${client.DeezUtils.time.durationFormatted(track.duration, true)} \`\n> **Requester:** <@${track.requester.id ?? track.requester}>`);
         msg = await channel.send({ 

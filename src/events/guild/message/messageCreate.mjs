@@ -16,6 +16,6 @@ export default async (client, message) => {
     if(!isPingOfMe) return;
     const hasCommand = client.commands.find(c => c.name === message.content?.split?.(/ +/g)?.[1]?.trim?.()?.toLowerCase?.());
     return message.reply({
-        content: `😒 Sorry, but you must use ${hasCommand ? hasCommand?.mention || `\`/${hasCommand.name}\`` : "Slash Commands"}, to get started use: ${client.commands.find(c => c.name === "play")?.mention || "`/play`"}\n> Or **link your account:** ${client.commands.find(c => c.name === "login")?.mention || "`/login`"}`
+        content: `😒 Sorry, but you must use ${hasCommand ? hasCommand?.mention || `\`/${hasCommand.name}\`` : "Slash Commands"}, to get started use: ${client.commands.find(c => c.name === "play")?.mention || "`/play`"}\n> Or **link your account:** ${client.commands.find(c => c.name === "login")?.mention || "`/login`"}\n> **Need Support ☎️** ${client.configData.supportServer}`
     }).catch(() => null)
 }

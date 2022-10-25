@@ -166,8 +166,8 @@ export default {
                             embeds: [
                                 new Embed().setAuthor({
                                     name: plAuthorData?.name ? `${plAuthorData?.name} - © Deezcord` : `© Deezcord`,
-                                    iconURL: plAuthorData?.image ? `${plAuthorData?.image}` : "https://cdn.discordapp.com/avatars/1032998523123290182/8cff58eb2a86f4eb692f137596ae44f5.webp?size=256",
-                                    url: plAuthorData?.link ? `${plAuthorData?.link}` : "https://cdn.discordapp.com/avatars/1032998523123290182/8cff58eb2a86f4eb692f137596ae44f5.webp?size=256"
+                                    iconURL: plAuthorData?.image ? `${plAuthorData?.image}` : "https://cdn.discordapp.com/avatars/1032998523123290182/83b2c200dbc11dd5e0a96dc83d600b17.webp?size=256",
+                                    url: plAuthorData?.link ? `${plAuthorData?.link}` : "https://cdn.discordapp.com/avatars/1032998523123290182/83b2c200dbc11dd5e0a96dc83d600b17.webp?size=256"
                                 })
                                 .setTitle(`📑 Playlist Loaded: **${plName}**`)
                                 .addField(`Tracks-Amount:`, `> \`${responsedTracks.length} Tracks\``)
@@ -312,8 +312,8 @@ export default {
                     embeds: [
                         new Embed().setAuthor({
                             name: plAuthorData?.name ? `${plAuthorData?.name} - © Deezcord` : `© Deezcord`,
-                            iconURL: plAuthorData?.image ? `${plAuthorData?.image}` : "https://cdn.discordapp.com/avatars/1032998523123290182/8cff58eb2a86f4eb692f137596ae44f5.webp?size=256",
-                            url: plAuthorData?.link ? `${plAuthorData?.link}` : "https://cdn.discordapp.com/avatars/1032998523123290182/8cff58eb2a86f4eb692f137596ae44f5.webp?size=256"
+                            iconURL: plAuthorData?.image ? `${plAuthorData?.image}` : "https://cdn.discordapp.com/avatars/1032998523123290182/83b2c200dbc11dd5e0a96dc83d600b17.webp?size=256",
+                            url: plAuthorData?.link ? `${plAuthorData?.link}` : "https://cdn.discordapp.com/avatars/1032998523123290182/83b2c200dbc11dd5e0a96dc83d600b17.webp?size=256"
                         })
                         .setTitle(`📑 Playlist Loaded: **${plName}**`)
                         .addField(`Tracks-Amount:`, `> \`${response.tracks.length} Tracks\``)
