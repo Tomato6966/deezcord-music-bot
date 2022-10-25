@@ -42,7 +42,7 @@ export class DeezCordPermissionUtils {
      * if == true | allowed   ---   if === false | denied
      * @param {import("discord.js").Channel} channel 
      * @param  {...any} perms 
-     * @returns 
+     * @returns {boolean}
      */
     checkPermOverwrites(channel, ...perms) {
         const permissions = this.returnOverwrites(channel);
@@ -76,11 +76,32 @@ export class DeezCordPermissionUtils {
     /**
      * @param {import("discord.js").Channel} channel 
      * @param {bigint[]} PermissionFlagsBitsProvided 
-     * @returns {import("discord.js").PermissionsBitField} permissions
+     * @returns {boolean} permissions
      */
     checkPerms(channel, ...PermissionFlagsBitsProvided) {
         if(channel?.guild?.members?.me?.permissions?.has(PermissionFlagsBits.Administrator)) return true;
-        if(channel?.guild?.members?.me) return this.checkPermOverwrites(channel, ...PermissionFlagsBitsProvided);
+        if(channel?.guild?.members?.me) return this.checkPermOverwrites(channel, [...PermissionFlagsBitsProvided.flat()]);
         return channel?.permissionsFor?.(this.client.user.id)?.has?.([...PermissionFlagsBitsProvided.flat()]);
+    }
+    /**
+     * if == true | allowed   ---   if === false | denied
+     * @param {import("discord.js").Channel} channel 
+     * @param  {...any} perms 
+     * @returns {string[]}
+     */
+    missingPermOverwrites(channel, ...perms) {
+        const permissions = this.returnOverwrites(channel);
+        if(typeof permissions === "boolean") return [];
+        return permissions.missing(perms)
+    }
+    /**
+     * @param {import("discord.js").Channel} channel 
+     * @param {bigint[]} PermissionFlagsBitsProvided 
+     * @returns {import("discord.js").PermissionsBitField} permissions
+     */
+    getMissingPerms(channel, ...PermissionFlagsBitsProvided) {
+        if(channel?.guild?.members?.me?.permissions?.has(PermissionFlagsBits.Administrator)) return [];
+        if(channel?.guild?.members?.me) return this.missingPermOverwrites(channel, [...PermissionFlagsBitsProvided.flat()]);
+        return channel?.permissionsFor?.(this.client.user.id)?.missing?.([...PermissionFlagsBitsProvided.flat()]);
     }
 }
