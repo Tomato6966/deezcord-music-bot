@@ -29,7 +29,9 @@ Official Repository for the Community Deezer Music Power Bot.
 ✔ Link your Account and do activities with it
 
 
-# Public Bot
+<img align="left" width="80" height="80" src="https://media.discordapp.net/attachments/1034419117853257738/1034421249356603482/Logo_cropped.png" alt="Deezcord Logo">
+
+## Deezcord | Public Bot
 
 - Check it out: [Invite @Deezcord#2386](https://discord.com/oauth2/authorize?client_id=1032998523123290182&scope=bot&permissions=279218310144)
 
@@ -37,14 +39,7 @@ Official Repository for the Community Deezer Music Power Bot.
 
 - Coded by [@Tomato6966](https://github.com/Tomato6966) & [@fb-sean](https://github.com/fb-sean)
 
-## Support & Updates Server
-
-<a href="https://discord.gg/7KJnTDKQ8N" target="_blank"><img src="https://discord.com/api/guilds/1034415148263297045/widget.png?style=banner4" /></a>
-
-
-
-
-# Self-Hosting Guide
+## Self-Hosting Guide
 
 - Note [here](https://github.com/Tomato6966/deezcord-music-bot/wiki) you can find a dedicated Wiki!
 
@@ -79,6 +74,11 @@ https://user-images.githubusercontent.com/68145571/197351293-bccfd84a-8e5b-41a9-
 
 4. Start it
     - Just type: `npm run start` or `node ./src/index.mjs`;
+
+
+## Support & Updates Server
+
+<a href="https://discord.gg/7KJnTDKQ8N" target="_blank"><img src="https://discord.com/api/guilds/1034415148263297045/widget.png?style=banner4" /></a>
 
 
 ## Todos
