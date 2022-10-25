@@ -688,7 +688,7 @@ export function getDefaultClientOptions() {
             //GatewayIntentBits.GuildInvites, // for guild invite managing
             GatewayIntentBits.GuildVoiceStates, // for voice related things
             //GatewayIntentBits.GuildPresences, // for user presence things
-            //GatewayIntentBits.GuildMessages, // for guild messages things
+            GatewayIntentBits.GuildMessages, // for guild messages things
             //GatewayIntentBits.GuildMessageReactions, // for message reactions things
             //GatewayIntentBits.GuildMessageTyping, // for message typing things
             //GatewayIntentBits.DirectMessages, // for dm messages
