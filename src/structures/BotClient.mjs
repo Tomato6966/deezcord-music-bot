@@ -9,6 +9,8 @@ import { dirSetup } from "../data/SlashCommandDirSetup.mjs";
 import { APIClient } from "./APIClient.mjs";
 import { DeezCordClient } from "./MusicClient.mjs";
 import { DeezCordUtils } from "./Utils.mjs";
+import DeezConfigData from "../data/ConfigData.mjs";
+import Locales from "../data/Locales.mjs";
 import { init as initLanguage, inlineLocale } from "./i18n.mjs";
 
 /** @type {import("@prisma/client").Languages} */
@@ -23,7 +25,7 @@ export class BotClient extends Client {
             ...options
         });
         initLanguage();
-
+        
         this.DeezRegex = /((https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|playlist|album|artist)\/(\d+)|(https?:\/\/|)?(?:www\.)?deezer\.page\.link\/(\S+))/;
 
         /** @type {ClusterClient} */
@@ -33,11 +35,11 @@ export class BotClient extends Client {
         this.db = new PrismaClient()
         this.DeezCord = new DeezCordClient(this);
         this.DeezUtils = new DeezCordUtils(this);
+        this.configData = new DeezConfigData(this);
 
         /** @type {Genius.Client} */
         this.lyrics = new Genius.Client(process.env.GENIUSTOKEN || undefined);
         
-
         this.commands = new Collection();
         this.eventPaths = new Collection();
         this.cooldowns = {
@@ -53,41 +55,49 @@ export class BotClient extends Client {
             fetchedApplication: [],
             locales: new Collection(),
         }
-        this.locales = {
-            "EnglishUS":"EnglishUS",
-            "EnglishGB":"EnglishGB",
-            "German" :"German" ,
-            "Bulgarian":"Bulgarian",
-            "ChineseCN":"ChineseCN",
-            "ChineseTW":"ChineseTW",
-            "Croatian":"Croatian",
-            "Czech":"Czech",
-            "Danish" :"Danish" ,
-            "Dutch":"Dutch",
-            "Finnish" :"Finnish" ,
-            "French" :"French" ,
-            "Greek":"Greek",
-            "Hindi" :"Hindi" ,
-            "Hungarian":"Hungarian",
-            "Italian" :"Italian" ,
-            "Japanese" :"Japanese" ,
-            "Korean":"Korean",
-            "Lithuanian":"Lithuanian",
-            "Norwegian":"Norwegian",
-            "Polish":"Polish",
-            "PortugueseBR":"PortugueseBR",
-            "Romanian":"Romanian",
-            "Russian":"Russian",
-            "SpanishE":"SpanishE",
-            "Swedish":"Swedish",
-            "Thai":"Thai",
-            "Turkish":"Turkish",
-            "Ukrainian":"Ukrainian",
-            "Vietnamese":"Vietnamese",
-        };
         this.init();
     }
     async init() {
+        /* // try out promise.all loading
+
+        await Promise.all([
+            async () => { 
+                this.logger.pure(`\n${"-=".repeat(40)}-`);
+                this.logger.info(`Loading Extenders`);
+                await this.loadExtenders();
+                this.logger.pure(`${"-=".repeat(40)}-\n`);
+                return true; 
+            },
+            async () => { 
+                this.logger.pure(`\n${"-=".repeat(40)}-`);
+                this.logger.info(`Loading Commands`);
+                await this.loadCommands();
+                this.logger.pure(`${"-=".repeat(40)}-\n`);
+                return true; 
+            },
+            async () => { 
+                this.logger.pure(`\n${"-=".repeat(40)}-`);
+                this.logger.info(`Loading ContextMenus`);
+                await this.loadContextMenu();
+                this.logger.pure(`${"-=".repeat(40)}-\n`);
+                return true; 
+            },
+            async () => { 
+                this.logger.pure(`\n${"-=".repeat(40)}-`);
+                this.logger.info(`Loading Events`);
+                await this.loadEvents();
+                this.logger.pure(`${"-=".repeat(40)}-\n`);
+                return true; 
+            },
+            async () => { 
+                this.logger.pure(`\n${"-=".repeat(40)}-`);
+                this.logger.info(`Starting API`);
+                await this.startAPI();
+                this.logger.pure(`${"-=".repeat(40)}-\n`);
+                return true; 
+            },
+        ])
+        */
         this.logger.pure(`\n${"-=".repeat(40)}-`);
         this.logger.info(`Loading Extenders`);
         await this.loadExtenders();
@@ -119,32 +129,97 @@ export class BotClient extends Client {
     getGuildLocale(guild) {
         if(this.DeezCache.locales.has(guild.id)) return this.DeezCache.locales.get(guild.id);
         // if not in cache, set it from db in cache, and then return default ("EnglishUS");  
-        return this.db.guildSettings.findFirst({
+        const locale = this.db.guildSettings.findFirst({
             where: { guildId: guild.id }, select: { language: true }
-        }).then(x => { 
-            this.DeezCache.locales.set(guild.id, x?.language || this.locales.EnglishUS)
-            return this.locales.EnglishUS
-        }).catch(() => { 
-            this.DeezCache.locales.set(guild.id, this.locales.EnglishUS)
-            return this.locales.EnglishUS
-        }), this.locales.EnglishUS;
+        }).then(x => this.DeezCache.locales.set(guild.id, x?.language || Locales.EnglishUS))
+        .catch(() => this.DeezCache.locales.set(guild.id, Locales.EnglishUS))
+        return Locales.EnglishUS;
     }
     translate (locale, text, ...params) {
         return inlineLocale(locale, text, ...params);
-    } 
+    }
     createUnresolvedData(v) {
+        const author = this.parseAuthorData(v);
         return {
             isrc: v.isrc || undefined,
             title: v.title,
-            author: v.artist?.name,
-            authorUri: v.artist?.link ?? v.artist?.share ?? v.artist?.id ? `https://www.deezer.com/artist/${v.artist.id}` : undefined,
-            authorImage: v.artist?.picture_big ?? v.artist?.picture_medium ?? v.artist?.picture_small ?? v.artist.picture,
+            author: author.name,
+            authorData: {
+                id: author.id, 
+                name: author.name, 
+                link: author.link, 
+                image: author.image, 
+                nb_album: author.albums,
+                nb_fan: author.fans
+            },
             thumbnail: v.md5_image ? `https://cdns-images.dzcdn.net/images/cover/${v.md5_image}/500x500.jpg` : undefined,
             uri: v.link,
             identifier: v.id,
             duration: v.duration * 1000,
         }
-    } 
+    }
+    async fetchAuthorData(v) {
+        if(typeof v === "string" && isNaN(v)) return { id: null, name: v, link: null, image: null, albums: null, fans: null }
+        const res = this.parseAuthorData(v);
+        if(res.name && res.link && res.image) return res;
+        
+        const authorId = res?.id || v.artist?.id || v.contributors?.[0]?.id;
+        const author = await this.DeezApi.deezer.fetch.artist(authorId, false);
+        return this.parseAuthorData(Object.assign(res, author));
+    }
+    parseAuthorData(v) {
+        if(typeof v === "string" && isNaN(v)) return { id: null, name: v, link: null, image: null, albums: null, fans: null }
+        let [ id, name, link, image, albums, fans ] = new Array(6).fill(null);
+        if(!v) return { id, name, link, image, albums, fans }
+
+        if(v?.artist) {
+            if(!id && v.artist.id) id = v.artist.id;
+            
+            if(!name && v.artist.name?.length) name = v.artist.name;
+            else if(!name && v.artist.title?.length) name = v.artist.title;
+
+
+            if(!link && v.artist.link?.length) link = v.artist.link;
+            else if(!link && v.artist.share?.length) link = v.artist.share;
+
+            if(!image && v.artist.picture_medium?.length) image = v.artist.picture_medium;
+            else if(!image && v.artist.picture_big?.length) image = v.artist.picture_big;
+            else if(!image && v.artist.picture_small?.length) image = v.artist.picture_small;
+            else if(!image && v.artist.picture_xl?.length) image = v.artist.picture_xl;
+            else if(!image && v.artist.picture?.length) image = v.artist.picture;
+
+            if(!albums && v.artist.nb_album) albums = v.artist.nb_album;
+
+            if(!fans && v.artist.nb_fan) fans = v.artist.nb_fan;
+        }
+
+        if((!name || !image || !link) && v?.contributors?.length) {
+            let thecontributer = v?.contributors[0];
+            if(id || v.artist) thecontributer = v?.contributors?.find?.(x => x?.id == id || x?.id == v.artist?.id) || thecontributer;
+
+            if(v.thecontributer) id = v.thecontributer;
+            
+            if(!name && thecontributer.name?.length) name = thecontributer.name;
+            else if(!name && thecontributer.title?.length) name = thecontributer.title;
+
+            if(!link && thecontributer.link?.length) link = thecontributer.link;
+            else if(!link && thecontributer.share?.length) link = thecontributer.share;
+
+            if(!image && thecontributer.picture_medium?.length) image = thecontributer.picture_medium;
+            else if(!image && thecontributer.picture_big?.length) image = thecontributer.picture_big;
+            else if(!image && thecontributer.picture_small?.length) image = thecontributer.picture_small;
+            else if(!image && thecontributer.picture_xl?.length) image = thecontributer.picture_xl;
+            else if(!image && thecontributer.picture?.length) image = thecontributer.picture;
+
+            if(!albums && thecontributer.nb_album) albums = thecontributer.nb_album;
+
+            if(!fans && thecontributer.nb_fan) fans = thecontributer.nb_fan;
+        }
+
+        if(!link && id) return `https://www.deezer.com/artist/${v.artist.id}`;
+
+        return { name, link, image, albums, fans };
+    }
 
     get guildsAndMembers() {
         return {
@@ -619,7 +694,7 @@ export function getDefaultClientOptions() {
             //GatewayIntentBits.GuildInvites, // for guild invite managing
             GatewayIntentBits.GuildVoiceStates, // for voice related things
             //GatewayIntentBits.GuildPresences, // for user presence things
-            //GatewayIntentBits.GuildMessages, // for guild messages things
+            GatewayIntentBits.GuildMessages, // for guild messages things
             //GatewayIntentBits.GuildMessageReactions, // for message reactions things
             //GatewayIntentBits.GuildMessageTyping, // for message typing things
             //GatewayIntentBits.DirectMessages, // for dm messages

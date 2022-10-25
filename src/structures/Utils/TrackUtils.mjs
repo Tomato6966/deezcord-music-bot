@@ -1,9 +1,68 @@
 import Puppeteer from "puppeteer";
-
+import { Embed, ErrorEmbed } from "../Embed.mjs";
+import { PermissionFlagsBits } from "discord.js";
 export class DeezCordTrackUtils {
     /** @param {import("../BotClient.mjs").BotClient} client */
     constructor(client) {
         this.client = client;
+    }
+    async createPlayer(interaction, { checkVC } = { }) {
+        // if no vc return error
+        if (!interaction.channel) return interaction.reply({ 
+            ephemeral: true, embeds: [ new ErrorEmbed().addField(`Ohno`, `> Please join a Voice Channel first`) ]
+        }).catch(console.warn), { player: null };
+
+        let player = this.client.DeezCord.players.get(interaction.guildId);
+
+        // get the missing perms.
+        const missingPerms = this.client.DeezUtils.perms.getMissingPerms(this.client, interaction.channel, [PermissionFlagsBits.ViewChannel,  PermissionFlagsBits.Connect, PermissionFlagsBits.Speak, PermissionFlagsBits.MoveMembers, PermissionFlagsBits.Administrator])
+        
+        // check for if not in the same voice channel
+        if (player && interaction.channel.id !== player.voiceChannel) return interaction.reply({ 
+            ephemeral: true, embeds: [ new ErrorEmbed().addField(`Not in same VC`, `> We are not in the same Voice Channel\n> I'm in <#${player.voiceChannel}>`) ]
+        }).catch(console.warn), { player: null };
+        // check perm for seeing
+        if (!player && !missingPerms?.includes?.("ViewChannel")) return interaction.reply({
+            ephemeral: true, embeds: [ new ErrorEmbed().addField(`Not Viewable`, `> I can't see your Voice Channel <#${interaction.changed.id}>`) ]
+        }).catch(console.warn), { player: null };
+        // check perm for connecting
+        if (!player && !missingPerms?.includes?.("Connect")) return interaction.reply({
+            ephemeral: true, embeds: [ new ErrorEmbed().addField(`Not Connectable`, `> I can't join your Voice Channel <#${interaction.changed.id}>`) ]
+        }).catch(console.warn), { player: null };
+        // check perm for speaking
+        if (!player && !missingPerms?.includes?.("Speak")) return interaction.reply({
+            ephemeral: true, embeds: [ new ErrorEmbed().addField(`Not Speakable`, `> I can't speak in your Voice Channel <#${interaction.changed.id}>`) ]
+        }).catch(console.warn), { player: null };
+        // check for if the channel is full
+        if (!player && interaction.channel.full && !(missingPerms?.includes?.("Administrator") || missingPerms?.includes?.("MoveMembers"))) return interaction.reply({
+            ephemeral: true, embeds: [ new ErrorEmbed().addField(`Vc is full`, `> There is no space left in your Voice Channel`) ]
+        }).catch(console.warn), { player: null };
+
+        const created = !player;
+        const previousQueue = player?.queue?.totalSize ?? 0;
+
+        // create player if not existing
+        if (!player) {
+            player = this.client.DeezCord.create({
+                region: interaction.member.voice.channel?.rtcRegion || undefined,
+                guild: interaction.guildId,
+                voiceChannel: interaction.member.voice.channel.id, 
+                textChannel: interaction.channel.id,
+                selfDeafen: true,
+            });
+            player.connect();
+            player.stop();
+        }
+        
+        // re-connect not existing nodes
+        const notConnectedNodes = this.client.DeezCord.nodes.filter(n => n.connected);
+        if(notConnectedNodes.length) {
+            for(const node of notConnectedNodes) await node.connect();
+            await this.client.DeezUtils.time.delay(500 * notConnectedNodes.length);
+        }
+
+        // return the datas
+        return { player, created, previousQueue };
     }
     /**
      * 

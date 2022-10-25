@@ -1,3 +1,5 @@
+import { EnglishUS } from "../../data/Locales.mjs";
+
 /** @param {import("../../structures/BotClient.mjs").BotClient} client */
 export default async (client) => {
     client.logger.success(`Discord Bot is ready as ${client.user.tag}`);
@@ -18,6 +20,6 @@ export default async (client) => {
     await client.db.guildSettings.findMany({
         select: { guildId: true, language: true }
     }).then(x => {
-        x.filter(v => client.guilds.cache.has(v.guildId)).forEach(v => client.DeezCache.locales.set(v.guildId, v.language || client.locales.German));
+        x.filter(v => client.guilds.cache.has(v.guildId)).forEach(v => client.DeezCache.locales.set(v.guildId, v.language || EnglishUS));
     });
 }

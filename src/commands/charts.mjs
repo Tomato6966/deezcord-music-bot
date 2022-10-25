@@ -47,25 +47,9 @@ export default {
     ],
     /** @param {import("../structures/BotClient.mjs").BotClient} client */
     async execute(client, interaction) {
-        let player = client.DeezCord.players.get(interaction.guildId);
-        const created = !player;
-        let previousQueue = player?.queue?.totalSize ?? 0;
-        if (!player) {
-            player = client.DeezCord.create({
-                region: interaction.member.voice.channel?.rtcRegion || undefined,
-                guild: interaction.guildId,
-                voiceChannel: interaction.member.voice.channel.id, // message.member.voice.channel.id,
-                textChannel: interaction.channel.id,
-                selfDeafen: true,
-            });
-            player.connect();
-            player.stop();
-        }
-        const notConnectedNodes = client.DeezCord.nodes.filter(n => n.connected);
-        if(notConnectedNodes.length) {
-            for(const node of notConnectedNodes) await node.connect();
-            await client.DeezUtils.time.delay(500 * notConnectedNodes.length);
-        }
+        const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction);
+        if(!player) return;
+
         const searchFilter = interaction.options.getString("query_search_filter");
         
         const limit = interaction.options.getNumber("limit") && isNaN(interaction.options.getNumber("limit")) ? Number(interaction.options.getNumber("limit")) : 100;
@@ -136,25 +120,10 @@ export default {
                         content: `Found the **${type.substring(0, 1).toUpperCase() + type.substring(1, type.length)}**: \`${data.title || data.name}\` with \`${data.tracks.length} Tracks\`\n> ${data.link || data.share}`,
                         components: [],
                     });
-                    let player = client.DeezCord.players.get(interaction.guildId);
-                    const created = !player;
-                    let previousQueue = player?.queue?.totalSize ?? 0;
-                    if (!player) {
-                        player = client.DeezCord.create({
-                            region: interaction.member.voice.channel?.rtcRegion || undefined,
-                            guild: interaction.guildId,
-                            voiceChannel: interaction.member.voice.channel.id, // message.member.voice.channel.id,
-                            textChannel: interaction.channel.id,
-                            selfDeafen: true,
-                        });
-                        player.connect();
-                        player.stop();
-                    }
-                    const notConnectedNodes = client.DeezCord.nodes.filter(n => n.connected);
-                    if(notConnectedNodes.length) {
-                        for(const node of notConnectedNodes) await node.connect();
-                        await client.DeezUtils.time.delay(500 * notConnectedNodes.length);
-                    }
+                    
+                    const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction);
+                    if(!player) return;
+                    
                     const responsedTracks = data.tracks.filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.createUnresolvedData(v), interaction.user));
                     if (created || previousQueue === 0) {
                         player.queue.add(responsedTracks);

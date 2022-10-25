@@ -1,10 +1,17 @@
+<div align="center">
+ <a href="https://discord.gg/7KJnTDKQ8N" target="_blank"><img src="https://img.shields.io/maintenance/yes/2023?style=for-the-badge" /></a>
+ <a href="https://discord.gg/7KJnTDKQ8N" target="_blank"><img src="https://img.shields.io/discord/1034415148263297045?color=blue&label=support&style=for-the-badge&logoColor=white" /></a>
+ <a href="https://deezer.com" target="_blank"><img src="https://img.shields.io/badge/Deezer-FEAA2D?style=for-the-badge&logo=deezer&logoColor=white"/></a>
+ <a href="https://www.postgresql.org" target="_blank"><img src="https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white"/></a>
+ <a href="https://www.nodejs.org" target="_blank"><img src="https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white"/></a>
+ <a href="https://www.fastify.io/" target="_blank"><img src="https://img.shields.io/badge/fastify-%23000000.svg?style=for-the-badge&logo=fastify&logoColor=white" /></a>
+</div>
+
 # Deezercord | A Music Bot for Deezer
 
 Official Repository for the Community Deezer Music Power Bot. 
 
 *Not affialiated with deezer.com, but using deezer.com Features only!*
-
-<a href="https://deezer.com" target="_blank"><img src="https://user-images.githubusercontent.com/68145571/197169083-60567cc3-245b-4a76-88d4-b2df1df9ddb8.jpeg"></a>
 
 # Features [Planned]
 
@@ -21,13 +28,17 @@ Official Repository for the Community Deezer Music Power Bot.
 ✔ Link your Account and do activities with it
 
 
-# Public Bot
+<img align="left" width="40" height="40" src="https://media.discordapp.net/attachments/1034419117853257738/1034421249356603482/Logo_cropped.png" alt="Deezcord Logo">
 
-- Check it out
+## Deezcord | Public Bot
 
+- Check it out: [Invite @Deezcord#2386](https://discord.com/oauth2/authorize?client_id=1032998523123290182&scope=bot&permissions=279218310144)
 
+- Hosted 24/7 on: [bero-host](https://bero.milrato.dev) (#AD *Use code: `milrato` to save 20% permamently*)
 
-# Self-Hosting Guide
+- Coded by [@Tomato6966](https://github.com/Tomato6966) & [@fb-sean](https://github.com/fb-sean)
+
+## Self-Hosting Guide
 
 - Note [here](https://github.com/Tomato6966/deezcord-music-bot/wiki) you can find a dedicated Wiki!
 
@@ -62,6 +73,11 @@ https://user-images.githubusercontent.com/68145571/197351293-bccfd84a-8e5b-41a9-
 
 4. Start it
     - Just type: `npm run start` or `node ./src/index.mjs`;
+
+
+## Support & Updates Server
+
+<a href="https://discord.gg/7KJnTDKQ8N" target="_blank"><img src="https://discord.com/api/guilds/1034415148263297045/widget.png?style=banner4" /></a>
 
 
 ## Todos
