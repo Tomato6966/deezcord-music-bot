@@ -1,39 +1,40 @@
 {
-    "login": {
-        "description": "Verbinde deinen Account mit diesem Bot",
-        "execute": {
-            "embedTitle": "Einloggen",
-            "embedDescription": "Um mit Titeln, Wiedergabelisten, Künstlern und Radios interagieren zu können, müssen Sie sich anmelden.",
-            "embedFooter": "Teilen Sie diesen Link nicht mit jemandem!"
-        }
-    },
-    "logout": {
-        "description": "Trenne dein deezer-Konto mit diesem Bot",
-        "execute": {
-            "embedTitle": "Abmeldung",
-            "embedDescription": "Wir haben deine Verbindung entfernt, aber vergiss das nicht. \nUm mit Titeln, Wiedergabelisten, Künstlern und Radios interagieren zu können, müssen Sie angemeldet sein."
-        }
-    },
-    "ping": {
-        "description": "Zeige meine Latenz zu Discord an",
-        "execute": {
-            "pong": "🏓 Meine Latenz nach Discord ist: `{{wsPing}}ms`"
-        }
-    },
-    "play": {
-        "description": "Spiele einen Song / Suchanfrage in deinem Sprachkanal",
-        "options": {
-            "query": "Song, Playlist oder eine Suchanfrage",
-            "query_search_filter": "Willst du die Suchanfragen filtern?",
-            "queueaction": "Aktionen welche auf die Warteschlange ausgeführt werden sollen?",
-            "file": "Spiele eine Datei statt einer Query ab (query wird überschrieben)"
-        }
-    },
-    "charts": {
-        "description": "Play the current Charts (Hit-Songs)",
-        "options": {
-            "query_search_filter": "Wanna filter Search Results?",
-            "limit": "How many songs? (10 <= limit <= 200 | default: 100)"
-        }
-    }
+	"login": {
+		"description": "Verbinde deinen Account mit diesem Bot",
+		"execute": {
+			"embedTitle": "Einloggen",
+			"embedDescription": "Um mit Titeln, Wiedergabelisten, Künstlern und Radios interagieren zu können, müssen Sie sich anmelden.",
+			"embedFooter": "Teilen Sie diesen Link nicht mit jemandem!"
+		}
+	},
+	"logout": {
+		"description": "Trenne dein deezer-Konto mit diesem Bot",
+		"execute": {
+			"embedTitle": "Abmeldung",
+			"embedDescription": "Wir haben deine Verbindung entfernt, aber vergiss das nicht. \nUm mit Titeln, Wiedergabelisten, Künstlern und Radios interagieren zu können, müssen Sie angemeldet sein."
+		}
+	},
+	"ping": {
+		"description": "Zeige meine Latenz zu Discord an",
+		"execute": {
+			"pong": "🏓 Meine Latenz nach Discord ist: `{{wsPing}}ms`"
+		}
+	},
+	"play": {
+		"description": "Spiele einen Song / Suchanfrage in deinem Sprachkanal",
+		"options": {
+			"query": "Song, Playlist oder eine Suchanfrage",
+			"query_search_filter": "Willst du die Suchanfragen filtern?",
+			"queueaction": "Aktionen welche auf die Warteschlange ausgeführt werden sollen?",
+			"file": "Spiele eine Datei statt einer Query ab (query wird überschrieben)",
+			"pick_searchresult": "Want to select the right search Result?"
+		}
+	},
+	"charts": {
+		"description": "Play the current Charts (Hit-Songs)",
+		"options": {
+			"query_search_filter": "Wanna filter Search Results?",
+			"limit": "How many songs? (10 <= limit <= 200 | default: 100)"
+		}
+	}
 }

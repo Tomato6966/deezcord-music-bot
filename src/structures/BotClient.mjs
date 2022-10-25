@@ -405,19 +405,22 @@ export class BotClient extends Client {
         if(!process.env.CLIENTID) process.env.CLIENTID = this.user.id;
         if(!process.env.BOTNAME) process.env.BOTNAME = this.user.tag
         // on Ready Execute - with 1 second delay for making 100% sure it's ready
-        
-        const allSlashs = await this.application.commands.fetch(undefined).then(x => [...x.values()]).catch(console.warn) || [...this.application.commands.cache.values()] || [];
+        const guild = process.env.DEVGUILD ? await this.cluster.broadcastEval(`this.guilds.cache.has('${process.env.DEVGUILD}') ? true : false`).then(x => x.filter(v => v === true).length > 0) : false;
+        console.log(guild ? { guild: process.env.DEVGUILD } : undefined)
+        const allSlashs = await this.application.commands.fetch(undefined, { guildId: guild ? process.env.DEVGUILD : undefined }).then(x => [...x.values()]).catch(console.warn) || [...this.application.commands.cache.values()] || [];
         if(allSlashs?.length) {
             this.DeezCache.fetchedApplication = allSlashs;
             for(const [key, value] of [...this.commands.entries()]) {
                 if(!value.slashCommandKey) continue;
                 const Base = value.slashCommandKey.split(" ")[0].replace("/", "");
+                //console.log(key, Base)
                 value.commandId = allSlashs.find(c => c.name === Base)?.permissions?.commandId || 0;
+                //console.log(key, Base, allSlashs.find(c => c.name === Base))
                 value.mention = value.mention.replace("commandId", value.commandId || "4206966420");
                 this.commands.set(key, value)
             }
             this.logger.debug(`✅ Set Command Mentions of: ${allSlashs?.length} Commands`);
-        }
+        } else console.log("no slash sizes found")
         return true;
     }
     async publishCommands(guildId) {

@@ -1,3 +1,5 @@
+
+
 export class DeezCordArrayUtils {
     /** @param {import("../BotClient.mjs").BotClient} client */
     constructor(client) {
@@ -136,15 +138,15 @@ export class DeezCordArrayUtils {
      */
     remove(thisArr, ...elems) {
         if (!elems || !elems.length) throw new SyntaxError(`Did not receive an element to remove.`);
-        return thisArr.filter((element) => !elems.some((elem) => element === elem || isEqual(element, elem)));
+        return thisArr.filter((element) => !elems.some((elem) => element === elem));
     }
     /**
      * Filter out duplicates
      * @param {any[]} thisArr  
      * @returns {any[]}
      */
-    removeDuplicates(thisArr) {
-        return thisArr.reduce((a, c) => (!a.some((item) => isEqual(item, c)) ? a.concat([c]) : a), []);
+    removeDuplicates(thisArr, keyToCheck) {
+        return thisArr.reduce((a, c) => (!a.some((item) => item == c || (keyToCheck && item[keyToCheck] === c[keyToCheck])) ? a.concat([c]) : a), []);
     }
     /**
      * Merge elements together

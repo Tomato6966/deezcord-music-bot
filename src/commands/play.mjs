@@ -51,7 +51,7 @@ export default {
         {
             name: "pick_searchresult",
             description: inlineLocale("EnglishUS", `play.options.pick_searchresult`),
-            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "queueaction", "play.options.pick_searchresult")),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "pick_searchresult", "play.options.pick_searchresult")),
             required: false,
             type: optionTypes.stringchoices,
             choices: [
@@ -137,9 +137,6 @@ export default {
                     .map(v => TrackUtils.buildUnresolved(client.DeezUtils.track.createUnresolvedData(v, v?.playlist, v?.album), interaction.user))
                 };
             }).catch(errorCatcher); 
-            if(pickSearchResult) {
-                // const pick = await somehow() // todo 
-            }
             // set the loadtype
             loadType = "TRACKS_FOUND";
         }
@@ -151,8 +148,52 @@ export default {
 
         const response = searchingTracks ? { data: searchingTracks, loadType, tracks: searchingTracks?.tracks || searchingTracks } : await client.DeezCord.search(query, interaction.user, player.node);
         if(!response.tracks?.length) return interaction.editReply({ ephemeral: true, content: `❌ No Tracks found` });
-        
+        let pick = false;
         const fetchTime = measureTimer.end();
+        if(loadType == "TRACKS_FOUND" && pickSearchResult) {
+            const msg = await interaction.editReply({
+                content: "Pick your wished Song",
+                components: [
+                    new ActionRowBuilder().addComponents([
+                        new SelectMenuBuilder()
+                        .setCustomId(`${interaction.user.id}_searchpick`)
+                        .setPlaceholder(`Select your wished Song`)
+                        .addOptions(client.DeezUtils.array.removeDuplicates(response.tracks, "identifier").slice(0, 25).map(v => {
+                            return {
+                                label: `${v.title || v.name}`.substring(0, 100), 
+                                value: `${v.identifier}`.substring(0, 100), 
+                                description: `[${client.DeezUtils.time.durationFormatted(v.duration, true)}] | By: ${v.author} | Rank #${v.rank}`.substring(0, 100), 
+                                // default, 
+                                // emoji
+                            }
+                        }))
+                    ]),
+                    new ActionRowBuilder().addComponents([
+                        new ButtonBuilder().setStyle(ButtonStyle.Danger).setLabel("Cancel").setLabel("Cancel Search").setCustomId("cancel")
+                    ])
+                ],
+            });
+            pick = await new Promise((r) => {
+                const col = msg.createMessageComponentCollector({ filter: x => x.user.id === interaction.user.id, max: 1, time: 60000 });
+                col.on("collect", async (i) => {
+                    if(i.customId === "cancel") {
+                        await i.update({ content: "Cancelled", components: [] }).catch(() => null);
+                        return r(false);
+                    } 
+                    return r({ interaction: i, track: i.values[0] });
+                }) 
+                col.on("end", (col) => { if(!col.size) return r(false); })
+            });
+            if(!pick) return
+        }
+        const pickedTrack = pick?.track ? response.tracks.find(x => x.identifier == pick.track) : undefined;
+        if(pickedTrack) {
+            if(Array.isArray(response?.data?.data?.data) && response.data.data.data.find(x => x.id == pickedTrack.identifier)) response.data.data.data = [response.data.data.data.find(x => x.id == pickedTrack.identifier)];
+            else if(Array.isArray(response?.data?.data) && response.data.data.find(x => x.id == pickedTrack.identifier)) response.data.data = [response.data.data.find(x => x.id == pickedTrack.identifier)];
+            else if(Array.isArray(response?.data) && response.data.find(x => x.id == pickedTrack.identifier)) response.data = [response.data.find(x => x.id == pickedTrack.identifier)];
+            response.tracks = [pickedTrack]
+            interaction.editReply = (...params) => pick.interaction.update(...params);
+        }
 
         const loadAllTracks = [`PLAYLIST_LOADED`, `ARTIST_LOADED`, `ALBUM_LOADED`, `RADIO_LOADED`, `MIXES_LOADED`].includes(response.loadType);
         // if a player was created, or the previous queue was empty, or there was no player before
@@ -221,7 +262,7 @@ export async function handleResSearchFilter (client, interaction, res, type, ski
             new ActionRowBuilder().addComponents([
                 new SelectMenuBuilder()
                     .setCustomId(`${interaction.user.id}_${type}pick`)
-                    .setPlaceholder(`Select your Wished ${type.substring(0, 1).toUpperCase() + type.substring(1, type.length)}`)
+                    .setPlaceholder(`Select your wished ${type.substring(0, 1).toUpperCase() + type.substring(1, type.length)}`)
                     .addOptions(sorted.map(v => {
                         const o = {
                             label: `${v.title || v.name}`, 
