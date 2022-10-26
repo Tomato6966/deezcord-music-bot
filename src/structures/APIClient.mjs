@@ -1,5 +1,5 @@
 import Fastify from "fastify";
-import fetch from 'node-fetch';
+import fetch, { Headers } from 'node-fetch';
 import { Logger } from "./Utils/Logger.mjs";
 
 export class APIClient {
@@ -12,22 +12,28 @@ export class APIClient {
         /** @type {import("./BotClient.mjs").BotClient} */
         this.client = options.client
         this.BaseURL = "https://api.deezer.com"
-        this.logger = new Logger({prefix: "DEEZAPI"});
+        this.logger = new Logger({prefix: "DEEZAPI "});
         this.searchLimit = 100;
         // https://developers.deezer.com/api/explorer
     }
-    async fetchAll(path, maxLimit = 1000, maxLen=100) {
+    async fetchAll(path, maxLimit = 1000, maxLen=99, access_token) {
         const data = [];
-        let tracks = await this.makeRequest(`${path}?limit=100&index=0`);
+        let tracks = await this.makeRequest(`${path}?limit=100&index=0&${this.parseAccessToken(access_token)}`);
         if(tracks.data?.length) data.push(...tracks.data);
         if(tracks.data.length < maxLen || (tracks.total && tracks.total <= maxLen)) return data;
         while(tracks.data?.length && tracks.data?.length === maxLen && maxLimit > data.length) {
-            tracks = await this.makeRequest(`${path}?limit=100&index=${data.length}`);
+            tracks = await this.makeRequest(`${path}?limit=100&index=${data.length}&${this.parseAccessToken(access_token)}`);
             if(tracks.data?.length) data.push(...tracks.data);
             else break;
         }
         if(data.length > maxLimit) data.splice(maxLimit, data.length);
         return data;
+    }
+    parseAccessToken(access_token) {
+        if(!access_token) return "filterout=param";
+        if(!access_token.includes("access_token")) return `access_token=${access_token}`;
+        const params = new URLSearchParams(access_token);
+        return `access_token=${params.get("access_token")}`;
     }
     user = {
         resetDeezerAccount: async (discordUserId) => {
@@ -93,62 +99,62 @@ export class APIClient {
         me: async (access_token) => {
             if (!access_token) throw new Error("No access token provided");
             if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-            return await this.makeRequest(`user/me?access_token=${access_token}`)
+            return await this.makeRequest(`user/me?${this.parseAccessToken(access_token)}`)
         },
-        data: async (ID) => {
-            return await this.makeRequest(`user/${ID}`)
+        data: async (ID, access_token) => {
+            return await this.makeRequest(`user/${ID}?${this.parseAccessToken(access_token)}`)
         },
-        flow: async (ID) => {
-            return await this.makeRequest(`user/${ID}/flow`)
+        flow: async (ID, access_token) => {
+            return await this.makeRequest(`user/${ID}/flow?${this.parseAccessToken(access_token)}`)
         },
-        followings: async (ID) => {
-            return await this.makeRequest(`user/${ID}/followings`)
+        followings: async (ID, access_token) => {
+            return await this.makeRequest(`user/${ID}/followings?${this.parseAccessToken(access_token)}`)
         },
-        followers: async (ID) => {
-            return await this.makeRequest(`user/${ID}/followers`)
+        followers: async (ID, access_token) => {
+            return await this.makeRequest(`user/${ID}/followers?${this.parseAccessToken(access_token)}`)
         },
         notifications: async (ID, access_token) => { // oauth
             if (!access_token) throw new Error("No access token provided");
             if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-            return await this.makeRequest(`user/${ID}/notifications?access_token=${access_token}`)
+            return await this.makeRequest(`user/${ID}/notifications?${this.parseAccessToken(access_token)}`)
         },
         permissions: async (ID, access_token) => { // oauth
             if (!access_token) throw new Error("No access token provided");
             if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-            return await this.makeRequest(`user/${ID}/permissions?access_token=${access_token}`)
+            return await this.makeRequest(`user/${ID}/permissions?${this.parseAccessToken(access_token)}`)
         },
         options: async (ID, access_token) => { // oauth
             if (!access_token) throw new Error("No access token provided");
             if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-            return await this.makeRequest(`user/${ID}/options?access_token=${access_token}`)
+            return await this.makeRequest(`user/${ID}/options?${this.parseAccessToken(access_token)}`)
         },
         personalSongs: async (ID, access_token) => { // oauth
             if (!access_token) throw new Error("No access token provided");
             if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-            return await this.makeRequest(`user/${ID}/personal_songs?access_token=${access_token}`)
+            return await this.makeRequest(`user/${ID}/personal_songs?${this.parseAccessToken(access_token)}`)
         },
         history: {
-            albums: async (ID) => {
-                return await this.makeRequest(`user/${ID}/albums`)
+            albums: async (ID, access_token) => {
+                return await this.makeRequest(`user/${ID}/albums?${this.parseAccessToken(access_token)}`)
             },
-            artists: async (ID) => {
-                return await this.makeRequest(`user/${ID}/artists`)
+            artists: async (ID, access_token) => {
+                return await this.makeRequest(`user/${ID}/artists?${this.parseAccessToken(access_token)}`)
             },
-            charts: async (ID) => {
-                return await this.makeRequest(`user/${ID}/charts`)
+            charts: async (ID, access_token) => {
+                return await this.makeRequest(`user/${ID}/charts?${this.parseAccessToken(access_token)}`)
             },
-            playlsits: async (ID) => {
-                return await this.makeRequest(`user/${ID}/playlists`)
+            playlsits: async (ID, access_token) => {
+                return await this.makeRequest(`user/${ID}/playlists?${this.parseAccessToken(access_token)}`)
             },
             general: async (ID, access_token) => { // oauth
                 if (!access_token) throw new Error("No access token provided");
                 if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-                return await this.makeRequest(`user/${ID}/history?access_token=${access_token}`)
+                return await this.makeRequest(`user/${ID}/history?${this.parseAccessToken(access_token)}`)
             },
             search: async (query, access_token, limit) => {
                 if (!access_token) throw new Error("No access token provided");
                 if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-                return await this.makeRequest(`search/history?q=${query.replaceAll(" ", "+")}&access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+                return await this.makeRequest(`search/history?q=${query.replaceAll(" ", "+")}&${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             }
         },
         recommendations: {
@@ -167,171 +173,200 @@ export class APIClient {
             albums: async (ID, access_token, limit) => { // oauth
                 if (!access_token) throw new Error("No access token provided");
                 if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-                return await this.makeRequest(`user/${ID}/recommendations/albums?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+                return await this.makeRequest(`user/${ID}/recommendations/albums?${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
             releases: async (ID, access_token, limit) => { // oauth
                 if (!access_token) throw new Error("No access token provided");
                 if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-                return await this.makeRequest(`user/${ID}/recommendations/releases?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+                return await this.makeRequest(`user/${ID}/recommendations/releases?${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
             artists: async (ID, access_token, limit) => { // oauth
                 if (!access_token) throw new Error("No access token provided");
                 if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-                return await this.makeRequest(`user/${ID}/recommendations/artists?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+                return await this.makeRequest(`user/${ID}/recommendations/artists?${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
             playlists: async (ID, access_token, limit) => { // oauth
                 if (!access_token) throw new Error("No access token provided");
                 if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-                return await this.makeRequest(`user/${ID}/recommendations/playlists?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+                return await this.makeRequest(`user/${ID}/recommendations/playlists?${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
             tracks: async (ID, access_token, limit) => { // oauth
                 if (!access_token) throw new Error("No access token provided");
                 if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-                return await this.makeRequest(`user/${ID}/recommendations/tracks?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+                return await this.makeRequest(`user/${ID}/recommendations/tracks?${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
             radios: async (ID, access_token, limit) => { // oauth // radio == mixes
                 if (!access_token) throw new Error("No access token provided");
                 if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-                return await this.makeRequest(`user/${ID}/recommendations/radios?access_token=${access_token}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+                return await this.makeRequest(`user/${ID}/recommendations/radios?${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
         }
     }
     deezer = {
         search: {
             // searching deezer
-            all: async (query, limit) => {
-                return await this.makeRequest(`search?q=${query.replaceAll(" ", "+")}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+            all: async (query, limit, access_token) => {
+                return await this.makeRequest(`search?q=${query.replaceAll(" ", "+")}&${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
-            albums: async (query, limit) => {
-                return await this.makeRequest(`search/album?q=${query.replaceAll(" ", "+")}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+            albums: async (query, limit, access_token) => {
+                return await this.makeRequest(`search/album?q=${query.replaceAll(" ", "+")}&${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
-            artists: async (query, limit) => {
-                return await this.makeRequest(`search/artist?q=${query.replaceAll(" ", "+")}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+            artists: async (query, limit, access_token) => {
+                return await this.makeRequest(`search/artist?q=${query.replaceAll(" ", "+")}&${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
-            playlists: async (query, limit) => {
-                return await this.makeRequest(`search/playlist?q=${query.replaceAll(" ", "+")}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+            playlists: async (query, limit, access_token) => {
+                return await this.makeRequest(`search/playlist?q=${query.replaceAll(" ", "+")}&${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
-            podcasts: async (query, limit) => {
-                return await this.makeRequest(`search/podcast?q=${query.replaceAll(" ", "+")}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+            podcasts: async (query, limit, access_token) => {
+                return await this.makeRequest(`search/podcast?q=${query.replaceAll(" ", "+")}&${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
-            radios: async (query, limit) => { // radio == mixes
-                return await this.makeRequest(`search/radio?q=${query.replaceAll(" ", "+")}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+            radios: async (query, limit, access_token) => { // radio == mixes
+                return await this.makeRequest(`search/radio?q=${query.replaceAll(" ", "+")}&${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
-            mixes: async (query, limit) => { // mixes == radio
-                return this.deezer.search.radios(query, limit)
+            mixes: async (query, limit, access_token) => { // mixes == radio
+                return this.deezer.search.radios(query, limit, access_token)
             },
-            tracks: async (query, limit) => {
-                return await this.makeRequest(`search/track?q=${query.replaceAll(" ", "+")}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+            tracks: async (query, limit, access_token) => {
+                return await this.makeRequest(`search/track?q=${query.replaceAll(" ", "+")}&${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
-            users: async (query, limit) => {
-                return await this.makeRequest(`search/user?q=${query.replaceAll(" ", "+")}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
+            users: async (query, limit, access_token) => {
+                return await this.makeRequest(`search/user?q=${query.replaceAll(" ", "+")}&${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
         },
         fetch: {
             // get deezer datas
-            album: async (ID, all = true) => {
-                const res = await this.makeRequest(`album/${ID}`);
+            album: async (ID, all = true, access_token) => {
+                const res = await this.makeRequest(`album/${ID}?${this.parseAccessToken(access_token)}`);
                 if(all && (!(res?.tracks||res?.tracks?.data||[])?.length || (res?.tracks||res?.tracks?.data||[]).length < 100)) {
                     const allTracks = await this.deezer.fetch.albumTracks(ID, 100, true);
                     if(allTracks?.length) res.tracks = allTracks; 
                 }
                 return res;
             },
-            albumTracks: async (ID, limit, all = true) => {
-                if(all) return await this.fetchAll(`album/${ID}/tracks`);
-                return await this.makeRequest(`album/${ID}/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
+            albumTracks: async (ID, limit, all = true, access_token) => {
+                if(all) return await this.fetchAll(`album/${ID}/tracks`, undefined, undefined, access_token);
+                return await this.makeRequest(`album/${ID}/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}&${this.parseAccessToken(access_token)}`);
             },
 
-            artist: async (ID, all = true) => {
-                const res = await this.makeRequest(`artist/${ID}`);
+            artist: async (ID, all = true, access_token) => {
+                const res = await this.makeRequest(`artist/${ID}?${this.parseAccessToken(access_token)}`);
                 if(all && (!(res?.tracks||res?.tracks?.data||[])?.length || (res?.tracks||res?.tracks?.data||[]).length < 100)) {
                     const allTracks = await this.deezer.fetch.artistTracks(ID, 100, true);
                     if(allTracks?.length) res.tracks = allTracks; 
                 }
                 return res;
             },
-            artistTracks: async (ID, limit, all = true) => {
-                if(all) return await this.fetchAll(`artist/${ID}/top`);
-                return await this.makeRequest(`artist/${ID}/top?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
+            artistTracks: async (ID, limit, all = true, access_token) => {
+                if(all) return await this.fetchAll(`artist/${ID}/top`, undefined, undefined, access_token);
+                return await this.makeRequest(`artist/${ID}/top?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}&${this.parseAccessToken(access_token)}`);
             },
 
-            track: async (ID) => {
-                return await this.makeRequest(`track/${ID}`);
+            track: async (ID, all, access_token) => {
+                if(!access_token && typeof all == "string") access_token = all;
+                return await this.makeRequest(`track/${ID}?${this.parseAccessToken(access_token)}`);
             },
 
-            playlist: async (ID, all = true) => {
-                const res = await this.makeRequest(`playlist/${ID}`);
+            playlist: async (ID, all = true, access_token) => {
+                const res = await this.makeRequest(`playlist/${ID}?${this.parseAccessToken(access_token)}`);
                 if(all && (!(res?.tracks||res?.tracks?.data||[])?.length || (res?.tracks||res?.tracks?.data||[]).length < 100)) {
                     const allTracks = await this.deezer.fetch.playlistTracks(ID, 100, true);
                     if(allTracks?.length) res.tracks = allTracks; 
                 }
                 return res;
             },
-            playlistTracks: async (ID, limit, all = true) => {
-                if(all) return await this.fetchAll(`playlist/${ID}/tracks`);
-                return await this.makeRequest(`playlist/${ID}/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
+            playlistTracks: async (ID, limit, all = true, access_token) => {
+                if(all) return await this.fetchAll(`playlist/${ID}/tracks`, undefined, undefined, access_token);
+                return await this.makeRequest(`playlist/${ID}/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}&${this.parseAccessToken(access_token)}`);
             },
-            podcast: async (ID) => {
-                return await this.makeRequest(`podcast/${ID}`);
+            podcast: async (ID, all = true, access_token) => {
+                if(!access_token && typeof all == "string") access_token = all;
+                return await this.makeRequest(`podcast/${ID}?${this.parseAccessToken(access_token)}`);
             },
-            radio: async (ID, all = true) => { // radio == mixes
-                const res = await this.makeRequest(`radio/${ID}`);
+            radio: async (ID, all = true, access_token) => { // radio == mixes
+                const res = await this.makeRequest(`radio/${ID}?${this.parseAccessToken(access_token)}`);
                 if(all && (!(res?.tracks||res?.tracks?.data||[])?.length || (res?.tracks||res?.tracks?.data||[]).length < 100)) {
                     const allTracks = await this.deezer.fetch.radioTracks(ID, 100, true);
                     if(allTracks?.length) res.tracks = allTracks; 
                 }
                 return res;
             },
-            radioTracks: async (ID, limit, all = true) => { // radio == mixes
-                if(all) return await this.fetchAll(`radio/${ID}/tracks`);
-                const tracks = await this.makeRequest(`radio/${ID}/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`, true).catch(() => []);
+            radioTracks: async (ID, limit, all = true, access_token) => { // radio == mixes
+                if(all) return await this.fetchAll(`radio/${ID}/tracks`, undefined, undefined, access_token);
+                const tracks = await this.makeRequest(`radio/${ID}/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}&${this.parseAccessToken(access_token)}`, true).catch(() => []);
                 return tracks
             },
-            mix: async (ID, all = true) => { // mixes == radio
-                return await this.deezer.fetch.radio(ID, all);
+            mix: async (ID, all = true, access_token) => { // mixes == radio
+                return await this.deezer.fetch.radio(ID, all, access_token);
             },
-            mixTracks: async (ID, limit, all = true) => { // mixes == radio
-                return await this.deezer.fetch.radioTracks(ID, limit, all);
+            mixTracks: async (ID, limit, all = true, access_token) => { // mixes == radio
+                return await this.deezer.fetch.radioTracks(ID, limit, all, access_token);
             },
-            episode: async (ID) => {
-                return await this.makeRequest(`episode/${ID}`);
+            episode: async (ID, all = true, access_token) => {
+                if(!access_token && typeof all == "string") access_token = all;
+                return await this.makeRequest(`episode/${ID}?${this.parseAccessToken(access_token)}`);
             },
         },
         genres: {
-            fetchAll: async () => {
-                return await this.makeRequest(`genre`);
+            fetchAll: async (access_token) => {
+                return await this.makeRequest(`genre?${this.parseAccessToken(access_token)}`);
             }
         },
         charts: { // charts
-            all: async (limit) => {
-                if(limit > 100) return await this.fetchAll("chart/0", limit, 99);
-                return await this.makeRequest(`chart/0?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
+            all: async (limit, access_token) => {
+                if(limit > 100) return await this.fetchAll("chart/0", limit, 99, access_token);
+                return await this.makeRequest(`chart/0?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}&${this.parseAccessToken(access_token)}`);
             },
-            tracks: async (limit) => {
-                if(limit > 100) return await this.fetchAll("chart/0/tracks", limit, 99);
-                return await this.makeRequest(`chart/0/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
+            tracks: async (limit, access_token) => {
+                if(limit > 100) return await this.fetchAll("chart/0/tracks", limit, 99, access_token);
+                return await this.makeRequest(`chart/0/tracks?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}&${this.parseAccessToken(access_token)}`);
             },
-            albums: async (limit) => {
-                if(limit > 100) return await this.fetchAll("chart/0/albums", limit, 99);
-                return await this.makeRequest(`chart/0/albums?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
+            albums: async (limit, access_token) => {
+                if(limit > 100) return await this.fetchAll("chart/0/albums", limit, 99, access_token);
+                return await this.makeRequest(`chart/0/albums?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}&${this.parseAccessToken(access_token)}`);
             },
-            artists: async (limit) => {
-                if(limit > 100) return await this.fetchAll("chart/0/artists", limit, 99);
-                return await this.makeRequest(`chart/0/artists?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
+            artists: async (limit, access_token) => {
+                if(limit > 100) return await this.fetchAll("chart/0/artists", limit, 99, access_token);
+                return await this.makeRequest(`chart/0/artists?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}&${this.parseAccessToken(access_token)}`);
             },
-            playlists: async (limit) => {
-                if(limit > 100) return await this.fetchAll("chart/0/playlists", limit, 99);
-                return await this.makeRequest(`chart/0/playlists?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
+            playlists: async (limit, access_token) => {
+                if(limit > 100) return await this.fetchAll("chart/0/playlists", limit, 99, access_token);
+                return await this.makeRequest(`chart/0/playlists?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}&${this.parseAccessToken(access_token)}`);
             },
-            podcasts: async (limit) => {
-                if(limit > 100) return await this.fetchAll("chart/0/podcasts", limit, 99);
-                return await this.makeRequest(`chart/0/podcasts?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`);
+            podcasts: async (limit, access_token) => {
+                if(limit > 100) return await this.fetchAll("chart/0/podcasts", limit, 99, access_token);
+                return await this.makeRequest(`chart/0/podcasts?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}&${this.parseAccessToken(access_token)}`);
             }
         }
     }
 
-    async makeRequest(path) {
-        const rawData = await fetch(`${this.BaseURL}/${path}`);
+    async makeRequest(path, method="GET") {
+        try {
+            if(path.includes("?") && path.includes("filterout")) {
+                const requestPath = path.split("?")[0];
+                const requestParams = path.split("?")[1];
+                const params = new URLSearchParams(requestParams)
+                // remove smt
+                if(params.get("filterout") === "param") params.delete("filterout");
+                // default params
+                if(!params.get("output")) params.append("output", "json");
+                if(!params.get("limit")) params.append("limit", "100");
+                if(!params.get("index")) params.append("index", "0");
+                path = requestPath + (params ? `?${params}`.replaceAll("%2F", "/").replaceAll("%3F", "?").replaceAll("%3D", "=").replaceAll("%26", "&") : "");
+            }
+        } catch (x) {
+            console.error(x)
+        }
+        this.logger.debug(`🌐 FETCHING: ${method}: "${this.BaseURL}/${path}"`)
+        const rawData = await fetch(`${this.BaseURL}/${path}`, {
+            method,
+            headers: new Headers({
+                "Access-Control-Allow-Headers": "*",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "*",
+                "Accept-Language": "en-us,en;q=0.5",
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0", // https://www.useragentstring.com/
+            })
+        });
         return rawData ? await rawData.json() : null;
     }
 
