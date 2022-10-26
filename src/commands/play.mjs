@@ -93,15 +93,18 @@ export default {
         const searchFilter = interaction.options.getString("query_search_filter")?.replace?.("genre_mix", "mixes/genre");
         const pickSearchResult = interaction.options.getString("pick_searchresult") && interaction.options.getString("pick_searchresult") === "true"
 
+        const access_token = await client.db.userData.findFirst({
+            where: { userId : interaction.user.id }, select: { deezerToken: true }
+        }).then(x => x?.deezerToken).catch(() => undefined);
+
         await interaction.reply({
             ephemeral: true,
             content: `Now searching for: ${query.match(client.DeezRegex) ? `<${query}>` : query}`
         });
 
-        const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction, interaction.member, true); // TODO
+        const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction, interaction.member, true);
         if(!player) return;
               
-        // if(link) extractId and search for right query
         let searchingTracks = null;
         let loadType = "TRACKS_FOUND";
 
@@ -113,24 +116,26 @@ export default {
         const [ ,,,URL_Type,URL_Id ] = query.match(client.DeezRegex) || [];
 
         if(URL_Id && URL_Type && URL_Type === "track") { // fetch if from URL
-            searchingTracks = await client.DeezApi.deezer.fetch.track(URL_Id).then(v => {
-                return { data: v, tracks: [TrackUtils.buildUnresolved(client.DeezUtils.track.createUnresolvedData(v), interaction.user)], }
+            searchingTracks = await client.DeezApi.deezer.fetch.track(URL_Id, access_token).then(v => {
+                return { data: v, tracks: [TrackUtils.buildUnresolved(client.DeezUtils.track.createUnresolvedData(v, v?.playlist, v?.album), interaction.user)], }
             }).catch(errorCatcher); 
             // set the loadtype
             loadType = "TRACKS_FOUND";
         } else if(URL_Id && URL_Type && loadTypes[URL_Type]) { // fetch if from URL (playlist, artist, album, mixes)
-            searchingTracks = await client.DeezApi.deezer.fetch[URL_Type == "mixes/genre" ? "mix" : URL_Type](URL_Id, true).then(v => finishFetcher(client, v, URL_Type, interaction.user)).catch(errorCatcher);
+            searchingTracks = await client.DeezApi.deezer.fetch[URL_Type == "mixes/genre" ? "mix" : URL_Type](URL_Id, true, access_token).then(v => finishFetcher(client, v, URL_Type, interaction.user)).catch(errorCatcher);
             loadType = loadTypes[URL_Type];
         } else if(URL_Id && URL_Type) { // url is matched, but it's not a valid searchingtype
-            searchingTracks = null;
-        } else if(searchFilter && searchFilterMethods[searchFilter] && !searchFilter === "track") { // search something, but not a track
-            const res = await client.DeezApi.deezer.search[`${searchFilterMethods[searchFilter]}`](query, 25);
+            return interaction.editReply({
+                content: `❌ ${query} is not a valid URL` 
+            })
+        } else if(searchFilter && searchFilterMethods[searchFilter] && searchFilter !== "track") { // search something, but not a track
+            const res = await client.DeezApi.deezer.search[`${searchFilterMethods[searchFilter]}`](query, 25, access_token);
             // end the timer
             measureTimer.end();
             // return the util function
-            return handleResSearchFilter(client, interaction, res, searchFilter, skipSong, addSongToTop)
+            return handleResSearchFilter(client, interaction, res, searchFilter, skipSong, addSongToTop, access_token)
         } else { // else search for a track
-            searchingTracks = await client.DeezApi.deezer.search.tracks(query, 25).then(x => {
+            searchingTracks = await client.DeezApi.deezer.search.tracks(query, 25, access_token).then(x => {
                 return { data: x, tracks: (x?.data || [])
                     .sort((a,b) => (a.rank || b.rank) ? a.rank - b.rank : 0)
                     .filter(v => typeof v.readable === "undefined" || v.readable == true)
@@ -186,6 +191,7 @@ export default {
             });
             if(!pick) return
         }
+
         const pickedTrack = pick?.track ? response.tracks.find(x => x.identifier == pick.track) : undefined;
         if(pickedTrack) {
             if(Array.isArray(response?.data?.data?.data) && response.data.data.data.find(x => x.id == pickedTrack.identifier)) response.data.data.data = [response.data.data.data.find(x => x.id == pickedTrack.identifier)];
@@ -194,6 +200,7 @@ export default {
             response.tracks = [pickedTrack]
             interaction.editReply = (...params) => pick.interaction.update(...params);
         }
+
 
         const loadAllTracks = [`PLAYLIST_LOADED`, `ARTIST_LOADED`, `ALBUM_LOADED`, `RADIO_LOADED`, `MIXES_LOADED`].includes(response.loadType);
         // if a player was created, or the previous queue was empty, or there was no player before
@@ -239,7 +246,7 @@ export function finishFetcher(client, x, type, user) {
     return data;
 }
 
-export async function handleResSearchFilter (client, interaction, res, type, skipSong, addSongToTop) {
+export async function handleResSearchFilter(client, interaction, res, type, skipSong, addSongToTop, access_token) {
     const sorted = res?.data?.filter?.(x => x.public === true || typeof x.public === "undefined")?.sort?.((a,b) => {
         if(a?.type === "artist" || b?.type === "artist") {
             return b.nb_fan - a.nb_fan;
@@ -294,7 +301,7 @@ export async function handleResSearchFilter (client, interaction, res, type, ski
         });
         const measureTimer = new client.DeezUtils.time.measureTime();
 
-        const data = await client.DeezApi.deezer.fetch[type == "mixes/genre" ? "mix" : type](id, true);
+        const data = await client.DeezApi.deezer.fetch[type == "mixes/genre" ? "mix" : type](id, true, access_token);
         if(data.tracks.length) {
             
             const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(i || interaction, interaction.member);
@@ -304,7 +311,7 @@ export async function handleResSearchFilter (client, interaction, res, type, ski
 
             const responsedTracks = data.tracks
                 .filter(v => typeof v.readable === "undefined" || v.readable == true)
-                .map(v => TrackUtils.buildUnresolved(client.DeezUtils.track.createUnresolvedData(v), interaction.user));
+                .map(v => TrackUtils.buildUnresolved(client.DeezUtils.track.createUnresolvedData(v, v?.playlist, v?.album), interaction.user));
             
             if (created || previousQueue === 0) {
                 if((!player.paused && !player.playing) || (!player.paused && player.playing)) responsedTracks[0].fetchTime = fetchTime;
