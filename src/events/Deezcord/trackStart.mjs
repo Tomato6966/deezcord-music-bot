@@ -90,7 +90,7 @@ export default async (client, player, track) => {
         if((Date.now() - lyricsTime) < 2000) await client.DeezUtils.time.delay(2000 - (Date.now() - lyricsTime));
         // Edit now playing message that lyrics are available
         // mayorly display genius track lyrics
-        // console.log(track.deezerLyrics, "deezerlyrics");
-        // console.log(track.geniusLyrics, "geniusLyrics");
     }
+    console.log(!!track.deezerLyrics, "deezerlyrics");
+    console.log(!!track.geniusLyrics, "geniusLyrics");
 }
