@@ -5,6 +5,7 @@ export default {
     localizations: [
         {name: ["de", "uptime"], description: ["de", "Zeige an wie lange ich schon laufe"]}
     ],
+    category: "info",
     async execute(client, interaction) {
         await interaction.reply({
             ephemeral: true,

@@ -13,26 +13,26 @@ datasource db {
 enum Languages {
   EnglishUS
   EnglishGB
-  German 
+  German
   Bulgarian
   ChineseCN
   ChineseTW
   Croatian
   Czech
-  Danish 
+  Danish
   Dutch
-  Finnish 
-  French 
+  Finnish
+  French
   Greek
-  Hindi 
+  Hindi
   Hungarian
-  Italian 
-  Japanese 
+  Italian
+  Japanese
   Korean
   Lithuanian
   Norwegian
   Polish
-  PortugueseBR 
+  PortugueseBR
   Romanian
   Russian
   SpanishE
@@ -43,15 +43,9 @@ enum Languages {
   Vietnamese
 }
 
-// Guild Data
-model GuildSettings {
-  guildId             String    @id
-  defaultvolume       Int       @default(100)
-  defaultautoplay     Boolean   @default(true)
-  language            Languages @default(EnglishUS)
-  ephemeralNowPlaying Boolean   @default(true)
-  extraData           Json? // can be anything inside a JSON.stringify({});
-}
+
+
+
 
 // User Data (vote system?)
 model UserData {
@@ -68,6 +62,48 @@ model UserData {
   extraData           Json? // can be anything inside a JSON.stringify({});
 }
 
+
+
+
+
+
+
+
+// Guild Data
+model GuildSettings {
+  guildId             String            @id
+  defaultvolume       Int               @default(100)
+  defaultautoplay     Boolean           @default(true)
+  language            Languages         @default(EnglishUS)
+  ephemeralNowPlaying Boolean           @default(true)
+  extraData           Json? // can be anything inside a JSON.stringify({});
+  DjSettings          DJSettings?
+  DisabledCommands    DisabledCommands?
+}
+
+// DJ Settings per Guild
+model DJSettings {
+  guild          GuildSettings @relation(fields: [guildId], references: [guildId])
+  guildId        String        @id
+  enabled        Boolean       @default(false)
+  access         String[]      @default([]) // roleIds
+  djonlycommands String[]      @default(["bassboost", "bettermusiceq", "clearfilters", "echo", "karaoke", "lowpass", "nightcore", "pitch", "rate", "pop", "speed", "rotating", "resume", "rewind", "seek", "shuffle", "skip", "stop", "stoploop", "unshuffle", "volume", "autoplay", "clearqueue", "forward", "jump", "leave", "loop", "move", "pause", "playskip", "playtop", "removedupes", "replay", "tremolo"])
+  extraData      Json? // can be anything inside a JSON.stringify({});
+}
+
+// each guild can disable / enable Commands
+model DisabledCommands {
+  guild         GuildSettings @relation(fields: [guildId], references: [guildId])
+  guildId       String        @id
+  commands      String[]
+  slashCommands String[]
+}
+
+
+
+
+
+
 // for saving lyrics in db
 model Lyrics {
   trackId String @id
@@ -75,29 +111,14 @@ model Lyrics {
   title   String
   lyrics  String
 }
+
 model DeezerLyrics {
-  trackId String @id
-  author  String
-  title   String
-  LYRICS_ID String
-  LYRICS_TEXT String
-  LYRICS_WRITERS String
+  trackId           String @id
+  author            String
+  title             String
+  LYRICS_ID         String
+  LYRICS_TEXT       String
+  LYRICS_WRITERS    String
   LYRICS_COPYRIGHTS String
-  LYRICS_SYNC_JSON Json
-}
-
-// DJ Settings per Guild
-model DJSettings {
-  guildId        String   @id
-  enabled        Boolean  @default(false)
-  access         String[] @default([]) // roleIds
-  djonlycommands String[] @default(["bassboost", "bettermusiceq", "clearfilters", "echo", "karaoke", "lowpass", "nightcore", "pitch", "rate", "pop", "speed", "rotating", "resume", "rewind", "seek", "shuffle", "skip", "stop", "stoploop", "unshuffle", "volume", "autoplay", "clearqueue", "forward", "jump", "leave", "loop", "move", "pause", "playskip", "playtop", "removedupes", "replay", "tremolo"])
-  extraData      Json? // can be anything inside a JSON.stringify({});
-}
-
-// each guild can disable / enable Commands
-model DisabledCommands {
-  guildId       String   @id
-  commands      String[]
-  slashCommands String[]
+  LYRICS_SYNC_JSON  Json
 }

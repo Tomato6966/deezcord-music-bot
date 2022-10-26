@@ -7,6 +7,7 @@ export default {
     localizations: i18n.getLocales().map(locale => [
         { name: [locale, "ping"], description: [ locale,`ping.description` ] }
     ]),
+    category: "info",
     async execute(client, interaction) {
         await interaction.reply({
             ephemeral: true,

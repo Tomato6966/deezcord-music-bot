@@ -2,6 +2,7 @@
 export default {
     name: "skip",
     description: "Skip a song",
+    category: "music#player",
     async execute(client, interaction) {
         
         const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction, interaction.member);

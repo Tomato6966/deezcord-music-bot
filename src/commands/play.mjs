@@ -26,6 +26,7 @@ const errorCatcher = (e) => { console.warn(e); return null; };
 /** @type {import("../data/DeezCordTypes.mjs").CommandExport} */ 
 export default {
     name: "play",
+    category: "music#request#player",
     description: inlineLocale("EnglishUS", `play.description`),
     localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "play", "play.description")),
     options: [
