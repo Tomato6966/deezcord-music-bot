@@ -87,6 +87,9 @@ export default {
                 content: `❌ You have to be logged in to Deezer, do it with: ${client.commands.get("login")?.mention || "`/login`"}`
             });
         */
+        const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction, interaction.member, true);
+        if(!player) return;
+
         let query = interaction.options.getString("query");
         const skipSong = interaction.options.getString("queueaction") && interaction.options.getString("queueaction") === "skip";
         const addSongToTop = interaction.options.getString("queueaction") && interaction.options.getString("queueaction") === "addontop";
@@ -102,8 +105,6 @@ export default {
             content: `Now searching for: ${query.match(client.DeezRegex) ? `<${query}>` : query}`
         });
 
-        const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction, interaction.member, true);
-        if(!player) return;
               
         let searchingTracks = null;
         let loadType = "TRACKS_FOUND";
@@ -137,7 +138,6 @@ export default {
         } else { // else search for a track
             searchingTracks = await client.DeezApi.deezer.search.tracks(query, 25, access_token).then(x => {
                 return { data: x, tracks: (x?.data || [])
-                    .sort((a,b) => (a.rank || b.rank) ? a.rank - b.rank : 0)
                     .filter(v => typeof v.readable === "undefined" || v.readable == true)
                     .map(v => TrackUtils.buildUnresolved(client.DeezUtils.track.createUnresolvedData(v, v?.playlist, v?.album), interaction.user))
                 };
@@ -147,8 +147,8 @@ export default {
         }
 
         // if song is not readable
-        if(searchingTracks?.tracks?.[0]?.readable === false) {
-            return await interaction.editReply({ content: `❌ Found Track: ${searchingTracks.tracks[0].link} but it's not playable` })
+        if(searchingTracks?.tracks?.[0]?.readable === false || searchingTracks.data?.readable === false) {
+            return await interaction.editReply({ content: `❌ Found Track: ${searchingTracks.tracks[0]?.title || searchingTracks.data?.title} but it's not playable in my Country\n> ${searchingTracks.tracks[0]?.uri || searchingTracks.data?.link}` })
         }
 
         const response = searchingTracks ? { data: searchingTracks, loadType, tracks: searchingTracks?.tracks || searchingTracks } : await client.DeezCord.search(query, interaction.user, player.node);
@@ -216,7 +216,7 @@ export default {
                 volume: await client.db.guildSettings.findFirst({
                     where: { guildId: interaction.guildId },
                     select: { defaultvolume: true }
-                }).then(x => x?.defaultvolume || 100),
+                }).then(x => x?.defaultvolume || client.configData.defaultVolume),
                 startTime: 0,
             });
             if(!player.paused && !player.playing) player.pause(false);
@@ -322,7 +322,7 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
                     volume: await client.db.guildSettings.findFirst({
                         where: { guildId: interaction.guildId },
                         select: { defaultvolume: true }
-                    }).then(x => x?.defaultvolume || 100),
+                    }).then(x => x?.defaultvolume || client.configData.defaultVolume),
                     startTime: 0,
                 });
                 //if(!player.queue.current.uri && contentURL) player.queue.current.uri = contentURL;
