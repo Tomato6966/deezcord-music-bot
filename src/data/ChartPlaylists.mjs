@@ -132,7 +132,7 @@ export const topChartsPlaylists = {
         "Peru":  {
             "name": "Peru",
             "link": "https://www.deezer.com/de/playlist/1362518525",
-            "emoji": "🇵🇪 ",
+            "emoji": "🇵🇪",
         },
         "Malaysia":  {
             "name": "Malaysia",

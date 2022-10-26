@@ -100,6 +100,7 @@ export default {
                     emoji: x.emoji ? parseEmoji(x.emoji) : undefined
                 }
             }).sort((a,b) => a.label.localeCompare(b.label)), 25)
+            console.log(options[1][19])
             let msg = await interaction.reply({
                 ephemeral: true,
                 content: `Please select your wished Country based Charts-Playlist`,
