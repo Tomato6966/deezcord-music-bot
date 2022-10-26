@@ -101,10 +101,11 @@ export default {
             where: { userId : interaction.user.id }, select: { deezerToken: true }
         }).then(x => x?.deezerToken).catch(() => undefined);
 
-        await interaction.reply({
+        console.log((client.DeezRegex.test(query) ? `<${query}>` : query));
+        return await interaction.reply({
             ephemeral: true,
             content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.searchingquery`, {
-                query: query.match(client.DeezRegex) ? `<${query}>` : query
+                query: (client.DeezRegex.test(query) ? `<${query}>` : query)
             })
         });
               
@@ -239,10 +240,10 @@ export default {
 export function finishFetcher(client, x, type, user) {
     const data = { ...x };
     const playlistData = String(type).toLowerCase?.().startsWith?.("playlist") ? client.DeezUtils.track.createPlaylistData(x) : undefined;
-    const albumData = String(type).toLowerCase?.().startsWith?.("album") ? client.DeezUtils.track.createAlbumData(x) : undefined;
+    const albumData = String(type).toLowerCase?.().startsWith?.("album") || x.album ? client.DeezUtils.track.createAlbumData(x) : undefined;
     data.tracks = (x?.tracks?.data||x?.tracks||x?.data||[])
         .filter(v => typeof v.readable === "undefined" || v.readable == true)
-        .map(v => TrackUtils.buildUnresolved(client.DeezUtils.track.createUnresolvedData(v, playlistData, albumData), user));
+        .map(v => TrackUtils.buildUnresolved(client.DeezUtils.track.createUnresolvedData(v, playlistData, albumData || v?.album), user));
     return data;
 }
 

@@ -53,6 +53,13 @@ export default async (client, player, track) => {
             url: authorData?.link ? `${authorData?.link}` : "https://cdn.discordapp.com/avatars/1032998523123290182/83b2c200dbc11dd5e0a96dc83d600b17.webp?size=256"
         })
 
+        if(track.playlistData) {
+            NpEmbed.addField(`📑 Playing of Playlist`, `> [\`${track.playlistData.name}\`](${track.playlistData.link})`, true)
+        } 
+        if(track.albumData) {
+            NpEmbed.addField(`Track's album:`, `> [\`${track.albumData.name}\`](${track.albumData.link})`, true)
+        }
+
         if(track.fetchTime) {
             NpEmbed.setFooter({
                 text: `Took ${track.fetchTime}ms until playing the Song.`
@@ -63,8 +70,10 @@ export default async (client, player, track) => {
             embeds: [ NpEmbed ],
             components: [
                 new ActionRowBuilder().addComponents([
-                    new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Link").setURL(track.uri)
-                ])
+                    new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Link").setURL(track.uri),
+                    track.albumData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Album-Link").setURL(track.albumData?.link) : undefined,
+                    track.playlistData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Playlist-Link").setURL(track.playlistData?.link) : undefined,
+                ].filter(Boolean))
             ]
         }).catch(console.warn);
     }
