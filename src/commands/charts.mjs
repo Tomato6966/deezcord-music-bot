@@ -46,6 +46,18 @@ export default {
                 {name: "playlists", value: "playlists" },
                 {name: "podcasts", value: "podcasts" },
             ]
+        },
+        {
+            name: "country_playlist",
+            description: inlineLocale("EnglishUS", `play.options.country_playlist`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "country_playlist", "play.options.country_playlist")),
+            required: false,
+            type: optionTypes.stringchoices,
+            choices: [
+                {name: "True", value: "true" },
+                {name: "False", value: "false" },
+                {name: "World Wide", value: "worldwide" },
+            ]
         }
     ],
     /** @param {import("../structures/BotClient.mjs").BotClient} client */
@@ -67,7 +79,10 @@ export default {
         const limit = interaction.options.getNumber("limit") && isNaN(interaction.options.getNumber("limit")) ? Number(interaction.options.getNumber("limit")) : 100;
         const skipSong = interaction.options.getString("queueaction") && interaction.options.getString("queueaction") === "skip";
         const addSongToTop = interaction.options.getString("queueaction") && interaction.options.getString("queueaction") === "addontop";
-
+        const chartCountryPlaylist = interaction.options.getString("country_playlist");
+        const takeWorldWide = chartCountryPlaylist && chartCountryPlaylist == "worldwide";
+        const takeSpecific = chartCountryPlaylist && chartCountryPlaylist == "true";
+        
         const access_token = await client.db.userData.findFirst({
             where: { userId : interaction.user.id }, select: { deezerToken: true }
         }).then(x => x?.deezerToken).catch(() => undefined);
@@ -84,13 +99,14 @@ export default {
         
         const measureTimer = new client.DeezUtils.time.measureTime();
 
+
         if(searchFilter && searchFilter === "tracks") {
             searchingTracks = await client.DeezApi.deezer.charts.tracks(limit, access_token).then(x => {
                 return { data: x, tracks: (x?.data || []).filter(v => typeof v.readable === "undefined" || v.readable == true).map(v => TrackUtils.buildUnresolved(client.DeezUtils.track.createUnresolvedData(v, v?.playlist, v?.album), interaction.user)) , }
             }).catch(errorCatcher); 
         }
         else if(searchFilter) {
-            const res = await client.DeezApi.deezer.charts[searchFilter](limit, access_token);
+            const res = await client.DeezApi.deezer.charts[searchFilter](limit > 25 ? 25 : limit, access_token);
             measureTimer.end();
             return handleResSearchFilter(client, interaction, res, searchFilter?.endsWith("s") ? searchFilter.substring(0, searchFilter.length - 1) : searchFilter, skipSong, addSongToTop)
         }
@@ -103,19 +119,17 @@ export default {
         }
         const fetchTime = measureTimer.end();
 
-        const response = searchingTracks ? { data: searchingTracks, loadType: `TRACKS_LOADED`, tracks: searchingTracks?.tracks || searchingTracks } : null;
+        const response = searchingTracks ? { data: searchingTracks, loadType: `CHARTS_LOADED`, tracks: searchingTracks?.tracks || searchingTracks } : null;
         if(!response?.tracks?.length) return interaction.editReply({
             ephemeral: true,
             content: `❌ No Tracks found`
         });
-        const loadAllTracks = [`PLAYLIST_LOADED`, `ARTIST_LOADED`, `ALBUM_LOADED`, `RADIO_LOADED`, `MIXES_LOADED`].includes(response.loadType);
         // if a player was created, or the previous queue was empty, or there was no player before
         if (created || previousQueue === 0) {
             // add fetchTime, only if song is the next song
             if((!player.paused && !player.playing) || (!player.paused && player.playing)) response.tracks[0].fetchTime = fetchTime;
             // Add the Track(s)
-            if (loadAllTracks) player.queue.add(response.tracks)
-            else player.queue.add(response.tracks[0]);
+            player.queue.add(response.tracks)
             // Play the song with default options
             player.play({
                 pause: false,
@@ -132,8 +146,8 @@ export default {
             // add fetchTime, only if song is the next song
             if(skipSong) response.tracks[0].fetchTime = fetchTime;
 
-            if(!skipSong && !addSongToTop) player.queue.add((loadAllTracks ? response.tracks : [response.tracks[0]]))
-            else player.queue.splice(0, 0, ...(loadAllTracks ? response.tracks : [response.tracks[0]]));
+            if(!skipSong && !addSongToTop) player.queue.add(response.tracks)
+            else player.queue.splice(0, 0, ...response.tracks);
             if(skipSong) player.stop();
 
             return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response.data, response.tracks || [], response.loadType, true, player, { skipSong, addSongToTop }))}).catch(console.warn);

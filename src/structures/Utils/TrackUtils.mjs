@@ -8,6 +8,13 @@ export class DeezCordTrackUtils {
     constructor(client) {
         this.client = client;
     }
+    /**
+     * 
+     * @param {*} interaction 
+     * @param {*} member 
+     * @param {*} editReply 
+     * @returns {{ player: import("erela.js").Player|null, created: boolean, previousQueue: number }}
+     */
     async createPlayer(interaction, member, editReply) {
         const fn = async (...params) => interaction.replied ? await interaction[editReply ? "editReply" : "followUp"](...params).catch(console.warn) : await interaction.reply(...params).catch(console.warn)
         // if no vc return error
@@ -438,7 +445,7 @@ export class DeezCordTrackUtils {
             // if est for queuing
             const EST = addSongToTop ? (player.queue.current?.duration || player.position) - player.position : (this.client.DeezUtils.array.sumNumbersOnly([...player.queue].slice(0, player.queue.size - tracks.length), x => x.duration) || player.position) - player.position;
             if(enqueued && !skipSong) {
-                embed.setTitle(`📑 Playlist to the queue`)
+                embed.setTitle(`📑 Added playlist to the queue`)
                 .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                 .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
             } else if(enqueued && skipSong) {
@@ -480,7 +487,7 @@ export class DeezCordTrackUtils {
             // if est for queuing
             const EST = addSongToTop ? (player.queue.current?.duration || player.position) - player.position : (this.client.DeezUtils.array.sumNumbersOnly([...player.queue].slice(0, player.queue.size - tracks.length), x => x.duration) || player.position) - player.position;
             if(enqueued && !skipSong) {
-                embed.setTitle(`📑 Genres-Mix to the queue`)
+                embed.setTitle(`📑 Added genres-mix to the queue`)
                 .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                 .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
             } else if(enqueued && skipSong) {
@@ -591,6 +598,92 @@ export class DeezCordTrackUtils {
                 components: [
                     new ActionRowBuilder().addComponents([
                         new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Artist-Link").setURL(artLink)
+                    ])
+                ]
+            }
+        } else if(["CHARTS_LOADED", "chart", "charts"].includes(type)) {
+            if(data.data?.dedicated || data?.dedicated) {
+                const plData = this.createPlaylistData(data.data?.dedicated || data.dedicated);
+                const plImg = plData.image;
+                const plName = plData?.name || plData?.title || "No-Title";
+                const plDescription = plData?.description || "No-Description";
+                const plLink = plData?.link || "https://www.deezer.com"; 
+                const plCreator = plData.creator?.id ? this.client.DeezApi.parseUserData(await this.client.DeezApi.user.data(plData.creator?.id).catch(() => plData.creator)) : null;
+                const plAuthorData = data.authorData || await this.client.DeezUtils.track.fetchAuthorData(data?.artist || tracks?.filter?.(v => v?.authorData)?.[0]?.authorData);
+                const plRelease = plData.releasedAt;
+
+                const trackDurationNum = this.client.DeezUtils.array.sumNumbersOnly(tracks, x => x.duration);
+                const trackDurationString = trackDurationNum ? this.client.DeezUtils.time.formatDuration(trackDurationNum, true).map(v => `\`${v}\``).join(", ") : "\`Unknown-Duration\`";
+                
+                const trackString = tracks?.length > 1 
+                    ? `> **\`${tracks.length}\` Tracks:** ${trackDurationString}` // translate
+                    : tracks.length ? `> **\`${tracks.length}\` Track:** ${trackDurationString}` : `> \`N/A\`` // translate
+                    
+                const embed = new Embed().setAuthor({
+                        name: plCreator?.name ? `Creator: ${plCreator.name}` : plAuthorData?.name ? `${plAuthorData?.name} - © Deezcord` : `© ${configData.name}`,
+                        iconURL: plCreator?.image ? plCreator.image : plAuthorData?.image ? `${plAuthorData?.image}` : configData.iconURL,
+                        url: (plCreator?.link || plCreator?.id) ? plCreator.link || `https://www.deezer.com/profile/${plCreator.id}` : plAuthorData?.link ? `${plAuthorData?.link}` : configData.inviteURL
+                    })
+                    .setThumbnail(plImg ? `${plImg}` : undefined)
+                    .setTitle(`<:deezer:1018174807092760586> Today's chart playlist loaded`)
+                    .addField(`Name:`, `> ${plName}`)
+                    .addField(`Description:`, `>>> ${plDescription.split(/(\r\n|\r|\n)/g).filter(v => !/(\r\n|\r|\n)/g.test(v)).map(x => `*${x}*`).join("\n")}`)
+                    .addField(`Loaded tracks:`, trackString)
+                    .addField(`Avg. Track-Ranking:`, `> \`#${Math.floor(10*(tracks.map(x => x.rank).reduce((a,b) => a+b,0) / tracks.length || 0))/10}\``)
+                    
+                // if est for queuing
+                const EST = addSongToTop ? (player.queue.current?.duration || player.position) - player.position : (this.client.DeezUtils.array.sumNumbersOnly([...player.queue].slice(0, player.queue.size - tracks.length), x => x.duration) || player.position) - player.position;
+                if(enqueued && !skipSong) {
+                    embed.setTitle(`<:deezer:1018174807092760586> Added today's chart playlist to the queue`)
+                    .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
+                    .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
+                } else if(enqueued && skipSong) {
+                    embed.setTitle(`⏭️ Today's chart playlist loaded and skipping to it`)
+                }
+                return {
+                    content: ``,
+                    ephemeral: true,
+                    embeds: [ embed ],
+                    components: [
+                        new ActionRowBuilder().addComponents([
+                            new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Playlist-Link").setURL(plLink)
+                        ])
+                    ]
+                }
+            }
+            const trackDurationNum = this.client.DeezUtils.array.sumNumbersOnly(tracks, x => x.duration);
+            const trackDurationString = trackDurationNum ? this.client.DeezUtils.time.formatDuration(trackDurationNum, true).map(v => `\`${v}\``).join(", ") : "\`Unknown-Duration\`";
+            
+            const trackString = tracks?.length > 1 
+                ? `> **\`${tracks.length}\` Tracks:** ${trackDurationString}` // translate
+                : tracks.length ? `> **\`${tracks.length}\` Track:** ${trackDurationString}` : `> \`N/A\`` // translate
+                
+            const embed = new Embed().setAuthor({
+                    name: `Deezer.com Charts - © Deezcord`,
+                    iconURL: "https://cdn.discordapp.com/emojis/1018174807092760586.webp?size=128&quality=lossless",
+                    url: "https://www.deezer.com/channels/charts"
+                })
+                .setThumbnail(configData.iconURL)
+                .setTitle(`<:deezer:1018174807092760586> Today's charts loaded`)
+                .addField(`Loaded tracks:`, trackString)
+                .addField(`Avg. Track-Ranking:`, `> \`#${Math.floor(10*(tracks.map(x => x.rank).reduce((a,b) => a+b,0) / tracks.length || 0))/10}\``)
+            
+            // if est for queuing
+            const EST = addSongToTop ? (player.queue.current?.duration || player.position) - player.position : (this.client.DeezUtils.array.sumNumbersOnly([...player.queue].slice(0, player.queue.size - tracks.length), x => x.duration) || player.position) - player.position;
+            if(enqueued && !skipSong) {
+                embed.setTitle(`📑 Added today's charts to the queue`)
+                .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
+                .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
+            } else if(enqueued && skipSong) {
+                embed.setTitle(`⏭️ Today's charts loaded and skipping to it`)
+            }
+            return {
+                content: ``,
+                ephemeral: true,
+                embeds: [ embed ],
+                components: [
+                    new ActionRowBuilder().addComponents([
+                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Charts-List").setURL("https://www.deezer.com/channels/charts")
                     ])
                 ]
             }
