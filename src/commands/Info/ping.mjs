@@ -11,7 +11,8 @@ export default {
         await interaction.reply({
             ephemeral: true,
             content: inlineLocale(client.getGuildLocale(interaction.guild), `ping.execute.pong`, {
-                wsPing: client.ws.ping
+                wsPing: client.ws.ping,
+                pingEmoji: "🏓"
             })
         });
     }

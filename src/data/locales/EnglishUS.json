@@ -1,4 +1,9 @@
 {
+    "general": {
+        "errors": {
+            "timeranout": "Time ran out"
+        }
+    },
 	"login": {
 		"description": "Connect your deezer account with this bot",
 		"execute": {
@@ -17,7 +22,7 @@
 	"ping": {
 		"description": "Show my Latency to Discord.",
 		"execute": {
-			"pong": "🏓 My Ping to Discord is: `{{wsPing}}ms`"
+			"pong": "{{pingEmoji}} My Ping to Discord is: `{{wsPing}}ms`"
 		}
 	},
 	"play": {
@@ -28,7 +33,20 @@
 			"queueaction": "Any extra Queue Actions wanted?",
 			"pick_searchresult": "Want to select the right search Result?",
 			"country_playlist": "play.options.country_playlist"
-		}
+		},
+        "execute": {
+            "searchingquery": "Now searching for: {{query}}",
+            "selectsong": "Select your wished Song",
+            "cancelbutton": "Cancel Search",
+            "cancelledresponse": "Cancelled the search request",
+            "nothingfound": "{{crossEmoji}} Nothing found for the **{{type}}**: `{{query}}`",
+            "selectwishedtype": "Select your wished {{type}}",
+            "mapmix": "[Genre-Mix] - {{desc}}",
+            "mapfans": "{{fans}} Fans with {{albums}} Albums",
+            "maptracks": "{{tracks}} Tracks by {{name}}",
+            "pickedtype": "Picked the **{{type}}**",
+            "pickedtypefoundnothing": "Picked the **{{type}}**: {{link}}\n> But found no Tracks for it..."
+        }
 	},
 	"charts": {
 		"description": "Play the current Charts (Hit-Songs)",

@@ -102,9 +102,10 @@ export default {
 
         await interaction.reply({
             ephemeral: true,
-            content: `Now searching for: ${query.match(client.DeezRegex) ? `<${query}>` : query}`
+            content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.searchingquery`, {
+                query: query.match(client.DeezRegex) ? `<${query}>` : query
+            })
         });
-
               
         let searchingTracks = null;
         let loadType = "TRACKS_FOUND";
@@ -162,19 +163,17 @@ export default {
                     new ActionRowBuilder().addComponents([
                         new SelectMenuBuilder()
                         .setCustomId(`${interaction.user.id}_searchpick`)
-                        .setPlaceholder(`Select your wished Song`)
+                        .setPlaceholder(inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.selectsong`))
                         .addOptions(client.DeezUtils.array.removeDuplicates(response.tracks, "identifier").slice(0, 25).map(v => {
                             return {
                                 label: `${v.title || v.name}`.substring(0, 100), 
                                 value: `${v.identifier}`.substring(0, 100), 
                                 description: `[${client.DeezUtils.time.durationFormatted(v.duration, true)}] | By: ${v.author} | Rank #${v.rank}`.substring(0, 100), 
-                                // default, 
-                                // emoji
                             }
                         }))
                     ]),
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Danger).setLabel("Cancel").setLabel("Cancel Search").setCustomId("cancel")
+                        new ButtonBuilder().setStyle(ButtonStyle.Danger).setLabel(inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.cancelbutton`)).setCustomId("cancel")
                     ])
                 ],
             });
@@ -182,7 +181,7 @@ export default {
                 const col = msg.createMessageComponentCollector({ filter: x => x.user.id === interaction.user.id, max: 1, time: 60000 });
                 col.on("collect", async (i) => {
                     if(i.customId === "cancel") {
-                        await i.update({ content: "Cancelled", components: [] }).catch(() => null);
+                        await i.update({ content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.cancelledresponse`), components: [] }).catch(() => null);
                         return r(false);
                     } 
                     return r({ interaction: i, track: i.values[0] });
@@ -261,7 +260,11 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
 
     if(!sorted?.length) return interaction.editReply({
         ephemeral: true,
-        content: `❌ Nothing found for the **${type.substring(0, 1).toUpperCase() + type.substring(1, type.length)}**: \`${query}\``.substring(0, 1000)
+        content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.nothingfound`, {
+            crossEmoji: "❌",
+            type: type.substring(0, 1).toUpperCase() + type.substring(1, type.length),
+            query: query
+        }).substring(0, 1000)
     })
 
     await interaction.editReply({
@@ -269,19 +272,24 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
             new ActionRowBuilder().addComponents([
                 new SelectMenuBuilder()
                     .setCustomId(`${interaction.user.id}_${type}pick`)
-                    .setPlaceholder(`Select your wished ${type.substring(0, 1).toUpperCase() + type.substring(1, type.length)}`)
+                    .setPlaceholder(inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.selectwishedtype`, { type: type.substring(0, 1).toUpperCase() + type.substring(1, type.length) }))
                     .addOptions(sorted.map(v => {
                         const o = {
                             label: `${v.title || v.name}`, 
                             value: `${v.id}`, 
-                            // description: `${v.title} Radio Station`, 
-                            // default, 
-                            // emoji
                         }
-                        if((type == "radio" || type == "mixes/genre") && v.description?.length) o.description = `[Genre-Mix] - ${v.description?.length}` .substring(0, 100);
+                        if((type == "radio" || type == "mixes/genre") && v.description?.length) o.description = inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.mapmix`, {
+                            desc: v.description
+                        }).substring(0, 100);
                         else if(v.description?.length) o.description = v.description.substring(0, 100);
-                        else if(v.nb_fan) o.description = `${client.DeezUtils.number.dotter(v.nb_fan)} Fans with ${client.DeezUtils.number.dotter(v.nb_album)} Albums`;
-                        else if(v.nb_tracks) o.description = `${client.DeezUtils.number.dotter(v.nb_tracks)} Tracks${v.user?.name ? ` by ${v.user?.name}` : v.artist?.name ? ` by ${v.artist.name}` : ``}${v.creation_date ? ` - ${v.creation_date}` : ``}`
+                        else if(v.nb_fan) o.description = inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.mapfans`, {
+                            fans: client.DeezUtils.number.dotter(v.nb_fan),
+                            albums: client.DeezUtils.number.dotter(v.nb_album),
+                        });
+                        else if(v.nb_tracks) o.description = (inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.maptracks`, {
+                            tracks: client.DeezUtils.number.dotter(v.nb_tracks),
+                            name: v.user?.name ? `${v.user?.name}` : v.artist?.name ? `${v.artist.name}` : `Unknown`
+                        }) + ` ${v.creation_date ? ` - ${v.creation_date}` : ``}`)
                         return o;
                     }).slice(0, 25))
             ])
@@ -296,7 +304,9 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
     collector.on("collect", async i => {
         const id = i.values[0];
         await i.update({
-            content: `Picked the **${type.substring(0, 1).toUpperCase() + type.substring(1, type.length)}**`,
+            content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.pickedtype`, {
+                type: type.substring(0, 1).toUpperCase() + type.substring(1, type.length),
+            }),
             components: []
         });
         const measureTimer = new client.DeezUtils.time.measureTime();
@@ -341,7 +351,10 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
             }
         } else {
             i.editReply({
-                content: `Picked the **${type.substring(0, 1).toUpperCase() + type.substring(1, type.length)}**: ${data.link || data.share}, but found 0 Tracks..`,
+                content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.pickedtypefoundnothing`, {
+                    type: type.substring(0, 1).toUpperCase() + type.substring(1, type.length),
+                    link: data.link || data.share,
+                }),
                 components: [],
             });
         }
@@ -351,7 +364,7 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
         if(!col.size) {
             interaction.editReply({
                 components: [],
-                content: `Time ran out`
+                content: inlineLocale(client.getGuildLocale(interaction.guild), "general.errors.timeranout")
             })
         }
     })
