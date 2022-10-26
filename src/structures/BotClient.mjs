@@ -138,7 +138,15 @@ export class BotClient extends Client {
     translate (locale, text, ...params) {
         return inlineLocale(locale, text, ...params);
     }
-
+    /**
+     * 
+     * @param {string} url 
+     * @returns {string|null}
+     */
+    deezerURLtoID(url) {
+        const [ ,,,,id ] = url.match(this.DeezRegex) || [];
+        return id || null;
+    }
     get guildsAndMembers() {
         return {
             guilds: this.guilds.cache.size,

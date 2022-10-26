@@ -27,7 +27,8 @@
 			"query_search_filter": "Willst du die Suchanfragen filtern?",
 			"queueaction": "Aktionen welche auf die Warteschlange ausgeführt werden sollen?",
 			"file": "Spiele eine Datei statt einer Query ab (query wird überschrieben)",
-			"pick_searchresult": "Want to select the right search Result?"
+			"pick_searchresult": "Want to select the right search Result?",
+			"country_playlist": "play.options.country_playlist"
 		}
 	},
 	"charts": {

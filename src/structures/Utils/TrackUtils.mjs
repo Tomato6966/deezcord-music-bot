@@ -288,7 +288,7 @@ export class DeezCordTrackUtils {
             link: data.link ?? data.share ?? data.id ? `https://www.deezer.com/playlist/${data.id}` : undefined, // https://www.deezer.com/playlist/7249110724
             image: this.getPlaylistImage(data),
             tracks: data.nb_tracks ?? data.tracks?.length, // 59
-            duration: data.duration && !isNaN(data.duration) ? data.duration * 1000 : [...(data.tracks||[])].reduce?.((a,b) => a+b,0) || 0, // 13801000
+            duration: data.duration && !isNaN(data.duration) ? data.duration * 1000 : [...(data?.tracks?.data||data?.tracks||[])].reduce?.((a,b) => a+b,0) || 0, // 13801000
             fans: data.fans ?? data.nb_fans, // 221159
             releasedAt: data.creation_date, // 2014-01-01
             creator: this.createCreatorData(data.creator), // { id, name, link, image, albums, fans }
@@ -414,6 +414,7 @@ export class DeezCordTrackUtils {
     async transformMessageData(data, tracks, type, enqueued = false, player, extras = {}) {
         const { skipSong, addSongToTop } = extras;
         if(["PLAYLIST_LOADED", "playlist", "playlists"].includes(type)) {
+            if(!data.tracks) data.tracks = tracks;
             const plData = this.createPlaylistData(data);
             const plImg = plData.image;
             const plName = plData?.name || plData?.title || "No-Title";
@@ -602,16 +603,15 @@ export class DeezCordTrackUtils {
                 ]
             }
         } else if(["CHARTS_LOADED", "chart", "charts"].includes(type)) {
-            if(data.data?.dedicated || data?.dedicated) {
-                const plData = this.createPlaylistData(data.data?.dedicated || data.dedicated);
+            if(data?.isPlaylist) {
+                if(!data.tracks) data.tracks = tracks;
+                const plData = this.createPlaylistData(data);
                 const plImg = plData.image;
                 const plName = plData?.name || plData?.title || "No-Title";
-                const plDescription = plData?.description || "No-Description";
                 const plLink = plData?.link || "https://www.deezer.com"; 
                 const plCreator = plData.creator?.id ? this.client.DeezApi.parseUserData(await this.client.DeezApi.user.data(plData.creator?.id).catch(() => plData.creator)) : null;
                 const plAuthorData = data.authorData || await this.client.DeezUtils.track.fetchAuthorData(data?.artist || tracks?.filter?.(v => v?.authorData)?.[0]?.authorData);
-                const plRelease = plData.releasedAt;
-
+                
                 const trackDurationNum = this.client.DeezUtils.array.sumNumbersOnly(tracks, x => x.duration);
                 const trackDurationString = trackDurationNum ? this.client.DeezUtils.time.formatDuration(trackDurationNum, true).map(v => `\`${v}\``).join(", ") : "\`Unknown-Duration\`";
                 
@@ -626,8 +626,7 @@ export class DeezCordTrackUtils {
                     })
                     .setThumbnail(plImg ? `${plImg}` : undefined)
                     .setTitle(`<:deezer:1018174807092760586> Today's chart playlist loaded`)
-                    .addField(`Name:`, `> ${plName}`)
-                    .addField(`Description:`, `>>> ${plDescription.split(/(\r\n|\r|\n)/g).filter(v => !/(\r\n|\r|\n)/g.test(v)).map(x => `*${x}*`).join("\n")}`)
+                    .addField(`Name:`, `> **${plName}**`)
                     .addField(`Loaded tracks:`, trackString)
                     .addField(`Avg. Track-Ranking:`, `> \`#${Math.floor(10*(tracks.map(x => x.rank).reduce((a,b) => a+b,0) / tracks.length || 0))/10}\``)
                     

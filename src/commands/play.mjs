@@ -253,8 +253,8 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
         } else if(a?.type == "playlist" || b?.type == "playlist") {
             return b.nb_tracks - a.nb_tracks;
         } else if(a?.type == "mixes/genre" || a?.type == "radio" || b?.type == "mixes/genre" || b?.type == "radio"){
-            const name1 = (a.title || a.name || "")?.split?.("")?.[0] || "";
-            const name2 = (b.title || b.name || "")?.split?.("")?.[0] || "";
+            const name1 = (a.title || a.name || "")
+            const name2 = (b.title || b.name || "")
             return name1.localeCompare(name2)
         } else return 0;
     });
