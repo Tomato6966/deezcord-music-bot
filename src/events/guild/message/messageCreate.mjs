@@ -23,12 +23,12 @@ export default async (client, message) => {
 
     const hasCommand = client.commands.find(c => c.name === message.content?.split?.(/ +/g)?.[1]?.trim?.()?.toLowerCase?.());
     return message.reply({
-        content: `${client.DeezEmojis.deezercord.str} Sorry, but you must use ${hasCommand ? hasCommand?.mention || `\`/${hasCommand.name}\`` : "Slash Commands"}, to get started use: ${client.commands.find(c => c.name === "play")?.mention || "`/play`"}\n> Or **link your account:** ${client.commands.find(c => c.name === "login")?.mention || "`/login`"}\n> **Need Support ☎️** ${client.configData.supportServer}`
+        content: `${client.DeezEmojis.deezcord.str} Sorry, but you must use ${hasCommand ? hasCommand?.mention || `\`/${hasCommand.name}\`` : "Slash Commands"}, to get started use: ${client.commands.find(c => c.name === "play")?.mention || "`/play`"}\n> Or **link your account:** ${client.commands.find(c => c.name === "login")?.mention || "`/login`"}\n> **Need Support ☎️** ${client.configData.supportServer}`
     }).then(msg => {
         if(client.configData.deleteMentionInfoAfter && client.configData.deleteMentionInfoAfter > 0) {
             setTimeout(async () => {
                 await msg?.delete?.()?.catch?.(console.warn);
-                await message.react(client.DeezEmojis.deezercord.parsed)?.catch?.(console.warn);
+                await message.react(client.DeezEmojis.deezcord.parsed)?.catch?.(console.warn);
             }, client.configData.deleteMentionInfoAfter)
         }
     }).catch(() => null)

@@ -44,7 +44,7 @@ export default async (client, player, track) => {
         const NpEmbed = new Embed().setThumbnail(track.thumbnail)
         NpEmbed.addField(`🎶 **${track.title}**`, `>>> **Duration:** \` ${client.DeezUtils.time.durationFormatted(track.duration, true)} \`\n**Requester:** <@${track.requester.id ?? track.requester}>`)
         
-        const authorData = await client.DeezUtils.track.fetchAuthorData(track.authorData);
+        const authorData = await client.DeezUtils.track.fetchAuthorData(track.authorData, track?.requester?.accessToken);
         // update queue datas
         if(!track.author && authorData.name) track.author = authorData.name;
         if(authorData) { track.authorData = authorData; player.queue.current.authorData = authorData; } 

@@ -46,17 +46,14 @@ export function init() {
         logWarnFn: function (msg) {
           console.warn(msg);
         },
-      
         logErrorFn: function (msg) {
           console.error(msg);
         },
-      
         missingKeyFn: function (locale, value) {
           return value;
         },
         mustacheConfig: {
           tags: ["{{", "}}"],
-          escape: (input) => input,
           disable: false
         }
     });

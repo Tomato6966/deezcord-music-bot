@@ -1,20 +1,85 @@
 import Fastify from "fastify";
+import session from "@fastify/session";
+import cookie from '@fastify/cookie'
+import { Authenticator } from "@fastify/passport";
 import fetch, { Headers } from 'node-fetch';
 import { Logger } from "./Utils/Logger.mjs";
+import { Strategy } from "passport-discord";
+import { Collection } from "discord.js";
+/**
+ * @typedef {object} DeezerResponseUserData
+ * @prop {string} id: 4958449102,
+ * @prop {string} accessToken: "awpdihjawdpihawdoiahdpiahwd",
+ * @prop {string} name: 'Tomato6966',
+ * @prop {string} lastname: '',
+ * @prop {string} firstname: '',
+ * @prop {string} email: 'XXXX.XXXX@gmail.com',
+ * @prop {string} status: 0,
+ * @prop {string} birthday: '0000-00-00',
+ * @prop {string} inscription_date: '2022-05-02',
+ * @prop {string} gender: '',
+ * @prop {string} link: 'https://www.deezer.com/profile/4958449102',
+ * @prop {string} picture: 'https://api.deezer.com/user/4958449102/image',
+ * @prop {string} picture_small: 'https://e-cdns-images.dzcdn.net/images/user//56x56-000000-80-0-0.jpg',
+ * @prop {string} picture_medium: 'https://e-cdns-images.dzcdn.net/images/user//250x250-000000-80-0-0.jpg',
+ * @prop {string} picture_big: 'https://e-cdns-images.dzcdn.net/images/user//500x500-000000-80-0-0.jpg',
+ * @prop {string} picture_xl: 'https://e-cdns-images.dzcdn.net/images/user//1000x1000-000000-80-0-0.jpg',
+ * @prop {string} country: 'AT',
+ * @prop {string} lang: 'DE',
+ * @prop {string} is_kid: false,
+ * @prop {string} explicit_content_level: 'explicit_display',
+ * @prop {string} explicit_content_levels_available: [ 'explicit_display', 'explicit_no_recommendation', 'explicit_hide' ],
+ * @prop {string} tracklist: 'https://api.deezer.com/user/4958449102/flow',
+ * @prop {string} type: 'user'
+ */
 
 export class APIClient {
     constructor(options = {}) {
-        this.port = options.port ?? 3000
-        this.secret = options.secret
-        this.domain = options.domain
-        if (this.domain?.endsWith("/")) this.domain = this.domain.substring(0, this.domain.length - 1)
-        this.appId = options.appId
         /** @type {import("./BotClient.mjs").BotClient} */
         this.client = options.client
+
+        this.port = process.env.APIPORT && !isNaN(process.env.APIPORT) ? Number(process.env.APIPORT) : 3000
+        this.appId = process.env.APP_ID;
+        this.secret = process.env.APP_SECRET;
+        this.domain = process.env.DOMAIN;
+        this.host = process.env.APIHOST || "::";
+
+        this.sessionUserCaches = new Collection();
+        
         this.BaseURL = "https://api.deezer.com"
-        this.logger = new Logger({prefix: "DEEZAPI "});
+        this.logger = new Logger({ prefix: "DEEZAPI " });
         this.searchLimit = 100;
         // https://developers.deezer.com/api/explorer
+        this.ensureDomainAndSettings();
+        
+    }
+    ensureDomainAndSettings() {
+        if(!this.domain?.length) throw new SyntaxError("Missing correct DOMAIN input");
+        if(!process.env.DISCORD_CLIENT_CALLBACK_REDIRECT?.length) throw new SyntaxError("Missing correct DISCORD_CLIENT_CALLBACK_REDIRECT input");
+        if(!process.env.APP_CALLBACK?.length) throw new SyntaxError("Missing correct DISCORD_CLIENT_CALLBACK_REDIRECT input");
+        
+        // ensure domain style
+        if (this.domain?.endsWith("/")) this.domain = this.domain.substring(0, this.domain.length - 1)
+        
+        // ensure login paths
+        if(!process.env.DISCORD_CLIENT_LOGIN?.length) process.env.DISCORD_CLIENT_LOGIN = "/discordlogin";
+        if(!process.env.APP_LOGIN?.length) process.env.APP_LOGIN = "/deezerlogin";
+
+        this.passport = {
+            secret: process.env.DISCORD_CLIENT_SECRET,
+            id: process.env.DISCORD_CLIENT_ID,
+            callback: `${this.domain}${this.ensurPath(process.env.DISCORD_CLIENT_CALLBACK_REDIRECT)}`
+        }
+        this.discordLoginLink = `${this.domain}${this.ensurPath(process.env.DISCORD_CLIENT_LOGIN)}`;
+        this.deezerCallback = this.ensurPath(process.env.APP_CALLBACK)
+        this.deezerAppLogin = this.ensurPath(process.env.APP_LOGIN)
+        return; 
+    }
+    ensurPath(path) {
+        return path.startsWith("/") ? path : `/${path}`;
+    }
+    ensurePathEnd(path) {
+
     }
     async fetchAll(path, maxLimit = 1000, maxLen=100, access_token) {
         const data = [];
@@ -42,11 +107,11 @@ export class APIClient {
                     userId: discordUserId
                 },
                 data: {
-                    deezerToken: "",
-                    deezerId: "",
-                    deezerName: "",
-                    deezerPictureMedium: "",
-                    deezerTrackList: "",
+                    deezerToken: null,
+                    deezerId: null,
+                    deezerName: null,
+                    deezerPictureMedium: null,
+                    deezerTrackList: null,
                 }
             })
         },
@@ -96,10 +161,19 @@ export class APIClient {
                 }
             });
         },
-        me: async (access_token) => {
+        /**
+         * @param {string} access_token 
+         * @param {boolean} [transformStrings] 
+         * @returns {DeezerResponseUserData}
+         */
+        me: async (access_token, transformStrings) => {
             if (!access_token) throw new Error("No access token provided");
             if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
-            return await this.makeRequest(`user/me?${this.parseAccessToken(access_token)}`)
+            /** @type {DeezerResponseUserData} */
+            const res = await this.makeRequest(`user/me?${this.parseAccessToken(access_token)}`)
+            res.accessToken = access_token;
+            if(res && typeof res == "object" && transformStrings) for(const [k, v] of Object.entries(res)) res[k] = String(v)
+            return res;
         },
         data: async (ID, access_token) => {
             return await this.makeRequest(`user/${ID}?${this.parseAccessToken(access_token)}`)
@@ -238,7 +312,7 @@ export class APIClient {
             album: async (ID, all = true, access_token) => {
                 const res = await this.makeRequest(`album/${ID}?${this.parseAccessToken(access_token)}`);
                 if(all && (!(res?.tracks?.data||res?.tracks||[])?.length || (res?.tracks?.data||res?.tracks||[]).length < 100)) {
-                    const allTracks = await this.deezer.fetch.albumTracks(ID, 100, true);
+                    const allTracks = await this.deezer.fetch.albumTracks(ID, 100, true, access_token);
                     if(allTracks?.length) res.tracks = allTracks; 
                 }
                 return res;
@@ -251,7 +325,7 @@ export class APIClient {
             artist: async (ID, all = true, access_token) => {
                 const res = await this.makeRequest(`artist/${ID}?${this.parseAccessToken(access_token)}`);
                 if(all && (!(res?.tracks?.data||res?.tracks||[])?.length || (res?.tracks?.data||res?.tracks||[]).length < 100)) {
-                    const allTracks = await this.deezer.fetch.artistTracks(ID, 100, true);
+                    const allTracks = await this.deezer.fetch.artistTracks(ID, 100, true, access_token);
                     if(allTracks?.length) res.tracks = allTracks; 
                 }
                 return res;
@@ -382,123 +456,123 @@ export class APIClient {
     }
 
     async init() {
-        return new Promise((PromiseResolve, PromiseReject) => {
-            const fastify = Fastify({
-                logger: true, //@TODO add here own logger (ask tomato what exactly he mean)
-                trustProxy: true,
-            });
-            
+        const SessionSecret = this.client.DeezUtils.array.shuffle("q4t7w!z%C*F)J@NcRfUjXn2r5u8x/A?D(G+KaPdSgVkYp3s6v9y$B&E)H@McQeThWmZq4t7w!z%C*F-JaNdRgUjXn2r5u8x/A?D(G+KbPeShVmYp3s6v9y$B&E)H@McQfTjWnZr4t7w!z%C*F-JaNdRgUkXp2s5v8x/A?D(G+KbPeShVmYq3t6w9z$B&E)H@McQfTjWnZr4u7x!A%D*F-JaNdRgUkXp2s5v8y/B?E(H+KbPeShVmYq3t6w9z$C&F".split("")).join("");
+        
+        return new Promise(async (PromiseResolve, PromiseReject) => {
             // 1. login with discord
                 // browser session
             // -> deezer/login
                 // session discord nutzername
 
-            fastify.get('/login/:randomString', (request, reply) => {
-                const randomString = request?.params?.randomString;
-                if (!randomString) {
-                    reply.type('application/json').code(429);
-                    return {
-                        Error: 'Please run the "/account login" command to get access to this link.',
-                    };
-                }
-
-                const userCache = this.client.DeezCache.loginCache.get(randomString);
-                if (!userCache) {
-                    reply.type('application/json').code(429);
-                    return {
-                        Error: 'Please run the "/account login" command to get access to this link.',
-                    };
-                }
-
-                if (userCache?.validUntil <= Date.now()) {
-                    this.client.DeezCache.loginCache.delete(randomString);
-
-                    reply.type('application/json').code(429);
-                    return {
-                        Error: 'This link is not valid anymore. Run "/account login" again to get a new link.',
-                    };
-                }
-
-                // Redirect the user to the OAuth from deezer
-                return reply.redirect(`https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.domain}/callback/${randomString}&perms=basic_access,offline_access,manage_library, delete_library, listening_history`);
-            })
-
-            fastify.get('/callback/:randomString', async (request, reply) => {
-                const randomString = request?.params?.randomString;
-                if (!randomString) {
-                    throw new Error('Please run the "/account login" command to get access to this link.');
-                }
-
-                try {
-                    if (!request?.query?.code) {
-                        throw new Error('Didn\'t got the code for the authentication.');
-                    }
-
-                    const userCache = this.client.DeezCache.loginCache.get(randomString);
-                    if (!userCache) {
-                        throw new Error('This authentication is too old. Please run the "/account login" command again.');
-                    }
-
-                    let deezerResponse = await fetch(`https://connect.deezer.com/oauth/access_token.php?app_id=${this.appId}&secret=${this.secret}&code=${request?.query?.code}`).catch(err => {
-                        throw new Error(`${err}`);
-                    });
-
-                    if (!deezerResponse) {
-                        throw new Error('Didn\'t got the access token from deezer.');
-                    }
-
-                    const accessToken = await deezerResponse?.text();
-
-                    if (!accessToken) {
-                        throw new Error('Can\'t parse your access token from deezer.');
-                    }
-
-                    deezerResponse = await fetch(`https://api.deezer.com/user/me?${deezerResponse}`).catch(err => {
-                        throw new Error(`${err}`);
-                    });
-
-                    if (!deezerResponse) {
-                        throw new Error('User data from deezer.');
-                    }
-
-                    deezerResponse.accessToken = accessToken;
-
-                    deezerResponse = await deezerResponse?.json();
-
-                    if (!deezerResponse) {
-                        throw new Error('Can\'t parse your user data from deezer.');
-                    }
-
-                    const discordUser = await this.client.users.fetch(userCache?.userId).catch(err => {
-                    }) || {};
-
-                    /**
-                     *  Event to work with the authentication.
-                     *  @returns {deezerResponse} JSON object with the deezer api response
-                     *  @returns {import("discord.js").User} The discord user behind this auth
-                     */
-                    this.client.emit('apiAuthentication', (deezerResponse, discordUser));
-
-                    this.logger.debug(`New Authentication from ${deezerResponse?.name ?? 'Unkown User'}`);
-
-                    this.client.DeezCache.loginCache.delete(randomString); // Delete the user from the cache
-
-                    reply.type('application/json').code(200)
-                    return {
-                        message: `Authentication done. Your account is now linked with the bot.`,
-                    };
-
-                } catch (err) {
-                    this.client.DeezCache.loginCache.delete(randomString); // Delete the user from the cache
-                    reply.type('application/json').code(500)
-                    return {
-                        Error: err,
-                        Info: 'If this happens often please report that to "Tomato#6966" or "fb_sean#1337\n"!'
-                    };
-                }
+            // create fastify server
+            const fastify = Fastify({
+                logger: false, // @TODO add here own logger (ask tomato what exactly he mean)
+                trustProxy: true,
             });
 
-            fastify.listen({port: this.port, host: process.env.APIHOST || "localhost"}, (err, address) => {
+            // passport authenticator for requests
+            const fastifyAuthenticator = new Authenticator()
+
+            // register cookie and session
+            fastify.register(cookie).register(session, {
+                cookieName: "deezcord.discord.oauth2",
+                secret: SessionSecret,
+                cookie: { secure: false },
+                saveUninitialized: false,
+                // store: {}
+                maxAge: this.client.DeezUtils.time.Millisecond.Day(7), // how long to keep in session
+            });
+
+            // register the fastifyAuthenticator
+            fastify.register(fastifyAuthenticator.initialize()).register(fastifyAuthenticator.secureSession());
+
+            // serialize session caches
+            fastifyAuthenticator.registerUserSerializer((user) => {
+                this.sessionUserCaches.set(user.id, user);
+                return user.id;
+            });
+            // get from seralize the data from cache / db
+            fastifyAuthenticator.registerUserDeserializer((id) => this.sessionUserCaches.get(id));
+            // login in strategies
+            fastifyAuthenticator.use(new Strategy({
+                clientID: this.passport.id,
+                clientSecret: this.passport.secret,
+                callbackURL: this.passport.callback,
+                scope: ["identify", "guilds"],
+            }, async (accessToken, refreshToken, profile, done) => {
+                return done(null, profile);
+            }))
+
+            
+            fastify.get(this.deezerAppLogin, (request, reply) => {
+                if(!request.user?.id) {
+                    reply.type('application/json').code(429);
+                    return {
+                        Error: `Please go to "${this.discordLoginLink}" and login with Discord first` 
+                    }
+                }
+                // Redirect the user to the OAuth from deezer
+                return reply.redirect(`https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.domain}${this.deezerCallback}&perms=basic_access,offline_access,manage_library, delete_library, listening_history`);
+            })
+            // deezer callback
+            fastify.get(this.deezerCallback, async (request, reply) => {
+                if(!request.user?.id) {
+                    reply.type('application/json').code(429);
+                    return { Error: `Please go to "${this.discordLoginLink}" and login with Discord first`  }
+                }
+                try {
+                    if (!request?.query?.code) throw new Error('Didn\'t got the code for the authentication.');
+                    // parse access token String from deezer Authentications
+                    const deezerAuthResponse = await fetch(`https://connect.deezer.com/oauth/access_token.php?app_id=${this.appId}&secret=${this.secret}&code=${request?.query?.code}`).then(x => x.text());
+                    if (!deezerAuthResponse) throw new Error('Didn\'t got the access token from deezer.');
+                    
+                    // parse access_token out of url params
+                    const accessToken = (new URLSearchParams(deezerAuthResponse)).get("access_token")
+                    
+                    // parse User responmse data
+                    const deezerResponseData = await this.user.me(accessToken, true)
+                    if (!deezerResponseData) throw new Error('Found no User-Data from Deezer.com');
+                    
+                    /** @type {(import("discord.js").User & { guilds: string[] }) | { id:string, username: string, guilds: string[] } } */
+                    const discordUser = this.client.users.cache.get(request.user.id) || await this.client.users.fetch(request.user.id).catch(console.warn) || request.user || {};
+                    if(discordUser && !discordUser.guilds) discordUser.guilds = request.user.guilds
+                    
+                    /**
+                     *  Event to work with the authentication.
+                     *  @returns {DeezerResponseUserData} JSON object with the deezer api response
+                     *  @returns {import("discord.js").User & { guilds: string[] }} The discord user behind this auth
+                     */
+                    this.client.emit('apiAuthentication', { ...deezerResponseData, accessToken }, discordUser);
+
+                    this.logger.debug(`New Authentication from ${deezerResponseData?.name ?? 'Unkown User'} | ${deezerResponseData.link ?? `https://www.deezer.com/profile/${deezerResponseData.id}`}`);
+                    
+                    // redirect back to the home-page
+                    return reply.redirect("/");
+                } catch (Error) {
+                    this.logger.error(Error);
+                    reply.type('application/json').code(500)
+                    return { Info: 'If this happens often please report that to "Tomato#6966" or "fb_sean#1337\n"!', Error };
+                }
+            });
+            
+            fastify.get(process.env.DISCORD_CLIENT_LOGIN, { // /auth
+                preValidation: fastifyAuthenticator.authenticate("discord")
+            }, async (request, reply) => {});
+
+            fastify.get(process.env.DISCORD_CLIENT_CALLBACK_REDIRECT, { // /auth/redirect
+                preValidation: fastifyAuthenticator.authenticate("discord", {
+                    failureRedirect: "/",
+                    successRedirect: process.env.APP_LOGIN,
+                })
+            }, async (request, reply) => {});
+
+            // discord logout
+            fastify.get("/logout", async (request, reply) => { // /auth/logout
+                if(request.user) request.logout();
+                reply.redirect("/");
+            })
+
+            fastify.listen({port: this.port, host: this.host}, (err, address) => {
                 if (err) return PromiseReject(err);
 
                 this.logger.success(`API online at ${address}`);

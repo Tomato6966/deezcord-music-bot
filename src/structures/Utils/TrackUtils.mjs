@@ -356,13 +356,13 @@ export class DeezCordTrackUtils {
         if(v.preview) o.preview = v.preview;
         return o;
     }
-    async fetchAuthorData(v) {
+    async fetchAuthorData(v, access_token) {
         if (!v) return { id: null, name: null, link: null, image: null, albums: null, fans: null }
         if (typeof v === "string" && isNaN(v)) return { id: null, name: v, link: null, image: null, albums: null, fans: null }
         const res = this.parseAuthorData({ artist: v?.artist ?? v?.contributors?.[0]?.id ?? v });
         if (!Object.values(res).filter(x => !x).length) return res;
         const authorId = res?.id || v?.artist?.id || v?.contributors?.[0]?.id;
-        const author = await this.client.DeezApi.deezer.fetch.artist(authorId, false);
+        const author = await this.client.DeezApi.deezer.fetch.artist(authorId, false, access_token);
         return this.parseAuthorData({ artist: Object.assign({}, res, author) });
     }
     parseAuthorData(v) {
@@ -413,6 +413,8 @@ export class DeezCordTrackUtils {
 
     async transformMessageData(data, tracks, type, enqueued = false, player, extras = {}) {
         const { skipSong, addSongToTop } = extras;
+        const accessToken = tracks[0]?.requester?.accessToken;
+        const authorData = data?.artist || tracks?.filter?.(v => v?.authorData)?.[0]?.authorData;
         if(["PLAYLIST_LOADED", "playlist", "playlists"].includes(type)) {
             if(!data.tracks) data.tracks = tracks;
             const plData = this.createPlaylistData(data);
@@ -420,8 +422,8 @@ export class DeezCordTrackUtils {
             const plName = plData?.name || plData?.title || "No-Title";
             const plDescription = plData?.description || "No-Description";
             const plLink = plData?.link || "https://www.deezer.com"; 
-            const plCreator = plData.creator?.id ? this.client.DeezApi.parseUserData(await this.client.DeezApi.user.data(plData.creator?.id).catch(() => plData.creator)) : null;
-            const plAuthorData = data.authorData || await this.client.DeezUtils.track.fetchAuthorData(data?.artist || tracks?.filter?.(v => v?.authorData)?.[0]?.authorData);
+            const plCreator = plData.creator?.id ? this.client.DeezApi.parseUserData(await this.client.DeezApi.user.data(plData.creator?.id, accessToken).catch(() => plData.creator)) : null;
+            const plAuthorData = data.authorData || await this.client.DeezUtils.track.fetchAuthorData(authorData, accessToken);
             const plRelease = plData.releasedAt;
 
             const trackDurationNum = this.client.DeezUtils.array.sumNumbersOnly(tracks, x => x.duration);
@@ -458,7 +460,7 @@ export class DeezCordTrackUtils {
                 embeds: [ embed ],
                 components: [
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Playlist-Link").setURL(plLink)
+                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(this.client.DeezEmojis.deezer.parsed).setLabel("Playlist-Link").setURL(plLink)
                     ])
                 ]
             }
@@ -466,7 +468,7 @@ export class DeezCordTrackUtils {
             const mixName = data?.name || data?.title || "No-Title";
             const mixDescription = data?.description || "No-Description";
             const mixLink = data?.link || "https://www.deezer.com";
-            const mixAuthorData = data.authorData || await this.client.DeezUtils.track.fetchAuthorData(data?.artist || tracks?.filter?.(v => v?.authorData)?.[0]?.authorData);
+            const mixAuthorData = data.authorData || await this.client.DeezUtils.track.fetchAuthorData(authorData, accessToken);
             
             const trackDurationNum = this.client.DeezUtils.array.sumNumbersOnly(tracks, x => x.duration);
             const trackDurationString = trackDurationNum ? this.client.DeezUtils.time.formatDuration(trackDurationNum, true).map(v => `\`${v}\``).join(", ") : "\`Unknown-Duration\`";
@@ -500,7 +502,7 @@ export class DeezCordTrackUtils {
                 embeds: [ embed ],
                 components: [
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Mix-Link").setURL(mixLink)
+                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(this.client.DeezEmojis.deezer.parsed).setLabel("Mix-Link").setURL(mixLink)
                     ])
                 ]
             } 
@@ -547,7 +549,7 @@ export class DeezCordTrackUtils {
                 embeds: [ embed ],
                 components: [
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Album-Link").setURL(albLink)
+                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(this.client.DeezEmojis.deezer.parsed).setLabel("Album-Link").setURL(albLink)
                     ])
                 ]
             }
@@ -598,7 +600,7 @@ export class DeezCordTrackUtils {
                 embeds: [ embed ],
                 components: [
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Artist-Link").setURL(artLink)
+                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(this.client.DeezEmojis.deezer.parsed).setLabel("Artist-Link").setURL(artLink)
                     ])
                 ]
             }
@@ -609,8 +611,8 @@ export class DeezCordTrackUtils {
                 const plImg = plData.image;
                 const plName = plData?.name || plData?.title || "No-Title";
                 const plLink = plData?.link || "https://www.deezer.com"; 
-                const plCreator = plData.creator?.id ? this.client.DeezApi.parseUserData(await this.client.DeezApi.user.data(plData.creator?.id).catch(() => plData.creator)) : null;
-                const plAuthorData = data.authorData || await this.client.DeezUtils.track.fetchAuthorData(data?.artist || tracks?.filter?.(v => v?.authorData)?.[0]?.authorData);
+                const plCreator = plData.creator?.id ? this.client.DeezApi.parseUserData(await this.client.DeezApi.user.data(plData.creator?.id, accessToken).catch(() => plData.creator)) : null;
+                const plAuthorData = data.authorData || await this.client.DeezUtils.track.fetchAuthorData(authorData, accessToken);
                 
                 const trackDurationNum = this.client.DeezUtils.array.sumNumbersOnly(tracks, x => x.duration);
                 const trackDurationString = trackDurationNum ? this.client.DeezUtils.time.formatDuration(trackDurationNum, true).map(v => `\`${v}\``).join(", ") : "\`Unknown-Duration\`";
@@ -645,7 +647,7 @@ export class DeezCordTrackUtils {
                     embeds: [ embed ],
                     components: [
                         new ActionRowBuilder().addComponents([
-                            new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Playlist-Link").setURL(plLink)
+                            new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(this.client.DeezEmojis.deezer.parsed).setLabel("Playlist-Link").setURL(plLink)
                         ])
                     ]
                 }
@@ -682,7 +684,7 @@ export class DeezCordTrackUtils {
                 embeds: [ embed ],
                 components: [
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Charts-List").setURL("https://www.deezer.com/channels/charts")
+                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(this.client.DeezEmojis.deezer.parsed).setLabel("Charts-List").setURL("https://www.deezer.com/channels/charts")
                     ])
                 ]
             }
@@ -712,7 +714,7 @@ export class DeezCordTrackUtils {
                 .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                 .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
             } else if(enqueued && skipSong) {
-                embed.setTitle(`${client.DeezEmojis.skip.str} Track loaded and skipping to it`)
+                embed.setTitle(`${this.client.DeezEmojis.skip.str} Track loaded and skipping to it`)
             }
 
             return { 
@@ -721,8 +723,8 @@ export class DeezCordTrackUtils {
                 embeds: [ embed ],
                 components: [
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Track-Link").setURL(tLink),
-                        tAlbum?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Album-Link").setURL(tAlbum?.link) : undefined
+                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(this.client.DeezEmojis.deezer.parsed).setLabel("Track-Link").setURL(tLink),
+                        tAlbum?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(this.client.DeezEmojis.deezer.parsed).setLabel("Album-Link").setURL(tAlbum?.link) : undefined
                     ].filter(Boolean))
                 ]
             }

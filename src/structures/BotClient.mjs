@@ -186,10 +186,6 @@ export class BotClient extends Client {
     }
     async startAPI() {
         this.DeezApi = new APIClient({
-            port: process.env.APIPORT,
-            secret: process.env.SECRET,
-            domain: process.env.DOMAIN,
-            appId: process.env.APPID,
             client: this,
         });
         if(this.cluster.id === 0) await this.DeezApi.init();

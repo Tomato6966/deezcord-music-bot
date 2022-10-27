@@ -2,9 +2,9 @@
     "general": {
         "errors": {
             "timeranout": "Time ran out",
-			"notracksfound": "{{errorEmoji}} No Tracks found",
-			"notplayable": "{{errorEmoji}} Found Track: {{tile}} but it's not playable in my Country\n> {{link}}",
-			"notvalidurl": "{{errorEmoji}} {{query}} is not a valid URL"
+			"notracksfound": "{{{errorEmoji}}} No Tracks found",
+			"notplayable": "{{{errorEmoji}}} Found Track: {{{tile}}} but it's not playable in my Country\n> {{{link}}}",
+			"notvalidurl": "{{{errorEmoji}}} {{{query}}} is not a valid URL"
         }
     },
 	"login": {
@@ -25,13 +25,13 @@
 	"ping": {
 		"description": "Show my Latency to Discord.",
 		"execute": {
-			"content": "{{pingEmoji}} My Ping to Discord is: `{{wsPing}}ms`"
+			"content": "{{{pingEmoji}}} My Ping to Discord is: `{{{wsPing}}}ms`"
 		}
 	},
 	"uptime": {
 		"description": "Show my Latency to Discord.",
 		"execute": {
-			"content": "{{uptimeEmoji}} I'm running since <t:{{time}}}:R>"
+			"content": "{{{uptimeEmoji}}} I'm running since <t:{{{time}}}:R>"
 		}
 	},
 	"play": {
@@ -43,17 +43,17 @@
 			"pick_searchresult": "Want to select the right search Result?"
 		},
         "execute": {
-            "searchingquery": "Now searching for: {{query}}",
+            "searchingquery": "Now searching for: {{{query}}}",
             "selectsong": "Select your wished Song",
             "cancelbutton": "Cancel Search",
             "cancelledresponse": "Cancelled the search request",
-            "nothingfound": "{{crossEmoji}} Nothing found for the **{{type}}**: `{{query}}`",
-            "selectwishedtype": "Select your wished {{type}}",
-            "mapmix": "[Genre-Mix] - {{desc}}",
-            "mapfans": "{{fans}} Fans with {{albums}} Albums",
-            "maptracks": "{{tracks}} Tracks by {{name}}",
-            "pickedtype": "Picked the **{{type}}**",
-            "pickedtypefoundnothing": "Picked the **{{type}}**: {{link}}\n> But found no Tracks for it...",
+            "nothingfound": "{{{crossEmoji}}} Nothing found for the **{{{type}}}**: `{{{query}}}`",
+            "selectwishedtype": "Select your wished {{{type}}}",
+            "mapmix": "[Genre-Mix] - {{{desc}}}",
+            "mapfans": "{{{fans}}} Fans with {{{albums}}} Albums",
+            "maptracks": "{{{tracks}}} Tracks by {{{name}}}",
+            "pickedtype": "Picked the **{{{type}}}**",
+            "pickedtypefoundnothing": "Picked the **{{{type}}}**: {{{link}}}\n> But found no Tracks for it...",
 			"pickwishedsong": "Pick your wished Song"
         }
 	},

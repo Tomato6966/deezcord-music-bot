@@ -17,7 +17,7 @@
 	"ping": {
 		"description": "Show my Latency to Discord.",
 		"execute": {
-			"content": "🏓 My Ping to Discord is: `{{wsPing}}ms`"
+			"content": "🏓 My Ping to Discord is: `{{{wsPing}}}ms`"
 		}
 	},
 	"play": {
@@ -34,7 +34,8 @@
 		"description": "Play the current Charts (Hit-Songs)",
 		"options": {
 			"query_search_filter": "Wanna filter Search Results?",
-			"limit": "How many songs? (10 <= limit <= 200 | default: 100)"
+			"limit": "How many songs? (10 <= limit <= 200 | default: 100)",
+			"country_playlist": "Wanna play specific Charts of a Country/Worldwide?"
 		}
 	}
 }
