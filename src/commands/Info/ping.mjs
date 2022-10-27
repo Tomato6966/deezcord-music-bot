@@ -11,9 +11,8 @@ export default {
     async execute(client, interaction) {
         await interaction.reply({
             ephemeral: true,
-            content: inlineLocale(client.getGuildLocale(interaction.guild), `ping.execute.pong`, {
-                wsPing: client.ws.ping,
-                pingEmoji: "🏓"
+            content: inlineLocale(client.getGuildLocale(interaction.guild), `ping.execute.content`, {
+                wsPing: client.ws.ping
             })
         });
     }

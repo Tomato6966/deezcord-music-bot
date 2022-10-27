@@ -12,6 +12,7 @@ import { DeezCordUtils } from "./Utils.mjs";
 import * as DeezConfigData from "../data/ConfigData.mjs";
 import * as Locales from "../data/Locales.mjs";
 import { init as initLanguage, inlineLocale } from "./i18n.mjs";
+import EmojisList from "../data/EmojisList.mjs";
 
 /** @type {import("@prisma/client").Languages} */
 BaseGuild.prototype.language = "EnglishUS";
@@ -27,6 +28,7 @@ export class BotClient extends Client {
         initLanguage();
         
         this.DeezRegex = /((https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|playlist|album|artist|mixes\/genre|episode)\/(\d+)|(https?:\/\/|)?(?:www\.)?deezer\.page\.link\/(\S+))/;
+        this.UrlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
 
         /** @type {ClusterClient} */
         this.cluster = new ClusterClient(this);
@@ -35,6 +37,7 @@ export class BotClient extends Client {
         this.db = new PrismaClient()
         this.DeezCord = new DeezCordClient(this);
         this.DeezUtils = new DeezCordUtils(this);
+        this.DeezEmojis = EmojisList;
         this.configData = DeezConfigData;
 
         /** @type {Genius.Client} */
@@ -125,6 +128,11 @@ export class BotClient extends Client {
 
         return this.emit("DeezCordLoaded", this);
     }
+    getLocaledEmojiStrings() {
+        const o = {}
+        Object.entries(this.DeezEmojis).forEach(([k, v]) => o[`${k}Emoji`] = v.str);
+        return o;
+    }
     /** @param {Guild} guild */
     getGuildLocale(guild) {
         if(this.DeezCache.locales.has(guild.id)) return this.DeezCache.locales.get(guild.id);
@@ -135,7 +143,9 @@ export class BotClient extends Client {
         .catch(() => this.DeezCache.locales.set(guild.id, Locales.EnglishUS))
         return Locales.EnglishUS;
     }
-    translate (locale, text, ...params) {
+    translate (locale, text, param) {
+        if(!param) param = this.getLocaledEmojiStrings();
+        else param = { ...param, ...this.getLocaledEmojiStrings() };
         return inlineLocale(locale, text, ...params);
     }
     /**

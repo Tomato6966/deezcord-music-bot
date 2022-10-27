@@ -450,7 +450,7 @@ export class DeezCordTrackUtils {
                 .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                 .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
             } else if(enqueued && skipSong) {
-                embed.setTitle(`⏭️ Playlist loaded and skipping to it`)
+                embed.setTitle(`${client.DeezEmojis.skip.str} Playlist loaded and skipping to it`)
             }
             return {
                 content: ``,
@@ -492,7 +492,7 @@ export class DeezCordTrackUtils {
                 .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                 .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
             } else if(enqueued && skipSong) {
-                embed.setTitle(`⏭️ Genres-Mix loaded and skipping to it`)
+                embed.setTitle(`${client.DeezEmojis.skip.str} Genres-Mix loaded and skipping to it`)
             }
             return {
                 content: ``,
@@ -539,7 +539,7 @@ export class DeezCordTrackUtils {
                 .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                 .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
             } else if(enqueued && skipSong) {
-                embed.setTitle(`⏭️ Album loaded and skipping to it`)
+                embed.setTitle(`${client.DeezEmojis.skip.str} Album loaded and skipping to it`)
             }
             return {
                 content: ``,
@@ -589,7 +589,7 @@ export class DeezCordTrackUtils {
                 .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                 .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
             } else if(enqueued && skipSong) {
-                embed.setTitle(`⏭️ Artist's tracks loaded and skipping to it`)
+                embed.setTitle(`${client.DeezEmojis.skip.str} Artist's tracks loaded and skipping to it`)
             }
             
             return {
@@ -637,7 +637,7 @@ export class DeezCordTrackUtils {
                     .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                     .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
                 } else if(enqueued && skipSong) {
-                    embed.setTitle(`⏭️ Today's chart playlist loaded and skipping to it`)
+                    embed.setTitle(`${client.DeezEmojis.skip.str} Today's chart playlist loaded and skipping to it`)
                 }
                 return {
                     content: ``,
@@ -674,7 +674,7 @@ export class DeezCordTrackUtils {
                 .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                 .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
             } else if(enqueued && skipSong) {
-                embed.setTitle(`⏭️ Today's charts loaded and skipping to it`)
+                embed.setTitle(`${client.DeezEmojis.skip.str} Today's charts loaded and skipping to it`)
             }
             return {
                 content: ``,
@@ -712,7 +712,7 @@ export class DeezCordTrackUtils {
                 .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                 .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
             } else if(enqueued && skipSong) {
-                embed.setTitle(`⏭️ Track loaded and skipping to it`)
+                embed.setTitle(`${client.DeezEmojis.skip.str} Track loaded and skipping to it`)
             }
 
             return { 

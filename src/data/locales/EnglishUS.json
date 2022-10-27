@@ -1,7 +1,10 @@
 {
     "general": {
         "errors": {
-            "timeranout": "Time ran out"
+            "timeranout": "Time ran out",
+			"notracksfound": "{{errorEmoji}} No Tracks found",
+			"notplayable": "{{errorEmoji}} Found Track: {{tile}} but it's not playable in my Country\n> {{link}}",
+			"notvalidurl": "{{errorEmoji}} {{query}} is not a valid URL"
         }
     },
 	"login": {
@@ -22,7 +25,13 @@
 	"ping": {
 		"description": "Show my Latency to Discord.",
 		"execute": {
-			"pong": "{{pingEmoji}} My Ping to Discord is: `{{wsPing}}ms`"
+			"content": "{{pingEmoji}} My Ping to Discord is: `{{wsPing}}ms`"
+		}
+	},
+	"uptime": {
+		"description": "Show my Latency to Discord.",
+		"execute": {
+			"content": "{{uptimeEmoji}} I'm running since <t:{{time}}}:R>"
 		}
 	},
 	"play": {
@@ -31,8 +40,7 @@
 			"query": "Song / Playlist Name / Link",
 			"query_search_filter": "Wanna filter Search Results?",
 			"queueaction": "Any extra Queue Actions wanted?",
-			"pick_searchresult": "Want to select the right search Result?",
-			"country_playlist": "play.options.country_playlist"
+			"pick_searchresult": "Want to select the right search Result?"
 		},
         "execute": {
             "searchingquery": "Now searching for: {{query}}",
@@ -45,7 +53,8 @@
             "mapfans": "{{fans}} Fans with {{albums}} Albums",
             "maptracks": "{{tracks}} Tracks by {{name}}",
             "pickedtype": "Picked the **{{type}}**",
-            "pickedtypefoundnothing": "Picked the **{{type}}**: {{link}}\n> But found no Tracks for it..."
+            "pickedtypefoundnothing": "Picked the **{{type}}**: {{link}}\n> But found no Tracks for it...",
+			"pickwishedsong": "Pick your wished Song"
         }
 	},
 	"charts": {

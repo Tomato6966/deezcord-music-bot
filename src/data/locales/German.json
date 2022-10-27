@@ -17,7 +17,7 @@
 	"ping": {
 		"description": "Zeige meine Latenz zu Discord an",
 		"execute": {
-			"pong": "🏓 Meine Latenz nach Discord ist: `{{wsPing}}ms`"
+			"content": "🏓 Meine Latenz nach Discord ist: `{{wsPing}}ms`"
 		}
 	},
 	"play": {
@@ -27,8 +27,7 @@
 			"query_search_filter": "Willst du die Suchanfragen filtern?",
 			"queueaction": "Aktionen welche auf die Warteschlange ausgeführt werden sollen?",
 			"file": "Spiele eine Datei statt einer Query ab (query wird überschrieben)",
-			"pick_searchresult": "Want to select the right search Result?",
-			"country_playlist": "play.options.country_playlist"
+			"pick_searchresult": "Want to select the right search Result?"
 		}
 	},
 	"charts": {

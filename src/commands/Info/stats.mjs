@@ -8,7 +8,7 @@ export default {
         console.log(thisStats)
         await interaction.reply({
             ephemeral: true,
-            content: `🏓 Pong \`${client.ws.ping}ms\``
+            content: `\`\`\`\n${thisStats}\n\`\`\``
         });
     }
 }

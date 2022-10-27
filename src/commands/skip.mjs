@@ -11,7 +11,7 @@ export default {
         player.stop();
         interaction.reply({
             ephemeral: true,
-            content: `⏭️ Skipped`
+            content: `${client.DeezEmojis.skip.str} Skipped`
         })
     }
 }

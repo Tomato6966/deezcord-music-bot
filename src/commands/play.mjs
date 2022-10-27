@@ -85,7 +85,7 @@ export default {
             });
             if(!login || !login.deezerToken) return interaction.reply({
                 ephemeral: true,
-                content: `❌ You have to be logged in to Deezer, do it with: ${client.commands.get("login")?.mention || "`/login`"}`
+                content: `${client.DeezEmojis.deny.str} You have to be logged in to Deezer, do it with: ${client.commands.get("login")?.mention || "`/login`"}`
             });
         */
         const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction, interaction.member, true);
@@ -128,9 +128,11 @@ export default {
         } else if(URL_Id && URL_Type && loadTypes[URL_Type]) { // fetch if from URL (playlist, artist, album, mixes)
             searchingTracks = await client.DeezApi.deezer.fetch[URL_Type == "mixes/genre" ? "mix" : URL_Type](URL_Id, true, access_token).then(v => finishFetcher(client, v, URL_Type, interaction.user)).catch(errorCatcher);
             loadType = loadTypes[URL_Type];
-        } else if(URL_Id && URL_Type) { // url is matched, but it's not a valid searchingtype
+        } else if((URL_Id && URL_Type) || client.UrlRegex.test(query)) { // url is matched, but it's not a valid searchingtype
             return interaction.editReply({
-                content: `❌ ${query} is not a valid URL` 
+                content: inlineLocale(client.getGuildLocale(interaction.guild), `general.errors.notvalidurl`, {
+                    query: client.UrlRegex.test(query) ? `<${query}>` : `${query}`,
+                })
             })
         } else if(searchFilter && searchFilterMethods[searchFilter] && searchFilter !== "track") { // search something, but not a track
             const res = await client.DeezApi.deezer.search[`${searchFilterMethods[searchFilter]}`](query, 25, access_token);
@@ -151,16 +153,24 @@ export default {
 
         // if song is not readable
         if(searchingTracks?.tracks?.[0]?.readable === false || searchingTracks.data?.readable === false) {
-            return await interaction.editReply({ content: `❌ Found Track: ${searchingTracks.tracks[0]?.title || searchingTracks.data?.title} but it's not playable in my Country\n> ${searchingTracks.tracks[0]?.uri || searchingTracks.data?.link}` })
+            return await interaction.editReply({ 
+                content: inlineLocale(client.getGuildLocale(interaction.guild), `general.errors.notplayable`, {
+                    title: searchingTracks.tracks[0]?.title || searchingTracks.data?.title,
+                    link: searchingTracks.tracks[0]?.uri || searchingTracks.data?.link,
+                })
+             })
         }
 
         const response = searchingTracks ? { data: searchingTracks, loadType, tracks: searchingTracks?.tracks || searchingTracks } : await client.DeezCord.search(query, interaction.user, player.node);
-        if(!response.tracks?.length) return interaction.editReply({ ephemeral: true, content: `❌ No Tracks found` });
+        if(!response.tracks?.length) return interaction.editReply({ 
+            ephemeral: true, 
+            content: inlineLocale(client.getGuildLocale(interaction.guild), `general.errors.notracksfound`)
+        });
         let pick = false;
         const fetchTime = measureTimer.end();
         if(loadType == "TRACKS_FOUND" && pickSearchResult) {
             const msg = await interaction.editReply({
-                content: "Pick your wished Song",
+                content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.pickwishedsong`),
                 components: [
                     new ActionRowBuilder().addComponents([
                         new SelectMenuBuilder()
@@ -263,7 +273,7 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
     if(!sorted?.length) return interaction.editReply({
         ephemeral: true,
         content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.nothingfound`, {
-            crossEmoji: "❌",
+            crossEmoji: client.DeezEmojis.error.str,
             type: type.substring(0, 1).toUpperCase() + type.substring(1, type.length),
             query: query
         }).substring(0, 1000)

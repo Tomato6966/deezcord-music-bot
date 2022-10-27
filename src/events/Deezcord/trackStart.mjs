@@ -71,8 +71,8 @@ export default async (client, player, track) => {
             components: [
                 new ActionRowBuilder().addComponents([
                     new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Link").setURL(track.uri),
-                    track.albumData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Album-Link").setURL(track.albumData?.link) : undefined,
                     track.playlistData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Playlist-Link").setURL(track.playlistData?.link) : undefined,
+                    track.albumData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Album-Link").setURL(track.albumData?.link) : undefined,
                 ].filter(Boolean))
             ]
         }).catch(console.warn);

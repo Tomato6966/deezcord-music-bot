@@ -52,8 +52,8 @@ export default {
         },
         {
             name: "country_playlist",
-            description: inlineLocale("EnglishUS", `play.options.country_playlist`),
-            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "country_playlist", "play.options.country_playlist")),
+            description: inlineLocale("EnglishUS", `charts.options.country_playlist`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "country_playlist", "charts.options.country_playlist")),
             required: false,
             type: optionTypes.stringchoices,
             choices: [
@@ -74,7 +74,7 @@ export default {
             });
             if(!login || !login.deezerToken) return interaction.reply({
                 ephemeral: true,
-                content: `❌ You have to be logged in to Deezer, do it with: ${client.commands.get("login")?.mention || "`/login`"}`
+                content: `${client.DeezEmojis.deny.str} You have to be logged in to Deezer, do it with: ${client.commands.get("login")?.mention || "`/login`"}`
             });
         */
 
@@ -189,7 +189,7 @@ export default {
         const response = searchingTracks ? { data: searchingTracks, loadType: `CHARTS_LOADED`, tracks: searchingTracks?.tracks || searchingTracks } : null;
         if(!response?.tracks?.length) return interaction.editReply({
             ephemeral: true,
-            content: `❌ No Tracks found`
+            content: `${client.DeezEmojis.error.str} No Tracks found`
         });
 
         // if a player was created, or the previous queue was empty, or there was no player before
@@ -235,7 +235,7 @@ export async function handleChartsPlaylist(client, interaction, response, player
     const { name, link, fetchTime, created, previousQueue, skipSong, addSongToTop } = chartsPlData;
     if(!response.tracks) return interaction.editReply({
         ephemeral: true,
-        content: `❌ No Tracks found for the chart playlist: \`${name}\`\n> ${link}`
+        content: `${client.DeezEmojis.error.str} No Tracks found for the chart playlist: \`${name}\`\n> ${link}`
     });
     // declare that it's a playlist
     response.isPlaylist = true;

@@ -13,7 +13,7 @@ export async function slashCommandHandler(client, interaction) {
     if(!client.DeezUtils.perms.checkPerms(interaction.channel, [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ViewChannel])) {
         return interaction.reply({
             ephemeral: true,
-            content: `❌ I can't view this channel, or I can't send messages in this channel`
+            content: `${client.DeezEmojis.error.str} I can't view this channel, or I can't send messages in this channel`
         });
     }
             
@@ -23,7 +23,7 @@ export async function slashCommandHandler(client, interaction) {
     if(!client.DeezUtils.perms.checkPerms(interaction.channel, [PermissionFlagsBits.EmbedLinks])) {
         return interaction.reply({
             ephemeral: true,
-            content: `❌ I need the Permission, to Embed-Links in this Channel`
+            content: `${client.DeezEmojis.error.str} I need the Permission, to Embed-Links in this Channel`
         });
     }
 
