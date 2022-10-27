@@ -7,6 +7,8 @@ export default {
     skip: createEmojiObject("⏭"),
     ping: createEmojiObject("🏓"),
     uptime: createEmojiObject("🕐"),
+    deezer: createEmojiObject("<:Deezer:1035104072396722196>"),
+    deezcord: createEmojiObject("<:Deezcord:1034421754577309756>")
 }
 
 function createEmojiObject(str) {

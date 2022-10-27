@@ -11,6 +11,8 @@ export default async (client, player, track) => {
     const guild = client.guilds.cache.get(player.guild);
     if(!guild) return player.destroy();
 
+    player.set("np_msg", undefined)
+    
     client.logger.debug(`🎵 Now playing the Track ${track.author} - ${track.title} in ${guild.name}, requested by @${client.DeezUtils.track.getRequesterString(track.requester)}`);
     
     // get lyrics of db, from deezer and if not then from genius
@@ -70,12 +72,13 @@ export default async (client, player, track) => {
             embeds: [ NpEmbed ],
             components: [
                 new ActionRowBuilder().addComponents([
-                    new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Link").setURL(track.uri),
-                    track.playlistData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Playlist-Link").setURL(track.playlistData?.link) : undefined,
-                    track.albumData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Album-Link").setURL(track.albumData?.link) : undefined,
+                    new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Link").setURL(track.uri),
+                    track.playlistData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Playlist-Link").setURL(track.playlistData?.link) : undefined,
+                    track.albumData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Album-Link").setURL(track.albumData?.link) : undefined,
                 ].filter(Boolean))
             ]
         }).catch(console.warn);
+        if(msg) player.set("np_msg", msg);
     }
 
 

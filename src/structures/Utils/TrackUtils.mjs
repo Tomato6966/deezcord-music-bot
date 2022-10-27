@@ -458,7 +458,7 @@ export class DeezCordTrackUtils {
                 embeds: [ embed ],
                 components: [
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Playlist-Link").setURL(plLink)
+                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Playlist-Link").setURL(plLink)
                     ])
                 ]
             }
@@ -500,7 +500,7 @@ export class DeezCordTrackUtils {
                 embeds: [ embed ],
                 components: [
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Mix-Link").setURL(mixLink)
+                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Mix-Link").setURL(mixLink)
                     ])
                 ]
             } 
@@ -547,7 +547,7 @@ export class DeezCordTrackUtils {
                 embeds: [ embed ],
                 components: [
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Album-Link").setURL(albLink)
+                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Album-Link").setURL(albLink)
                     ])
                 ]
             }
@@ -598,7 +598,7 @@ export class DeezCordTrackUtils {
                 embeds: [ embed ],
                 components: [
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Artist-Link").setURL(artLink)
+                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Artist-Link").setURL(artLink)
                     ])
                 ]
             }
@@ -625,7 +625,7 @@ export class DeezCordTrackUtils {
                         url: (plCreator?.link || plCreator?.id) ? plCreator.link || `https://www.deezer.com/profile/${plCreator.id}` : plAuthorData?.link ? `${plAuthorData?.link}` : configData.inviteURL
                     })
                     .setThumbnail(plImg ? `${plImg}` : undefined)
-                    .setTitle(`<:deezer:1018174807092760586> Today's chart playlist loaded`)
+                    .setTitle(`${client.DeezEmojis.deezer.str} Today's chart playlist loaded`)
                     .addField(`Name:`, `> **${plName}**`)
                     .addField(`Loaded tracks:`, trackString)
                     .addField(`Avg. Track-Ranking:`, `> \`#${Math.floor(10*(tracks.map(x => x.rank).reduce((a,b) => a+b,0) / tracks.length || 0))/10}\``)
@@ -633,7 +633,7 @@ export class DeezCordTrackUtils {
                 // if est for queuing
                 const EST = addSongToTop ? (player.queue.current?.duration || player.position) - player.position : (this.client.DeezUtils.array.sumNumbersOnly([...player.queue].slice(0, player.queue.size - tracks.length), x => x.duration) || player.position) - player.position;
                 if(enqueued && !skipSong) {
-                    embed.setTitle(`<:deezer:1018174807092760586> Added today's chart playlist to the queue`)
+                    embed.setTitle(`${client.DeezEmojis.deezer.str} Added today's chart playlist to the queue`)
                     .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                     .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
                 } else if(enqueued && skipSong) {
@@ -645,7 +645,7 @@ export class DeezCordTrackUtils {
                     embeds: [ embed ],
                     components: [
                         new ActionRowBuilder().addComponents([
-                            new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Playlist-Link").setURL(plLink)
+                            new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Playlist-Link").setURL(plLink)
                         ])
                     ]
                 }
@@ -663,7 +663,7 @@ export class DeezCordTrackUtils {
                     url: "https://www.deezer.com/channels/charts"
                 })
                 .setThumbnail(configData.iconURL)
-                .setTitle(`<:deezer:1018174807092760586> Today's charts loaded`)
+                .setTitle(`${client.DeezEmojis.deezer.str} Today's charts loaded`)
                 .addField(`Loaded tracks:`, trackString)
                 .addField(`Avg. Track-Ranking:`, `> \`#${Math.floor(10*(tracks.map(x => x.rank).reduce((a,b) => a+b,0) / tracks.length || 0))/10}\``)
             
@@ -682,7 +682,7 @@ export class DeezCordTrackUtils {
                 embeds: [ embed ],
                 components: [
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Charts-List").setURL("https://www.deezer.com/channels/charts")
+                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Charts-List").setURL("https://www.deezer.com/channels/charts")
                     ])
                 ]
             }
@@ -721,8 +721,8 @@ export class DeezCordTrackUtils {
                 embeds: [ embed ],
                 components: [
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Track-Link").setURL(tLink),
-                        tAlbum?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(parseEmoji("<:deezer:1018174807092760586>")).setLabel("Album-Link").setURL(tAlbum?.link) : undefined
+                        new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Track-Link").setURL(tLink),
+                        tAlbum?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Album-Link").setURL(tAlbum?.link) : undefined
                     ].filter(Boolean))
                 ]
             }
