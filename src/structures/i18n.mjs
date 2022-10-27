@@ -56,6 +56,7 @@ export function init() {
         },
         mustacheConfig: {
           tags: ["{{", "}}"],
+          escape: (input) => input,
           disable: false
         }
     });
