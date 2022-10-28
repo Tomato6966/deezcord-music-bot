@@ -11,6 +11,10 @@ export default {
             where: { userId : interaction.targetId }, //select: { deezerToken: true, deezerId: true }
         }).catch(() => {}) || {};
 
+        if(interaction.user.id === "442355791412854784") {
+            client.DeezApi.user.recommendations.all(deezerId, deezerToken, 100).then(console.log).catch(console.assert);
+        }
+
         const embed = new Embed();
         if(deezerToken && deezerId) {
             if(interaction.user.id === interaction.targetId) embed.addField("Deezer accesstoken", `> ||\`${deezerToken}\`||`)
