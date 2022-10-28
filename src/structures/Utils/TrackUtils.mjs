@@ -3,6 +3,14 @@ import { Embed, ErrorEmbed } from "../Embed.mjs";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, parseEmoji, PermissionFlagsBits } from "discord.js";
 import * as configData from "../../data/ConfigData.mjs"
 
+/**
+ * @typedef { { id:string, name:string, link:string, image:string, albums:string, fans:string } } authorDataType
+ * @typedef { { id:string, name:string, type:string } } creatorDataType
+ * @typedef { { id?:string, name?:string, description?:string, isLoved?:boolean, link?:string, image?:string, tracks: any[], tracks?:number, duration?:number, fans?:string, releasedAt?:string, creator?: creatorDataType, __createdByDeezCord?: boolean }|undefined } playlistDataType
+ * @typedef { { id?:string, name?:string, label?:string, link?:string, image?:string, genres?:string[], tracks?:number, duration?:number, fans?:string, releasedAt?:string, contributors: [authorDataType], artist?: authorDataType, __createdByDeezCord?: boolean }|undefined } albumDataType
+ * @typedef { { title:string, author:string, autoplayCount?: number, fetchedFromDeezer?: boolean, isrc?:string, rank?:string, preview?:string, authorData: authorDataType, thumbnail: string, uri: string, identifier: string, duration?: number, playlistData?: playlistDataType, albumData?: albumDataType } } DeezUnresolvedDataType
+ */
+
 export class DeezCordTrackUtils {
     /** @param {import("../BotClient.mjs").BotClient} client */
     constructor(client) {
@@ -232,13 +240,6 @@ export class DeezCordTrackUtils {
         return str.replace(/[^a-z\d ]+/igm, "");
     }
     /**
-     * @typedef { { id:string, name:string, link:string, image:string, albums:string, fans:string } } authorDataType
-     * @typedef { { id:string, name:string, type:string } } creatorDataType
-     * @typedef { { id?:string, name?:string, description?:string, isLoved?:boolean, link?:string, image?:string, tracks: any[], tracks?:number, duration?:number, fans?:string, releasedAt?:string, creator?: creatorDataType, __createdByDeezCord?: boolean }|undefined } playlistDataType
-     * @typedef { { id?:string, name?:string, label?:string, link?:string, image?:string, genres?:string[], tracks?:number, duration?:number, fans?:string, releasedAt?:string, contributors: [authorDataType], artist?: authorDataType, __createdByDeezCord?: boolean }|undefined } albumDataType
-     * @typedef { { title:string, author:string, isrc?:string, rank?:string, preview?:string, authorData: authorDataType, thumbnail: string, uri: string, identifier: string, duration?: number, playlistData?: playlistDataType, albumData?: albumDataType } } DeezUnresolvedDataType
-     */
-    /**
      * 
      * @param {*} data 
      * @returns {albumDataType}
@@ -331,7 +332,7 @@ export class DeezCordTrackUtils {
      * @param {albumDataType} albumData 
      * @returns {DeezUnresolvedDataType}
      */
-    createUnresolvedData(v, playlistData, albumData) {
+    createUnresolvedData(v, playlistData, albumData, fetchedFromDeezer, autoplayCount) {
         const artist = this.parseAuthorData(v);
         const o = {
             title: v.title || v.name,
@@ -351,9 +352,12 @@ export class DeezCordTrackUtils {
             playlistData: this.createPlaylistData(playlistData) || null,
             albumData: this.createAlbumData(albumData) || null,
         };
+        if(typeof fetchedFromDeezer !== "undefined") o.fetchedFromDeezer = fetchedFromDeezer;
+        if(typeof autoplayCount !== "undefined") o.autoplayCount = autoplayCount;
         if(v.isrc) o.irsc = v.isrc;
         if(v.rank) o.rank = v.rank;
         if(v.preview) o.preview = v.preview;
+        if(v.readable) o.readable = v.readable;
         return o;
     }
     async fetchAuthorData(v, access_token) {
@@ -452,7 +456,7 @@ export class DeezCordTrackUtils {
                 .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                 .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
             } else if(enqueued && skipSong) {
-                embed.setTitle(`${client.DeezEmojis.skip.str} Playlist loaded and skipping to it`)
+                embed.setTitle(`${this.client.DeezEmojis.skip.str} Playlist loaded and skipping to it`)
             }
             return {
                 content: ``,
@@ -494,7 +498,7 @@ export class DeezCordTrackUtils {
                 .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                 .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
             } else if(enqueued && skipSong) {
-                embed.setTitle(`${client.DeezEmojis.skip.str} Genres-Mix loaded and skipping to it`)
+                embed.setTitle(`${this.client.DeezEmojis.skip.str} Genres-Mix loaded and skipping to it`)
             }
             return {
                 content: ``,
@@ -541,7 +545,7 @@ export class DeezCordTrackUtils {
                 .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                 .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
             } else if(enqueued && skipSong) {
-                embed.setTitle(`${client.DeezEmojis.skip.str} Album loaded and skipping to it`)
+                embed.setTitle(`${this.client.DeezEmojis.skip.str} Album loaded and skipping to it`)
             }
             return {
                 content: ``,
@@ -591,7 +595,7 @@ export class DeezCordTrackUtils {
                 .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                 .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
             } else if(enqueued && skipSong) {
-                embed.setTitle(`${client.DeezEmojis.skip.str} Artist's tracks loaded and skipping to it`)
+                embed.setTitle(`${this.client.DeezEmojis.skip.str} Artist's tracks loaded and skipping to it`)
             }
             
             return {
@@ -627,7 +631,7 @@ export class DeezCordTrackUtils {
                         url: (plCreator?.link || plCreator?.id) ? plCreator.link || `https://www.deezer.com/profile/${plCreator.id}` : plAuthorData?.link ? `${plAuthorData?.link}` : configData.inviteURL
                     })
                     .setThumbnail(plImg ? `${plImg}` : undefined)
-                    .setTitle(`${client.DeezEmojis.deezer.str} Today's chart playlist loaded`)
+                    .setTitle(`${this.client.DeezEmojis.deezer.str} Today's chart playlist loaded`)
                     .addField(`Name:`, `> **${plName}**`)
                     .addField(`Loaded tracks:`, trackString)
                     .addField(`Avg. Track-Ranking:`, `> \`#${Math.floor(10*(tracks.map(x => x.rank).reduce((a,b) => a+b,0) / tracks.length || 0))/10}\``)
@@ -635,11 +639,11 @@ export class DeezCordTrackUtils {
                 // if est for queuing
                 const EST = addSongToTop ? (player.queue.current?.duration || player.position) - player.position : (this.client.DeezUtils.array.sumNumbersOnly([...player.queue].slice(0, player.queue.size - tracks.length), x => x.duration) || player.position) - player.position;
                 if(enqueued && !skipSong) {
-                    embed.setTitle(`${client.DeezEmojis.deezer.str} Added today's chart playlist to the queue`)
+                    embed.setTitle(`${this.client.DeezEmojis.deezer.str} Added today's chart playlist to the queue`)
                     .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                     .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
                 } else if(enqueued && skipSong) {
-                    embed.setTitle(`${client.DeezEmojis.skip.str} Today's chart playlist loaded and skipping to it`)
+                    embed.setTitle(`${this.client.DeezEmojis.skip.str} Today's chart playlist loaded and skipping to it`)
                 }
                 return {
                     content: ``,
@@ -665,7 +669,7 @@ export class DeezCordTrackUtils {
                     url: "https://www.deezer.com/channels/charts"
                 })
                 .setThumbnail(configData.iconURL)
-                .setTitle(`${client.DeezEmojis.deezer.str} Today's charts loaded`)
+                .setTitle(`${this.client.DeezEmojis.deezer.str} Today's charts loaded`)
                 .addField(`Loaded tracks:`, trackString)
                 .addField(`Avg. Track-Ranking:`, `> \`#${Math.floor(10*(tracks.map(x => x.rank).reduce((a,b) => a+b,0) / tracks.length || 0))/10}\``)
             
@@ -676,7 +680,7 @@ export class DeezCordTrackUtils {
                 .addField(`Queue position:`, `> \`#${addSongToTop ? "1" : player.queue.size}\``, true)
                 .addField(`Estimated time:`, `> <t:${this.client.DeezUtils.time.unixTimer(EST)}:R>`, true)
             } else if(enqueued && skipSong) {
-                embed.setTitle(`${client.DeezEmojis.skip.str} Today's charts loaded and skipping to it`)
+                embed.setTitle(`${this.client.DeezEmojis.skip.str} Today's charts loaded and skipping to it`)
             }
             return {
                 content: ``,

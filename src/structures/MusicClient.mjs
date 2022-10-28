@@ -25,6 +25,7 @@ export class DeezCordClient extends Manager {
             ],
             shards: client.cluster.info.TOTAL_SHARDS,
             clientName: "Deezcord",
+            clientId: process.env.DISCORD_CLIENT_ID,
             send: (i, p) => client?.guilds?.cache.get(i)?.shard?.send?.(p),
         });
         this.client = client;

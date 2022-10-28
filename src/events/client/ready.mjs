@@ -7,13 +7,17 @@ export default async (client) => {
     client.updateStatus();
     setInterval(() => client.updateStatus(), client.DeezUtils.time.Millisecond.Minute(30))
 
-    if(process.env.PUBLICSLASH === "true") await client.publishCommands(process.env.DEVGUILD || undefined);
-    client.prepareCommands();
+    if(process.env.PUBLICSLASH === "true") {
+        await client.publishCommands(process.env.DEVGUILD || undefined);
+        await client.DeezUtils.time.delay(1000);
+    }
+
+    await client.prepareCommands();
 
     client.DeezCord.init(client.user.id, {
         shards: client.cluster.info.TOTAL_SHARDS,
         clientName: "Deezcord",
-        clientId: client.user.id, 
+        clientId: client.user.id || process.env.DISCORD_CLIENT_ID, 
     });
 
     // ensure languages

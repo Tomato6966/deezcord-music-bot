@@ -4,65 +4,89 @@
             "timeranout": "Time ran out",
 			"notracksfound": "{{{errorEmoji}}} No Tracks found",
 			"notplayable": "{{{errorEmoji}}} Found Track: {{{tile}}} but it's not playable in my Country\n> {{{link}}}",
-			"notvalidurl": "{{{errorEmoji}}} {{{query}}} is not a valid URL"
+			"notvalidurl": "{{{errorEmoji}}} {{{query}}} is not a valid URL",
+			"usernotloggedin": "> {{{errorEmoji}}} {{{user}}} has not synced their Account with Deezer yet.\n> For more information see {{{command}}}"
         }
     },
-	"login": {
-		"description": "Connect your deezer account with this bot",
-		"execute": {
-			"embedTitle": "Login",
-			"embedDescription": "In order to interact with tracks, playlists, artists and radios you have to logged.",
-			"embedFooter": "Don't share this link with someone!"
-		}
-	},
-	"logout": {
-		"description": "Disconnect your deezer account with this bot",
-		"execute": {
-			"embedTitle": "Logout",
-			"embedDescription": "We removed your connection but dont forget. \nIn order to interact with tracks, playlists, artists and radios you have to logged."
-		}
-	},
-	"ping": {
-		"description": "Show my Latency to Discord.",
-		"execute": {
-			"content": "{{{pingEmoji}}} My Ping to Discord is: `{{{wsPing}}}ms`"
-		}
-	},
-	"uptime": {
-		"description": "Show my Latency to Discord.",
-		"execute": {
-			"content": "{{{uptimeEmoji}}} I'm running since <t:{{{time}}}:R>"
-		}
-	},
-	"play": {
-		"description": "Play a song / query inside your Voice-Channel",
-		"options": {
-			"query": "Song / Playlist Name / Link",
-			"query_search_filter": "Wanna filter Search Results?",
-			"queueaction": "Any extra Queue Actions wanted?",
-			"pick_searchresult": "Want to select the right search Result?"
+	"account": {
+		"login": {
+			"description": "Connect your deezer account with this bot",
+			"options": { },
+			"execute": {
+				"embedTitle": "Login",
+				"embedDescription": "In order to interact with tracks, playlists, artists and radios you have to logged.",
+				"embedFooter": "Don't share this link with someone!"
+			}
 		},
-        "execute": {
-            "searchingquery": "Now searching for: {{{query}}}",
-            "selectsong": "Select your wished Song",
-            "cancelbutton": "Cancel Search",
-            "cancelledresponse": "Cancelled the search request",
-            "nothingfound": "{{{crossEmoji}}} Nothing found for the **{{{type}}}**: `{{{query}}}`",
-            "selectwishedtype": "Select your wished {{{type}}}",
-            "mapmix": "[Genre-Mix] - {{{desc}}}",
-            "mapfans": "{{{fans}}} Fans with {{{albums}}} Albums",
-            "maptracks": "{{{tracks}}} Tracks by {{{name}}}",
-            "pickedtype": "Picked the **{{{type}}}**",
-            "pickedtypefoundnothing": "Picked the **{{{type}}}**: {{{link}}}\n> But found no Tracks for it...",
-			"pickwishedsong": "Pick your wished Song"
-        }
+		"logout": {
+			"description": "Disconnect your deezer account with this bot",
+			"options": { },
+			"execute": {
+				"embedTitle": "Logout",
+				"embedDescription": "We removed your connection but dont forget. \nIn order to interact with tracks, playlists, artists and radios you have to logged."
+			}
+		}
 	},
-	"charts": {
-		"description": "Play the current Charts (Hit-Songs)",
-		"options": {
-			"query_search_filter": "Wanna filter Search Results?",
-			"limit": "How many songs? (10 <= limit <= 200 | default: 100)",
-			"country_playlist": "Wanna play specific Charts of a Country/Worldwide?"
+	"info": {
+		"ping": {
+			"description": "Show my Latency to Discord.",
+			"options": { },
+			"execute": {
+				"content": "{{{pingEmoji}}} My Ping to Discord is: `{{{wsPing}}}ms`"
+			}
+		},
+		"uptime": {
+			"description": "Show my Latency to Discord.",
+			"options": { },
+			"execute": {
+				"content": "{{{uptimeEmoji}}} I'm running since <t:{{{time}}}:R>"
+			}
+		},
+		"stats": {
+			"description": "Shows the Bot's Stats",
+			"options": { },
+			"execute": { }
+		}
+	},
+	"musicrequest": {
+		"play": {
+			"description": "Play a song / query inside your Voice-Channel",
+			"options": {
+				"query": "Song / Playlist Name / Link",
+				"query_search_filter": "Wanna filter Search Results?",
+				"queueaction": "Any extra Queue Actions wanted?",
+				"pick_searchresult": "Want to select the right search Result?"
+			},
+			"execute": {
+				"searchingquery": "Now searching for: {{{query}}}",
+				"selectsong": "Select your wished Song",
+				"cancelbutton": "Cancel Search",
+				"cancelledresponse": "Cancelled the search request",
+				"nothingfound": "{{{crossEmoji}}} Nothing found for the **{{{type}}}**: `{{{query}}}`",
+				"selectwishedtype": "Select your wished {{{type}}}",
+				"mapmix": "[Genre-Mix] - {{{desc}}}",
+				"mapfans": "{{{fans}}} Fans with {{{albums}}} Albums",
+				"maptracks": "{{{tracks}}} Tracks by {{{name}}}",
+				"pickedtype": "Picked the **{{{type}}}**",
+				"pickedtypefoundnothing": "Picked the **{{{type}}}**: {{{link}}}\n> But found no Tracks for it...",
+				"pickwishedsong": "Pick your wished Song"
+			}
+		},
+		"charts": {
+			"description": "Play the current Charts (Hit-Songs)",
+			"options": {
+				"query_search_filter": "Wanna filter Search Results?",
+				"limit": "How many songs? (10 <= limit <= 200 | default: 100)",
+				"country_playlist": "Wanna play specific Charts of a Country/Worldwide?"
+			}
+		},
+		"recommendations" : {
+			"description": "Play/Enqueue recommended tracks/albums/releases",
+			"options": { },
+			"execute": {
+				"searching": "Now searching for your recommendations"
+			}
 		}
 	}
+	
 }

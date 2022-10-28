@@ -2,6 +2,7 @@
 /**
  * Execute the Command
  * @typedef {(client: import("../structures/BotClient.mjs").BotClient, interaction: import("discord.js").CommandInteraction) => Promise<any> } executeType
+ * @typedef {(client: import("../structures/BotClient.mjs").BotClient, interaction: import("discord.js").UserContextMenuCommandInteraction | import("discord.js").MessageContextMenuCommandInteraction) => Promise<any> } contextExecuteType
 */
 
 import { ApplicationCommandType, BitField } from "discord.js";
@@ -46,8 +47,8 @@ import { ApplicationCommandType, BitField } from "discord.js";
  * @typedef {CommandExportType} CommandExport
  */
 /**
- * @typedef {Object} CommandExportType
- * @prop {executeType} execute
+ * @typedef {Object} ContextCommandExportType
+ * @prop {contextExecuteType} execute
  * @prop {string} name
  * @prop {ApplicationCommandType} type
  * @prop {{name: string[]}[]} [localizations]
@@ -55,6 +56,6 @@ import { ApplicationCommandType, BitField } from "discord.js";
  * @prop {boolean} [isContext] - set by the loader
  */
 /**
- * @typedef {CommandExportType} CommandExpContextExportort
+ * @typedef {ContextCommandExportType} ContextCommandExport
  */
 exports.unused = {}

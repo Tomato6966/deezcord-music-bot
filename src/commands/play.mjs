@@ -27,32 +27,32 @@ const errorCatcher = (e) => { console.warn(e); return null; };
 export default {
     name: "play",
     category: "music#request#player",
-    description: inlineLocale("EnglishUS", `play.description`),
-    localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "play", "play.description")),
+    description: inlineLocale("EnglishUS", `musicrequest.play.description`),
+    localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "play", "musicrequest.play.description")),
     options: [
         {
             name: "query",
-            description: inlineLocale("EnglishUS", `play.options.query`),
-            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "query", "play.options.query")),
+            description: inlineLocale("EnglishUS", `musicrequest.play.options.query`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "query", "musicrequest.play.options.query")),
             required: true,
             type: optionTypes.string,
             // autocomplete: true,
         },
         {
             name: "queueaction",
-            description: inlineLocale("EnglishUS", `play.options.queueaction`),
-            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "queueaction", "play.options.queueaction")),
+            description: inlineLocale("EnglishUS", `musicrequest.play.options.queueaction`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "queueaction", "musicrequest.play.options.queueaction")),
             required: false,
             type: optionTypes.stringchoices,
             choices: [
-                {name: "skip", value: "skip" },
-                {name: "addontop", value: "addontop" },
+                {name: "Skip", value: "skip" },
+                {name: "Add on Top", value: "addontop" },
             ]
         }, 
         {
             name: "pick_searchresult",
-            description: inlineLocale("EnglishUS", `play.options.pick_searchresult`),
-            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "pick_searchresult", "play.options.pick_searchresult")),
+            description: inlineLocale("EnglishUS", `musicrequest.play.options.pick_searchresult`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "pick_searchresult", "musicrequest.play.options.pick_searchresult")),
             required: false,
             type: optionTypes.stringchoices,
             choices: [
@@ -62,16 +62,16 @@ export default {
         }, 
         {
             name: "query_search_filter",
-            description: inlineLocale("EnglishUS", `play.options.query_search_filter`),
-            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "query_search_filter", "play.options.query_search_filter")),
+            description: inlineLocale("EnglishUS", `musicrequest.play.options.query_search_filter`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "query_search_filter", "musicrequest.play.options.query_search_filter")),
             required: false,
             type: optionTypes.stringchoices,
             choices: [
-                {name: "track", value: "track" },
-                {name: "artist", value: "artist" },
-                {name: "playlist", value: "playlist" },
-                {name: "album", value: "album" },
-                {name: "genre_mix", value: "genre_mix" },
+                {name: "Tracks", value: "track" },
+                {name: "Artists", value: "artist" },
+                {name: "Playlists", value: "playlist" },
+                {name: "Albums", value: "album" },
+                {name: "Genre Mixes", value: "genre_mix" },
             ]
         }
     ],
@@ -106,7 +106,7 @@ export default {
 
         await interaction.reply({
             ephemeral: true,
-            content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.searchingquery`, {
+            content: inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.searchingquery`, {
                 query: (client.regex.DeezerURL.test(query) ? `<${query}>` : query)
             })
         });
@@ -123,7 +123,7 @@ export default {
 
         if(URL_Id && URL_Type && URL_Type === "track") { // fetch if from URL
             searchingTracks = await client.DeezApi.deezer.fetch.track(URL_Id, accessToken).then(v => {
-                return { data: v, tracks: [TrackUtils.buildUnresolved(client.DeezUtils.track.createUnresolvedData(v, v?.playlist, v?.album), interaction.user)], }
+                return { data: v, tracks: [TrackUtils.buildUnresolved(client.DeezUtils.track.createUnresolvedData(v, v?.playlist, v?.album, true), interaction.user)], }
             }).catch(errorCatcher); 
             // set the loadtype
             loadType = "TRACKS_FOUND";
@@ -172,12 +172,12 @@ export default {
         const fetchTime = measureTimer.end();
         if(loadType == "TRACKS_FOUND" && pickSearchResult) {
             const msg = await interaction.editReply({
-                content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.pickwishedsong`),
+                content: inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.pickwishedsong`),
                 components: [
                     new ActionRowBuilder().addComponents([
                         new SelectMenuBuilder()
                         .setCustomId(`${interaction.user.id}_searchpick`)
-                        .setPlaceholder(inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.selectsong`))
+                        .setPlaceholder(inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.selectsong`))
                         .addOptions(client.DeezUtils.array.removeDuplicates(response.tracks, "identifier").slice(0, 25).map(v => {
                             return {
                                 label: `${v.title || v.name}`.substring(0, 100), 
@@ -187,7 +187,7 @@ export default {
                         }))
                     ]),
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Danger).setLabel(inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.cancelbutton`)).setCustomId("cancel")
+                        new ButtonBuilder().setStyle(ButtonStyle.Danger).setLabel(inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.cancelbutton`)).setCustomId("cancel")
                     ])
                 ],
             });
@@ -195,7 +195,7 @@ export default {
                 const col = msg.createMessageComponentCollector({ filter: x => x.user.id === interaction.user.id, max: 1, time: 60000 });
                 col.on("collect", async (i) => {
                     if(i.customId === "cancel") {
-                        await i.update({ content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.cancelledresponse`), components: [] }).catch(() => null);
+                        await i.update({ content: inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.cancelledresponse`), components: [] }).catch(() => null);
                         return r(false);
                     } 
                     return r({ interaction: i, track: i.values[0] });
@@ -259,6 +259,16 @@ export function finishFetcher(client, x, type, user) {
     return data;
 }
 
+/**
+ * @param {import("../structures/BotClient.mjs").BotClient} client 
+ * @param {import("discord.js").CommandInteraction} interaction 
+ * @param {any} res 
+ * @param {string} type 
+ * @param {boolean} skipSong 
+ * @param {boolean} addSongToTop 
+ * @param {string} accessToken 
+ * @returns 
+ */
 export async function handleResSearchFilter(client, interaction, res, type, skipSong, addSongToTop, accessToken) {
     const sorted = res?.data?.filter?.(x => x.public === true || typeof x.public === "undefined")?.sort?.((a,b) => {
         if(a?.type === "artist" || b?.type === "artist") {
@@ -274,7 +284,7 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
 
     if(!sorted?.length) return interaction.editReply({
         ephemeral: true,
-        content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.nothingfound`, {
+        content: inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.nothingfound`, {
             crossEmoji: client.DeezEmojis.error.str,
             type: type.substring(0, 1).toUpperCase() + type.substring(1, type.length),
             query: query
@@ -286,21 +296,21 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
             new ActionRowBuilder().addComponents([
                 new SelectMenuBuilder()
                     .setCustomId(`${interaction.user.id}_${type}pick`)
-                    .setPlaceholder(inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.selectwishedtype`, { type: type.substring(0, 1).toUpperCase() + type.substring(1, type.length) }))
+                    .setPlaceholder(inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.selectwishedtype`, { type: type.substring(0, 1).toUpperCase() + type.substring(1, type.length) }))
                     .addOptions(sorted.map(v => {
                         const o = {
                             label: `${v.title || v.name}`, 
                             value: `${v.id}`, 
                         }
-                        if((type == "radio" || type == "mixes/genre") && v.description?.length) o.description = inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.mapmix`, {
+                        if((type == "radio" || type == "mixes/genre") && v.description?.length) o.description = inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.mapmix`, {
                             desc: v.description
                         }).substring(0, 100);
                         else if(v.description?.length) o.description = v.description.substring(0, 100);
-                        else if(v.nb_fan) o.description = inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.mapfans`, {
+                        else if(v.nb_fan) o.description = inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.mapfans`, {
                             fans: client.DeezUtils.number.dotter(v.nb_fan),
                             albums: client.DeezUtils.number.dotter(v.nb_album),
                         });
-                        else if(v.nb_tracks) o.description = (inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.maptracks`, {
+                        else if(v.nb_tracks) o.description = (inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.maptracks`, {
                             tracks: client.DeezUtils.number.dotter(v.nb_tracks),
                             name: v.user?.name ? `${v.user?.name}` : v.artist?.name ? `${v.artist.name}` : `Unknown`
                         }) + ` ${v.creation_date ? ` - ${v.creation_date}` : ``}`)
@@ -318,7 +328,7 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
     collector.on("collect", async i => {
         const id = i.values[0];
         await i.update({
-            content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.pickedtype`, {
+            content: inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.pickedtype`, {
                 type: type.substring(0, 1).toUpperCase() + type.substring(1, type.length),
             }),
             components: []
@@ -365,7 +375,7 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
             }
         } else {
             i.editReply({
-                content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.pickedtypefoundnothing`, {
+                content: inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.pickedtypefoundnothing`, {
                     type: type.substring(0, 1).toUpperCase() + type.substring(1, type.length),
                     link: data.link || data.share,
                 }),

@@ -5,15 +5,16 @@ import { Embed } from "../../structures/Embed.mjs";
 /** 
  * @param {import("../../structures/BotClient.mjs").BotClient} client
  * @param {import("erela.js").Player} player
- * @param {import("erela.js").Track} track
+ * @param {import("erela.js").Track & import("../../structures/Utils/TrackUtils.mjs").DeezUnresolvedDataType} track
 */
 export default async (client, player, track) => {
     const guild = client.guilds.cache.get(player.guild);
     if(!guild) return player.destroy();
 
-    player.set("np_msg", undefined)
-    
-    client.logger.debug(`🎵 Now playing the Track ${track.author} - ${track.title} in ${guild.name}, requested by @${client.DeezUtils.track.getRequesterString(track.requester)}`);
+    player.set("np_msg", undefined);
+    player.set("current", track);
+
+    client.logger.debug(`🎵 Now ${track.autoplayCount ? "auto-" : ""}playing the Track ${track.author} - ${track.title} in ${guild.name}, requested by @${client.DeezUtils.track.getRequesterString(track.requester)}`);
     
     // get lyrics of db, from deezer and if not then from genius
     const ofDBDeezer = await client.db.deezerLyrics.findFirst({
@@ -56,7 +57,9 @@ export default async (client, player, track) => {
         })
 
         if(track.playlistData) {
-            NpEmbed.addField(`📑 Playing of Playlist`, `> [\`${track.playlistData.name}\`](${track.playlistData.link})`, true)
+            if(track.autoplayCount) {
+                NpEmbed.addField(`📑 Playing of ${track.requester?.tag ?? track.requester?.username ?? 'users'}'s autoplay-recommendations`, `> It's their \`#${track.autoplayCount} autoplayed track\` in the current Session`)
+            } else NpEmbed.addField(`📑 Playing of Playlist`, `> [\`${track.playlistData.name}\`](${track.playlistData.link})`, true)
         } 
         if(track.albumData) {
             NpEmbed.addField(`Track's album:`, `> [\`${track.albumData.name}\`](${track.albumData.link})`, true)
@@ -67,9 +70,24 @@ export default async (client, player, track) => {
                 text: `Took ${track.fetchTime}ms until playing the Song.`
             })
         }
+        let secondEmbed = null;
+        
+        const addedViaAutoplay = player.get("addedviaautoplay")
+        if(addedViaAutoplay) {
+            const icon = track.requester?.avatar && track.requester?.id ? client.rest.cdn.avatar(track.requester?.id, track.requester?.avatar, undefined, undefined, true) : this.client.rest.cdn.DefaultAvatar((track.requester?.discriminator || 6969) % 5);
+            secondEmbed = new Embed()
+                .setAuthor({
+                    name: track.requester?.tag || undefined,
+                    iconURL: icon || undefined,
+                    url: client.configData.inviteURL
+                })
+                .setThumbnail(icon || undefined)
+                .addField(`Added ${addedViaAutoplay.length} Tracks via Autoplay`, `> By <@${track.requester.id}>'s recommendations`)
+                .addField(`Tracklist`, `>>> ${addedViaAutoplay.map((track, index) => `\`${index+1}.\` [\`${client.DeezUtils.time.durationFormatted(track.duration, true)}\`] - ${track.authorData?.link ? `[**${track.authorData.name || track.author}**](${track.authorData.link})` : `**${track.author}**`}: [${track.title}](${track.uri})`).join("\n\n")}`)
+        }
         //NpEmbed.setDescription(`🎶 [**${track.title}**](${track.uri})\n> **Duration:** \` ${client.DeezUtils.time.durationFormatted(track.duration, true)} \`\n> **Requester:** <@${track.requester.id ?? track.requester}>`);
         msg = await channel.send({ 
-            embeds: [ NpEmbed ],
+            embeds: [ NpEmbed, secondEmbed ].filter(Boolean),
             components: [
                 new ActionRowBuilder().addComponents([
                     new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Link").setURL(track.uri),
@@ -100,9 +118,15 @@ export default async (client, player, track) => {
     }
     if(track.geniusLyrics || track.deezerLyrics) {
         if((Date.now() - lyricsTime) < 2000) await client.DeezUtils.time.delay(2000 - (Date.now() - lyricsTime));
+        player.set("current", track);
         // Edit now playing message that lyrics are available
         // mayorly display genius track lyrics
         //console.log(!!track.deezerLyrics, "deezerlyrics");
         //console.log(!!track.geniusLyrics, "geniusLyrics");
     }
+
+
+    
+    // for autoplay recommendations.
+    if(!track.fetchedFromDeezer && track.requester.accessToken) await client.DeezApi.deezer.fetch.track(track.identifier, false, track.requester.accessToken).catch(() => null);
 }

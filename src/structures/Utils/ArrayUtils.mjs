@@ -13,11 +13,12 @@ export class DeezCordArrayUtils {
      * Remove every until the function matches something. if no match found empty array gets returned
      * @param {any[]} thisArr 
      * @param {exampleCallBack} fn 
+     * @param {boolean} dontchangeifempty 
      * @returns {any[]}
      */
-    removeUntil(thisArr, fn) {
+    removeUntil(thisArr, fn, dontchangeifempty) {
         const index = thisArr.findIndex(fn);
-        return index >= 0 ? thisArr.slice(index) : [];
+        return index >= 0 ? thisArr.slice(index) : (dontchangeifempty ? thisArr : []);
     }
 
     /**

@@ -47,13 +47,13 @@ export class Logger {
         if(typeof this?.logLevel !== "undefined" && this.logLevel > 0) return;
         return color_log(["FgWhite", "Dim"], text, this.dateEnabled, this.prefix && typeof this.prefix === "string" ? `Debug  - ${this.prefix}` : "Debug")
     }
-    info(...text) {
-        if(typeof this?.logLevel !== "undefined" && this.logLevel > 1) return;
-        return color_log(["FgCyan", "Bright"], text, this.dateEnabled, this.prefix && typeof this.prefix === "string" ? `Info   - ${this.prefix}` : "Info")
-    }
     log(...text) {
-        if(typeof this?.logLevel !== "undefined" && this.logLevel > 2) return;
+        if(typeof this?.logLevel !== "undefined" && this.logLevel > 1) return;
         return color_log(["FgWhite"], text, this.dateEnabled, this.prefix && typeof this.prefix === "string" ? `Log    - ${this.prefix}` : "Log")
+    }
+    info(...text) {
+        if(typeof this?.logLevel !== "undefined" && this.logLevel > 2) return;
+        return color_log(["FgCyan", "Bright"], text, this.dateEnabled, this.prefix && typeof this.prefix === "string" ? `Info   - ${this.prefix}` : "Info")
     }
     success(...text) {
         if(typeof this?.logLevel !== "undefined" && this.logLevel > 3) return;

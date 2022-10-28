@@ -37,5 +37,49 @@
 			"limit": "How many songs? (10 <= limit <= 200 | default: 100)",
 			"country_playlist": "Wanna play specific Charts of a Country/Worldwide?"
 		}
+	},
+	"recommendations": {
+		"description": "Play/Enqueue recommended tracks/albums/releases"
+	},
+	"account": {
+		"login": {
+			"description": "Connect your deezer account with this bot"
+		},
+		"logout": {
+			"description": "Disconnect your deezer account with this bot"
+		}
+	},
+	"info": {
+		"ping": {
+			"description": "Show my Latency to Discord."
+		},
+		"stats": {
+			"description": "Shows the Bot's Stats"
+		},
+		"uptime": {
+			"description": "Show my Latency to Discord."
+		}
+	},
+	"musicrequest": {
+		"play": {
+			"description": "Play a song / query inside your Voice-Channel",
+			"options": {
+				"query": "Song / Playlist Name / Link",
+				"queueaction": "Any extra Queue Actions wanted?",
+				"pick_searchresult": "Want to select the right search Result?",
+				"query_search_filter": "Wanna filter Search Results?"
+			}
+		},
+		"charts": {
+			"description": "Play the current Charts (Hit-Songs)",
+			"options": {
+				"limit": "How many songs? (10 <= limit <= 200 | default: 100)",
+				"query_search_filter": "Wanna filter Search Results?",
+				"country_playlist": "Wanna play specific Charts of a Country/Worldwide?"
+			}
+		},
+		"recommendations": {
+			"description": "Play/Enqueue recommended tracks/albums/releases"
+		}
 	}
 }

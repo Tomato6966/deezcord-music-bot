@@ -13,13 +13,13 @@ const errorCatcher = (e) => { console.warn(e); return null; };
 export default {
     name: "charts",
     category: "music#request#player",
-    description: inlineLocale("EnglishUS", `charts.description`),
-    localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "charts", "charts.description")),
+    description: inlineLocale("EnglishUS", `musicrequest.charts.description`),
+    localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "charts", "musicrequest.charts.description")),
     options: [
         {
             name: "limit",
-            description: inlineLocale("EnglishUS", `charts.options.limit`),
-            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "limit", "charts.options.limit")),
+            description: inlineLocale("EnglishUS", `musicrequest.charts.options.limit`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "limit", "musicrequest.charts.options.limit")),
             required: false,
             type: optionTypes.number,
             max: 200,
@@ -27,8 +27,8 @@ export default {
         },
         {
             name: "queueaction",
-            description: inlineLocale("EnglishUS", `play.options.queueaction`),
-            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "queueaction", "play.options.queueaction")),
+            description: inlineLocale("EnglishUS", `musicrequest.play.options.queueaction`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "queueaction", "musicrequest.play.options.queueaction")),
             required: false,
             type: optionTypes.stringchoices,
             choices: [
@@ -38,8 +38,8 @@ export default {
         }, 
         {
             name: "query_search_filter",
-            description: inlineLocale("EnglishUS", `charts.options.query_search_filter`),
-            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "query_search_filter", "charts.options.query_search_filter")),
+            description: inlineLocale("EnglishUS", `musicrequest.charts.options.query_search_filter`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "query_search_filter", "musicrequest.charts.options.query_search_filter")),
             required: false,
             type: optionTypes.stringchoices,
             choices: [
@@ -52,8 +52,8 @@ export default {
         },
         {
             name: "country_playlist",
-            description: inlineLocale("EnglishUS", `charts.options.country_playlist`),
-            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "country_playlist", "charts.options.country_playlist")),
+            description: inlineLocale("EnglishUS", `musicrequest.charts.options.country_playlist`),
+            localizations: i18n.getLocales().map(locale => inlineLocalization(locale, "country_playlist", "musicrequest.charts.options.country_playlist")),
             required: false,
             type: optionTypes.stringchoices,
             choices: [

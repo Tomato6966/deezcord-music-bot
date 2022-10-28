@@ -436,15 +436,16 @@ export class BotClient extends Client {
                 value.mention = value.mention.replace("commandId", value.commandId || "4206966420");
                 this.commands.set(key, value)
             }
-            this.logger.debug(`✅ Set Command Mentions of: ${allSlashs?.length} Commands`);
+            this.logger.debug(`✅ Set Command Mentions of: ${this.commands.size} Commands (${allSlashs.length} unique Base-Command Ids)`);
         } else this.logger.debug("❌ No Slash Commands for Command-Mention parsing found.")
         return true;
     }
-    async publishCommands(guildId) {
+    async publishCommands(guildIdInput) {
+        const guildId = this.regex.DiscordSnowfalke.test(guildIdInput) ? guildIdInput : undefined;
         if(!guildId) {
             if(this.cluster.id !== 0) return;
             await this.application.commands.set(this.allCommands).then(() => {
-                this.logger.info(`SLASH-CMDS | Set ${this.commands.size} slashCommands!`)
+                this.logger.info(`SLASH-CMDS | Set ${this.commands.size} slashCommands globally!`)
                 this.logger.warn(`Because u are Using Global Settings, it can take up to 1 hour until the Commands are changed!`)
             }).catch(e => {this.logger.error(e);});
             return true;
@@ -454,8 +455,8 @@ export class BotClient extends Client {
         if(![...this.cluster.ids.keys()].includes(shardId)) return this.logger.warn("CANT UPDATE SLASH COMMANDS - WRONG CLUSTER");
         const guild = this.guilds.cache.get(guildId);
         if(!guild) return this.logger.error("could not find the guild for updating slash commands")
-        guild.commands.set(this.allCommands).then(() => {
-            this.logger.info(`SLASH-CMDS | Set ${this.commands.size} slashCommands!`)
+        return await guild.commands.set(this.allCommands).then(() => {
+            this.logger.info(`SLASH-CMDS | Set ${this.commands.size} slashCommands in ${guild.name}!`)
             this.application.commands.set([]);
         }).catch(this.logger.error);
     }

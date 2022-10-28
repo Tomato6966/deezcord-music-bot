@@ -86,8 +86,11 @@ export class APIClient {
         
         // ensure login paths
         if(!process.env.DISCORD_CLIENT_LOGIN?.length) process.env.DISCORD_CLIENT_LOGIN = "/discordlogin";
+        else if(!process.env.DISCORD_CLIENT_LOGIN.startsWith("/")) throw new SyntaxError("Missing correct 'env#process.env.DISCORD_CLIENT_LOGIN', it must be a path starting with /pathname...")
+        
         if(!process.env.DEEZER_APP_LOGIN?.length) process.env.DEEZER_APP_LOGIN = "/deezerlogin";
-
+        else if(!process.env.DEEZER_APP_LOGIN.startsWith("/")) throw new SyntaxError("Missing correct 'env#process.env.DEEZER_APP_LOGIN', it must be a path starting with /pathname...")
+        
         return; 
     }
     ensurPath(path) {
@@ -287,6 +290,9 @@ export class APIClient {
                 if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
                 return await this.makeRequest(`user/${ID}/recommendations/radios?${this.parseAccessToken(access_token)}&limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}`)
             },
+            mixes: async(ID, access_token, limit) => {
+                return await this.user.recommendations.radios(ID, access_token, limit);
+            }
         }
     }
     deezer = {

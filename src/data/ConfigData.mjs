@@ -15,3 +15,6 @@ export const defaultVolume = 100;
 
 export const mentionInfoCooldown = 30000;
 export const deleteMentionInfoAfter = 30000;
+
+
+export const addTracksPerAutoplayFetchAmount = 5; // how many tracks to add after each autoplay recommendations fetch (maximum)

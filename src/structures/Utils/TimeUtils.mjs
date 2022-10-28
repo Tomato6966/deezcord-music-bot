@@ -123,16 +123,16 @@ export class DeezCordTimeUtils {
      * @returns {string} formatted duration
      */
     durationFormatted(value, inputAsMs, displayMs) {
-        let times = [86400, 3600, 60, 1];
-        if(inputAsMs) times = [...times.map(x => x * 1000), 1] 
-        return this.client.DeezUtils.array.keepStrings(this.client.DeezUtils.array.removeUntil(times.reduce((acc, cur) => {
+        //                  [days,     hours,   mins,  sec, ms] : [days,  hrs,  min, sec]
+        return (inputAsMs ? [86400000, 3600000, 60000, 1000, 1] : [86400, 3600,  60,   1]).reduce((acc, cur) => {
             let res = ~~(value / cur);
             value -= res * cur;
             return [...acc, res];
-        }, []), x => x > 0).map((v, i, a) => {
-            if(inputAsMs && !displayMs && i === a.length - 1) return undefined
-            return `${v < 10 ? `0${v}` : v}`;
-        })).join(":");
+        }, []).map((v, i, a) => i <= 1 && v === 0 ? undefined : [
+            i === 4 ? "." : "", // prefix for ms
+            inputAsMs && !displayMs && i === a.length - 1 ? `${v < 10 ? `00${v}` : v < 100 ? `0${v}` : v}` : `${v < 10 ? `0${v}` : v}`, // format time to (days, hrs, mins): 00 or ms: 001
+            i === 1 || i === 2 ? ":" : i === 0 ? " Days, " : "" // suffix for days, hhs, mins
+        ].join("")).filter(Boolean).slice(0, (inputAsMs && !displayMs ? -1 : 5)).join("") 
     }
     /**
      * Formats MS to UNIX (seconds)
