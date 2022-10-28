@@ -10,22 +10,7 @@ export default {
       user: 60 * 1000,
     },
     async execute(client, interaction) {
-        const randomId = Math.random().toString(36).substring(2, 9);
-        const url = 'https://deezcord.milrato.eu/login/' + randomId;
-
-        const utils = {
-            userId: interaction.user.id,
-            randomId,
-            validUntil: Date.now() + 10 * 60 * 1000,
-        }
-
-        client.cluster.broadcastEval(
-        /** @param {client} c The Discord User Client */
-        (c, utils) => {
-            c.DeezCache.loginCache.set(utils.randomId, {
-                ...utils
-            });
-        }, {cluster: 0, context: utils});
+        const url = client.DeezApi.discordLoginLink;
 
         return interaction.reply({
             embeds: [

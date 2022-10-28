@@ -107,7 +107,7 @@ export default {
         await interaction.reply({
             ephemeral: true,
             content: inlineLocale(client.getGuildLocale(interaction.guild), `play.execute.searchingquery`, {
-                query: (client.DeezRegex.test(query) ? `<${query}>` : query)
+                query: (client.regex.DeezerURL.test(query) ? `<${query}>` : query)
             })
         });
               
@@ -116,10 +116,10 @@ export default {
 
         const measureTimer = new client.DeezUtils.time.measureTime();
 
-        if(query.match(client.DeezRegex) && query.includes("page.link")) {
+        if(query.match(client.regex.DeezerURL) && query.includes("page.link")) {
             query = await fetch(query, { redirect: 'manual', follow: 0 }).then(x => x.headers.get("location").split("?utm_campaign=")[0]).catch(v => query);
         }
-        const [ ,,,URL_Type,URL_Id ] = query.match(client.DeezRegex) || [];
+        const [ ,,,URL_Type,URL_Id ] = query.match(client.regex.DeezerURL) || [];
 
         if(URL_Id && URL_Type && URL_Type === "track") { // fetch if from URL
             searchingTracks = await client.DeezApi.deezer.fetch.track(URL_Id, accessToken).then(v => {
@@ -130,10 +130,10 @@ export default {
         } else if(URL_Id && URL_Type && loadTypes[URL_Type]) { // fetch if from URL (playlist, artist, album, mixes)
             searchingTracks = await client.DeezApi.deezer.fetch[URL_Type == "mixes/genre" ? "mix" : URL_Type](URL_Id, true, accessToken).then(v => finishFetcher(client, v, URL_Type, interaction.user)).catch(errorCatcher);
             loadType = loadTypes[URL_Type];
-        } else if((URL_Id && URL_Type) || client.UrlRegex.test(query)) { // url is matched, but it's not a valid searchingtype
+        } else if((URL_Id && URL_Type) || client.regex.GeneralURL.test(query)) { // url is matched, but it's not a valid searchingtype
             return interaction.editReply({
                 content: inlineLocale(client.getGuildLocale(interaction.guild), `general.errors.notvalidurl`, {
-                    query: client.UrlRegex.test(query) ? `<${query}>` : `${query}`,
+                    query: client.regex.GeneralURL.test(query) ? `<${query}>` : `${query}`,
                 })
             })
         } else if(searchFilter && searchFilterMethods[searchFilter] && searchFilter !== "track") { // search something, but not a track

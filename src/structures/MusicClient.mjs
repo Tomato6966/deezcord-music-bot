@@ -9,7 +9,7 @@ export class DeezCordClient extends Manager {
             useUnresolvedData: true,
             position_update_interval: 100,
             allowedLinksRegexes: [
-                client.DeezRegex
+                client.regex.DeezerURL
             ],
             nodes: [
                 {

@@ -6,6 +6,8 @@ import fetch, { Headers } from 'node-fetch';
 import { Logger } from "./Utils/Logger.mjs";
 import { Strategy } from "passport-discord";
 import { Collection } from "discord.js";
+import Regexes from "../data/Regexes.mjs";
+
 /**
  * @typedef {object} DeezerResponseUserData
  * @prop {string} id: 4958449102,
@@ -37,42 +39,55 @@ export class APIClient {
     constructor(options = {}) {
         /** @type {import("./BotClient.mjs").BotClient} */
         this.client = options.client
+        
+        this.regex = Regexes;
 
-        this.port = process.env.APIPORT && !isNaN(process.env.APIPORT) ? Number(process.env.APIPORT) : 3000
-        this.appId = process.env.APP_ID;
-        this.secret = process.env.APP_SECRET;
-        this.domain = process.env.DOMAIN;
-        this.host = process.env.APIHOST || "::";
+        // ensure .env variables
+        this.ensureDotEnvVariables();
+
+        this.port = process.env.DEEZER_API_PORT && !isNaN(process.env.DEEZER_API_PORT) ? Number(process.env.DEEZER_API_PORT) : 3000;
+        this.domain = process.env.DEEZER_API_DOMAIN;
+        this.host = process.env.DEEZER_API_HOSTNAME || "::";
 
         this.sessionUserCaches = new Collection();
         
         this.BaseURL = "https://api.deezer.com"
         this.logger = new Logger({ prefix: "DEEZAPI " });
-        this.searchLimit = 100;
-        // https://developers.deezer.com/api/explorer
-        this.ensureDomainAndSettings();
+        this.searchLimit = 100; // https://developers.deezer.com/api/explorer
+        
+        // Deezer Api Stuff
+        this.DeezerAppId = process.env.DEEZER_APP_ID;
+        this.DeezerSecretKey = process.env.DEEZER_APP_SECRET
+
+        // set variables
+        this.discordSecret = process.env.DISCORD_CLIENT_SECRET;
+        this.discordId = process.env.DISCORD_CLIENT_ID;
+        this.discordCallback = `${this.domain}${this.ensurPath(process.env.DISCORD_CLIENT_CALLBACK)}`;
+        this.discordLoginLink = `${this.domain}${this.ensurPath(process.env.DISCORD_CLIENT_LOGIN)}`;
+        this.deezerCallback = `${this.ensurPath(process.env.DEEZER_APP_CALLBACK)}`
+        this.deezerAppLogin = `${this.ensurPath(process.env.DEEZER_APP_LOGIN)}`
         
     }
-    ensureDomainAndSettings() {
-        if(!this.domain?.length) throw new SyntaxError("Missing correct DOMAIN input");
-        if(!process.env.DISCORD_CLIENT_CALLBACK_REDIRECT?.length) throw new SyntaxError("Missing correct DISCORD_CLIENT_CALLBACK_REDIRECT input");
-        if(!process.env.APP_CALLBACK?.length) throw new SyntaxError("Missing correct DISCORD_CLIENT_CALLBACK_REDIRECT input");
+    ensureDotEnvVariables() {
+        if(process.env.DEEZER_API_PORT?.length && (isNaN(process.env.DEEZER_API_PORT) || Number(process.env.DEEZER_API_PORT) > 65535 || Number(process.env.DEEZER_API_PORT) < 1)) throw new SyntaxError("provided 'env#DEEZER_API_PORT' Variable is not a valid Port-Number (must be between 1 and 65535");
+        if(!process.env.DEEZER_API_DOMAIN?.length) throw new SyntaxError("Missing correct 'env#DEEZER_API_DOMAIN' input");
+        else if(!this.regex.apiUrl.test(process.env.DEEZER_API_DOMAIN)) throw new SyntaxError("'env#DEEZER_API_DOMAIN' is not a valid URL input");
+        
+        if(process.env.DEEZER_API_HOSTNAME?.length && process.env.DEEZER_API_HOSTNAME !== "::" && process.env.DEEZER_API_HOSTNAME !== "localhost" && !this.regex.Ipv4Address.test(process.env.DEEZER_API_HOSTNAME)) throw new SyntaxError("Provided 'env#DEEZER_API_HOSTNAME' is not a valid IP ADDRESS nor '::' nor 'localhost'")
+
+        if(!process.env.DISCORD_CLIENT_SECRET?.length || process.env.DISCORD_CLIENT_SECRET.length < 5) throw new SyntaxError("Missing correct 'env#DISCORD_CLIENT_SECRET'")
+        if(!process.env.DISCORD_CLIENT_ID?.length || !this.regex.DiscordSnowfalke.test(process.env.DISCORD_CLIENT_ID)) throw new SyntaxError("Missing correct 'env#DISCORD_CLIENT_ID'")
+
+        if(!process.env.DISCORD_CLIENT_CALLBACK?.length) throw new SyntaxError("Missing correct 'env#DISCORD_CLIENT_CALLBACK' input");
+        if(!process.env.DEEZER_APP_CALLBACK?.length) throw new SyntaxError("Missing correct 'env#DISCORD_CLIENT_CALLBACK' input");
         
         // ensure domain style
-        if (this.domain?.endsWith("/")) this.domain = this.domain.substring(0, this.domain.length - 1)
+        if (process.env.DEEZER_API_DOMAIN?.endsWith("/")) process.env.DEEZER_API_DOMAIN = process.env.DEEZER_API_DOMAIN.substring(0, process.env.DEEZER_API_DOMAIN.length - 1)
         
         // ensure login paths
         if(!process.env.DISCORD_CLIENT_LOGIN?.length) process.env.DISCORD_CLIENT_LOGIN = "/discordlogin";
-        if(!process.env.APP_LOGIN?.length) process.env.APP_LOGIN = "/deezerlogin";
+        if(!process.env.DEEZER_APP_LOGIN?.length) process.env.DEEZER_APP_LOGIN = "/deezerlogin";
 
-        this.passport = {
-            secret: process.env.DISCORD_CLIENT_SECRET,
-            id: process.env.DISCORD_CLIENT_ID,
-            callback: `${this.domain}${this.ensurPath(process.env.DISCORD_CLIENT_CALLBACK_REDIRECT)}`
-        }
-        this.discordLoginLink = `${this.domain}${this.ensurPath(process.env.DISCORD_CLIENT_LOGIN)}`;
-        this.deezerCallback = this.ensurPath(process.env.APP_CALLBACK)
-        this.deezerAppLogin = this.ensurPath(process.env.APP_LOGIN)
         return; 
     }
     ensurPath(path) {
@@ -495,9 +510,9 @@ export class APIClient {
             fastifyAuthenticator.registerUserDeserializer((id) => this.sessionUserCaches.get(id));
             // login in strategies
             fastifyAuthenticator.use(new Strategy({
-                clientID: this.passport.id,
-                clientSecret: this.passport.secret,
-                callbackURL: this.passport.callback,
+                clientID: this.discordId,
+                clientSecret: this.discordSecret,
+                callbackURL: this.discordCallback,
                 scope: ["identify", "guilds"],
             }, async (accessToken, refreshToken, profile, done) => {
                 return done(null, profile);
@@ -512,7 +527,7 @@ export class APIClient {
                     }
                 }
                 // Redirect the user to the OAuth from deezer
-                return reply.redirect(`https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.domain}${this.deezerCallback}&perms=basic_access,offline_access,manage_library, delete_library, listening_history`);
+                return reply.redirect(`https://connect.deezer.com/oauth/auth.php?app_id=${this.DeezerAppId}&redirect_uri=${this.domain}${this.deezerCallback}&perms=basic_access,offline_access,manage_library, delete_library, listening_history`);
             })
             // deezer callback
             fastify.get(this.deezerCallback, async (request, reply) => {
@@ -523,7 +538,7 @@ export class APIClient {
                 try {
                     if (!request?.query?.code) throw new Error('Didn\'t got the code for the authentication.');
                     // parse access token String from deezer Authentications
-                    const deezerAuthResponse = await fetch(`https://connect.deezer.com/oauth/access_token.php?app_id=${this.appId}&secret=${this.secret}&code=${request?.query?.code}`).then(x => x.text());
+                    const deezerAuthResponse = await fetch(`https://connect.deezer.com/oauth/access_token.php?app_id=${this.DeezerAppId}&secret=${this.DeezerSecretKey}&code=${request?.query?.code}`).then(x => x.text());
                     if (!deezerAuthResponse) throw new Error('Didn\'t got the access token from deezer.');
                     
                     // parse access_token out of url params
@@ -559,10 +574,10 @@ export class APIClient {
                 preValidation: fastifyAuthenticator.authenticate("discord")
             }, async (request, reply) => {});
 
-            fastify.get(process.env.DISCORD_CLIENT_CALLBACK_REDIRECT, { // /auth/redirect
+            fastify.get(process.env.DISCORD_CLIENT_CALLBACK, { // /auth/redirect
                 preValidation: fastifyAuthenticator.authenticate("discord", {
                     failureRedirect: "/",
-                    successRedirect: process.env.APP_LOGIN,
+                    successRedirect: process.env.DEEZER_APP_LOGIN,
                 })
             }, async (request, reply) => {});
 

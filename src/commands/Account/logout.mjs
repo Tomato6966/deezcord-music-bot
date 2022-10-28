@@ -11,7 +11,7 @@ export default {
     },
     async execute(client, interaction) {
         await client.DeezApi.resetDeezerAccount(interaction.user.id);
-
+        // loggout discord link ?
         return interaction.reply({
             embeds: [
                 new Embed()

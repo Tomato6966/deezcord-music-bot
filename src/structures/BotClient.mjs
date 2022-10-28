@@ -13,6 +13,7 @@ import * as DeezConfigData from "../data/ConfigData.mjs";
 import * as Locales from "../data/Locales.mjs";
 import { init as initLanguage, inlineLocale } from "./i18n.mjs";
 import EmojisList from "../data/EmojisList.mjs";
+import Regexes from "../data/Regexes.mjs";
 
 /** @type {import("@prisma/client").Languages} */
 BaseGuild.prototype.language = "EnglishUS";
@@ -27,8 +28,10 @@ export class BotClient extends Client {
         });
         initLanguage();
         
-        this.DeezRegex = /((https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|playlist|album|artist|mixes\/genre|episode)\/(\d+)|(https?:\/\/|)?(?:www\.)?deezer\.page\.link\/(\S+))/;
-        this.UrlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+        this.regex = Regexes;
+
+        if(!process.env.DISCORD_TOKEN?.length || !this.regex.DiscordToken.test(process.env.DISCORD_TOKEN)) throw new SyntaxError("No valid 'env#DISCORD_TOKEN' provided")
+        if(!process.env.DATABASE_URL?.length) throw new SyntaxError
 
         /** @type {ClusterClient} */
         this.cluster = new ClusterClient(this);
@@ -154,7 +157,7 @@ export class BotClient extends Client {
      * @returns {string|null}
      */
     deezerURLtoID(url) {
-        const [ ,,,,id ] = url.match(this.DeezRegex) || [];
+        const [ ,,,,id ] = url.match(this.regex.DeezerURL) || [];
         return id || null;
     }
     get guildsAndMembers() {
@@ -416,11 +419,11 @@ export class BotClient extends Client {
         return true;
     }
     async prepareCommands() {
-        if(!process.env.CLIENTID) process.env.CLIENTID = this.user.id;
-        if(!process.env.BOTNAME) process.env.BOTNAME = this.user.tag
+        if(!process.env.DISCORD_CLIENT_ID) process.env.DISCORD_CLIENT_ID = this.user.id;
+        if(!process.env.DISCORD_BOT_NAME) process.env.DISCORD_BOT_NAME = this.user.username;
         // on Ready Execute - with 1 second delay for making 100% sure it's ready
         const guild = process.env.DEVGUILD ? await this.cluster.broadcastEval(`this.guilds.cache.has('${process.env.DEVGUILD}') ? true : false`).then(x => x.filter(v => v === true).length > 0) : false;
-        console.log(guild ? { guild: process.env.DEVGUILD } : undefined)
+        
         const allSlashs = await this.application.commands.fetch(undefined, { guildId: guild ? process.env.DEVGUILD : undefined }).then(x => [...x.values()]).catch(console.warn) || [...this.application.commands.cache.values()] || [];
         if(allSlashs?.length) {
             this.DeezCache.fetchedApplication = allSlashs;
@@ -434,7 +437,7 @@ export class BotClient extends Client {
                 this.commands.set(key, value)
             }
             this.logger.debug(`✅ Set Command Mentions of: ${allSlashs?.length} Commands`);
-        } else console.log("no slash sizes found")
+        } else this.logger.debug("❌ No Slash Commands for Command-Mention parsing found.")
         return true;
     }
     async publishCommands(guildId) {
