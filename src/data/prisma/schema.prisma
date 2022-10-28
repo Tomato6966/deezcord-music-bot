@@ -55,8 +55,7 @@ model UserData {
   deezerToken         String?
   deezerId            String?
   deezerName          String?
-  deezerPictureMedium String?
-  deezerTrackList     String?
+  deezerImage         String?
   // votedAt    String?
   // voteCounts Int     @default(0)
   extraData           Json? // can be anything inside a JSON.stringify({});

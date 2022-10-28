@@ -125,12 +125,12 @@ export class APIClient {
                     deezerToken: null,
                     deezerId: null,
                     deezerName: null,
-                    deezerPictureMedium: null,
-                    deezerTrackList: null,
+                    deezerImage: null,
                 }
             })
         },
         saveDeezerAccount: async (deezerData, discordUserId) => {
+            const deezerImage = this.client.DeezUtils.track.getUserImage(deezerData);
             return await this.client.db.userData.upsert({
                 where: {
                     userId: discordUserId
@@ -139,16 +139,14 @@ export class APIClient {
                     deezerToken: deezerData.accessToken,
                     deezerId: deezerData.id,
                     deezerName: deezerData.name,
-                    deezerPictureMedium: deezerData.picture_medium,
-                    deezerTrackList: deezerData.tracklist,
+                    deezerImage: deezerImage,
                 },
                 create: {
                     userId: discordUserId,
                     deezerToken: deezerData.accessToken,
                     deezerId: deezerData.id,
                     deezerName: deezerData.name,
-                    deezerPictureMedium: deezerData.picture_medium,
-                    deezerTrackList: deezerData.tracklist,
+                    deezerImage: deezerImage,
                 }
             })
         },

@@ -101,13 +101,12 @@ export default {
                     emoji: x.emoji ? parseEmoji(x.emoji) : undefined
                 }
             }).sort((a,b) => a.label.localeCompare(b.label)), 25)
-            console.log(options[1][19])
             let msg = await interaction.reply({
                 ephemeral: true,
                 content: `Please select your wished Country based Charts-Playlist`,
                 components: [
                     ...options.map((x, i) => {
-                        return new ActionRowBuilder().addComponents(new SelectMenuBuilder().setCustomId("picksongs"+i).setPlaceholder(`Select a Country ${i*25}-${x.length}`).setOptions(x))
+                        return new ActionRowBuilder().addComponents(new SelectMenuBuilder().setCustomId("picksongs"+i).setPlaceholder(`Select a Country ${i*25}-${i*25 + x.length}`).setOptions(x))
                     }),
                     new ActionRowBuilder().addComponents([
                         new ButtonBuilder().setStyle(ButtonStyle.Primary).setCustomId(client.deezerURLtoID(topChartsPlaylists.others["World Wide"].link)).setLabel("OR: " + topChartsPlaylists.others["World Wide"].name).setEmoji(parseEmoji(topChartsPlaylists.others["World Wide"].emoji)),

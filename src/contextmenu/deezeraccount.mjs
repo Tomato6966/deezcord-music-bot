@@ -11,12 +11,16 @@ export default {
     async execute(client, interaction) {
         
         const { deezerToken, deezerId, deezerTrackList, deezerPictureMedium, deezerName } = await client.db.userData.findFirst({
-            where: { userId : interaction.user.id }, //select: { deezerToken: true, deezerId: true }
+            where: { userId : interaction.targetId }, //select: { deezerToken: true, deezerId: true }
         }).catch(() => {}) || {};
 
         const embed = new Embed();
         if(deezerToken && deezerId) {
-
+            if(interaction.user.id === interaction.targetId) embed.addField("Deezer accesstoken", `> ||\`${deezerToken}\`||`)
+            embed.addField("Deezer profile ID", `> \`${deezerId}\``)
+            embed.addField("Deezer profile Tracklist-URL", `> ${deezerTrackList}`)
+            embed.addField("Deezer profile Tracklist-URL", `> ${deezerTrackList}`)
+            if(deezerPictureMedium) embed.setThumbnail(deezerPictureMedium)
         } else {
             embed.addField("Error", `> You are not [logged in] yet\n> For more information see ${client.commands.find(c => c.name == "login")?.mention}`)
         }
