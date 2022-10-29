@@ -11,10 +11,19 @@
 			"cancel": "Cancel",
 			"or": "Or",
 			"yes": "Yes",
-			"no": "No"
+			"no": "No",
+			"ReleasedAlbums": "Released Albums",
+			"GenreMixes": "Genre Mixes",
+			"Albums": "Albums",
+			"Playlists": "Playlists",
+			"Artists": "Artists",
+			"Tracks": "Tracks",
+			"Podcasts": "Podcasts",
+			"Skip": "Skip"
 		},
 		"phrases": {
-			"requestCanceled": "Cancelled the request"
+			"requestCanceled": "Cancelled the request",
+			"addontop": "Add on Top"
 		}
 	},
 	"account": {

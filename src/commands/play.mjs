@@ -45,8 +45,16 @@ export default {
             required: false,
             type: optionTypes.stringchoices,
             choices: [
-                {name: "Skip", value: "skip" },
-                {name: "Add on Top", value: "addontop" },
+                {
+                    name: "Skip",
+                    name_localizations: inlineChoicesLocale("general.words.Skip"), 
+                    value: "skip"
+                },
+                {
+                    name: "Add on Top",
+                    name_localizations: inlineChoicesLocale("general.phrases.addontop"), 
+                    value: "addontop"
+                },
             ]
         }, 
         {
@@ -75,11 +83,31 @@ export default {
             required: false,
             type: optionTypes.stringchoices,
             choices: [
-                {name: "Tracks", value: "track" },
-                {name: "Artists", value: "artist" },
-                {name: "Playlists", value: "playlist" },
-                {name: "Albums", value: "album" },
-                {name: "Genre Mixes", value: "genre_mix" },
+                {
+                    name: "Tracks", 
+                    name_localizations: inlineChoicesLocale("general.words.Tracks"),
+                    value: "tracks" 
+                },
+                {
+                    name: "Artists", 
+                    name_localizations: inlineChoicesLocale("general.words.Artists"),
+                    value: "artists" 
+                },
+                {
+                    name: "Playlists", 
+                    name_localizations: inlineChoicesLocale("general.words.Playlists"),
+                    value: "playlists" 
+                },
+                {
+                    name: "Albums", 
+                    name_localizations: inlineChoicesLocale("general.words.Albums"),
+                    value: "albums" 
+                },
+                {
+                    name: "Genre Mixes", 
+                    name_localizations: inlineChoicesLocale("general.words.GenreMixes"),
+                    value: "mixes" 
+                },
             ]
         }
     ],

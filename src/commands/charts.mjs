@@ -3,7 +3,7 @@ import { ButtonBuilder, ButtonInteraction, ButtonStyle, parseEmoji } from "disco
 import { TrackUtils } from "erela.js";
 import { topChartsPlaylists } from "../data/ChartPlaylists.mjs";
 import { optionTypes } from "../structures/BotClient.mjs";
-import { i18n, inlineLocale, inlineLocalization } from "../structures/i18n.mjs";
+import { i18n, inlineChoicesLocale, inlineLocale, inlineLocalization } from "../structures/i18n.mjs";
 import { finishFetcher, handleResSearchFilter } from "./play.mjs";
 
 const errorCatcher = (e) => { console.warn(e); return null; };
@@ -32,8 +32,16 @@ export default {
             required: false,
             type: optionTypes.stringchoices,
             choices: [
-                {name: "skip", value: "skip" },
-                {name: "addontop", value: "addontop" },
+                {
+                    name: "Skip",
+                    name_localizations: inlineChoicesLocale("general.words.Skip"), 
+                    value: "skip"
+                },
+                {
+                    name: "Add on Top",
+                    name_localizations: inlineChoicesLocale("general.phrases.addontop"), 
+                    value: "addontop"
+                },
             ]
         }, 
         {
@@ -43,11 +51,31 @@ export default {
             required: false,
             type: optionTypes.stringchoices,
             choices: [
-                {name: "tracks", value: "tracks" },
-                {name: "artists", value: "artists" },
-                {name: "albums", value: "albums" },
-                {name: "playlists", value: "playlists" },
-                {name: "podcasts", value: "podcasts" },
+                {
+                    name: "Tracks", 
+                    name_localizations: inlineChoicesLocale("general.words.Tracks"),
+                    value: "tracks" 
+                },
+                {
+                    name: "Artists", 
+                    name_localizations: inlineChoicesLocale("general.words.Artists"),
+                    value: "artists" 
+                },
+                {
+                    name: "Playlists", 
+                    name_localizations: inlineChoicesLocale("general.words.Playlists"),
+                    value: "playlists" 
+                },
+                {
+                    name: "Albums", 
+                    name_localizations: inlineChoicesLocale("general.words.Albums"),
+                    value: "albums" 
+                },
+                {
+                    name: "Podcasts", 
+                    name_localizations: inlineChoicesLocale("general.words.Podcasts"),
+                    value: "podcasts" 
+                },
             ]
         },
         {

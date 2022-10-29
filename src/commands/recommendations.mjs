@@ -30,8 +30,16 @@ export default {
             required: false,
             type: optionTypes.stringchoices,
             choices: [
-                {name: "skip", value: "skip" },
-                {name: "addontop", value: "addontop" },
+                {
+                    name: "Skip",
+                    name_localizations: inlineChoicesLocale("general.words.Skip"), 
+                    value: "skip"
+                },
+                {
+                    name: "Add on Top",
+                    name_localizations: inlineChoicesLocale("general.phrases.addontop"), 
+                    value: "addontop"
+                },
             ]
         }, 
         {
@@ -60,12 +68,36 @@ export default {
             required: false,
             type: optionTypes.stringchoices,
             choices: [
-                {name: "Tracks", value: "tracks" },
-                {name: "Artists", value: "artists" },
-                {name: "Playlists", value: "playlists" },
-                {name: "Albums", value: "albums" },
-                {name: "Genre Mixes", value: "mixes" },
-                {name: "Released Albums", value: "releases" },
+                {
+                    name: "Tracks", 
+                    name_localizations: inlineChoicesLocale("general.words.Tracks"),
+                    value: "tracks" 
+                },
+                {
+                    name: "Artists", 
+                    name_localizations: inlineChoicesLocale("general.words.Artists"),
+                    value: "artists" 
+                },
+                {
+                    name: "Playlists", 
+                    name_localizations: inlineChoicesLocale("general.words.Playlists"),
+                    value: "playlists" 
+                },
+                {
+                    name: "Albums", 
+                    name_localizations: inlineChoicesLocale("general.words.Albums"),
+                    value: "albums" 
+                },
+                {
+                    name: "Genre Mixes", 
+                    name_localizations: inlineChoicesLocale("general.words.GenreMixes"),
+                    value: "mixes" 
+                },
+                {
+                    name: "Released Albums",
+                    name_localizations: inlineChoicesLocale("general.words.ReleasedAlbums"),
+                    value: "releases" 
+                },
             ]
         },
     ],
