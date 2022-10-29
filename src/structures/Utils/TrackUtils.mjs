@@ -8,7 +8,7 @@ import * as configData from "../../data/ConfigData.mjs"
  * @typedef { { id:string, name:string, type:string } } creatorDataType
  * @typedef { { id?:string, name?:string, description?:string, isLoved?:boolean, link?:string, image?:string, tracks: any[], tracks?:number, duration?:number, fans?:string, releasedAt?:string, creator?: creatorDataType, __createdByDeezCord?: boolean }|undefined } playlistDataType
  * @typedef { { id?:string, name?:string, label?:string, link?:string, image?:string, genres?:string[], tracks?:number, duration?:number, fans?:string, releasedAt?:string, contributors: [authorDataType], artist?: authorDataType, __createdByDeezCord?: boolean }|undefined } albumDataType
- * @typedef { { title:string, author:string, autoplayCount?: number, fetchedFromDeezer?: boolean, isrc?:string, rank?:string, preview?:string, authorData: authorDataType, thumbnail: string, uri: string, identifier: string, duration?: number, playlistData?: playlistDataType, albumData?: albumDataType } } DeezUnresolvedDataType
+ * @typedef { { title:string, author:string, autoplayCount?: number, fetchedFromDeezer?: boolean, isrc?:string, rank?:string, preview?:string, authorData: authorDataType, thumbnail: string, uri: string, identifier: string, duration?: number, playlistData?: playlistDataType, albumData?: albumDataType, flowTrack?:boolean } } DeezUnresolvedDataType
  */
 
 export class DeezCordTrackUtils {
@@ -18,12 +18,14 @@ export class DeezCordTrackUtils {
     }
     /**
      * 
-     * @param {*} interaction 
-     * @param {*} member 
-     * @param {*} editReply 
+     * @param {import("discord.js").CommandInteraction} interaction 
+     * @param {import("discord.js").GuildMember} member 
+     * @param {boolean} editReply 
+     * @param { {playermustexist?:boolean, playeralreadyexisterror?:boolean} } options
      * @returns {{ player: import("erela.js").Player|null, created: boolean, previousQueue: number }}
      */
-    async createPlayer(interaction, member, editReply) {
+    async createPlayer(interaction, member, editReply, options = {}) {
+        const { playermustexist, playeralreadyexisterror } = options;
         const fn = async (...params) => interaction.replied ? await interaction[editReply ? "editReply" : "followUp"](...params).catch(console.warn) : await interaction.reply(...params).catch(console.warn)
         // if no vc return error
         if (!interaction.channel) return await fn({
@@ -31,7 +33,16 @@ export class DeezCordTrackUtils {
         }), { player: null };
 
         let player = this.client.DeezCord.players.get(interaction.guildId);
-
+        if(playermustexist && (!player)) {
+            return await fn({
+                ephemeral: true, embeds: [new ErrorEmbed().addField(`Not connected`, `> I'm not connected yet.`)]
+            }), { player: null };
+        }
+        if(playermustexist && (!player?.queue?.current?.title)) {
+            return await fn({
+                ephemeral: true, embeds: [new ErrorEmbed().addField(`Nothing playing`, `> I'm nothing playing right now`)]
+            }), { player: null };
+        }
         // get the missing perms.
         const missingPerms = this.client.DeezUtils.perms.getMissingPerms(this.client, interaction.channel, [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.Connect, PermissionFlagsBits.Speak, PermissionFlagsBits.MoveMembers, PermissionFlagsBits.Administrator])
 
@@ -103,6 +114,29 @@ export class DeezCordTrackUtils {
     /** @param {import("discord.js").User|string} requester */
     getRequesterString(requester) {
         return requester?.tag || requester?.username || requester?.id || requester || "Requester";
+    }
+    
+    /**
+     * @param {import("erela.js").Player} player 
+     * @returns {boolean}
+     */
+    autoplayAble(player) {
+        return !!this.autoPlayUser(player);
+    }
+
+    /**
+     * @param {import("erela.js").Player} player 
+     * @returns { {userId:string, accessToken:string, deezerId:string, addTracksPerAutoplayFetchAmount: number} | undefined }
+     */
+    autoPlayUser(player) {
+        const lastTrack = (player.get("current") || player.queue.current || player.get("previous")?.[0] || player.queue.previous);
+        
+        const autoplays = player.get("autoplay") || []; // { userId, deezerId, accessToken }
+        if(autoplays.length) {
+            const autoplayUser = autoplays.find(x => x.userId === (lastTrack?.requester?.id || lastTrack?.requester));
+            if(autoplayUser) return autoplayUser;
+        }
+        return undefined;
     }
     /**
      * @typedef {{line:string|null, lrc_timestamp?:string, milliseconds?:string, duration?:string}} lyricsSincObject
@@ -350,7 +384,7 @@ export class DeezCordTrackUtils {
             identifier: v.id,
             duration: v.duration * 1000,
             playlistData: this.createPlaylistData(playlistData) || null,
-            albumData: this.createAlbumData(albumData) || null,
+            albumData: this.createAlbumData(albumData || v.album) || null,
         };
         if(typeof fetchedFromDeezer !== "undefined") o.fetchedFromDeezer = fetchedFromDeezer;
         if(typeof autoplayCount !== "undefined") o.autoplayCount = autoplayCount;
@@ -665,7 +699,7 @@ export class DeezCordTrackUtils {
                 
             const embed = new Embed().setAuthor({
                     name: `Deezer.com Charts - © Deezcord`,
-                    iconURL: "https://cdn.discordapp.com/emojis/1018174807092760586.webp?size=128&quality=lossless",
+                    iconURL: configData.deezerLogo,
                     url: "https://www.deezer.com/channels/charts"
                 })
                 .setThumbnail(configData.iconURL)

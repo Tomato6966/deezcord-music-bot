@@ -13,6 +13,7 @@ export default async (client, message) => {
     const isPingOfMe = message.mentions?.has?.(client.user.id) || message.mentions?.has?.(guildBotRole);
     
     if(!isPingOfMe) return;
+    if(!client.regex.botMention.test(message.content)) return; // if not first arg mention
     
     if(cool.has(message.channelId)) {
         if(client.DeezUtils.perms.checkPerms(message.channel, PermissionFlagsBits.AddReactions)) return message.react(parseEmoji("🕛")).catch(() => null)

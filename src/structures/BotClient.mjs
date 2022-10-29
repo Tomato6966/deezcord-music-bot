@@ -613,7 +613,6 @@ export function getDefaultClientOptions() {
     return {
         shards: getInfo().SHARD_LIST, // An array of shards that will get spawned
         shardCount: getInfo().TOTAL_SHARDS, // Total number of shards
-
         partials: [
             //Partials.Channel,
             //Partials.Message,

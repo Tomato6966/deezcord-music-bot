@@ -64,10 +64,9 @@ export class APIClient {
         this.discordId = process.env.DISCORD_CLIENT_ID;
         this.discordCallback = `${this.domain}${this.ensurPath(process.env.DISCORD_CLIENT_CALLBACK)}`;
         this.discordLoginLink = `${this.domain}${this.ensurPath(process.env.DISCORD_CLIENT_LOGIN)}`;
-        this.deezerCallback = `${this.ensurPath(process.env.DEEZER_APP_CALLBACK)}`
-        this.deezerAppLogin = `${this.ensurPath(process.env.DEEZER_APP_LOGIN)}`
-        
-    }
+        this.deezerCallback = `${this.ensurPath(process.env.DEEZER_APP_CALLBACK)}`;
+        this.deezerAppLogin = `${this.ensurPath(process.env.DEEZER_APP_LOGIN)}`;
+    };
     ensureDotEnvVariables() {
         if(process.env.DEEZER_API_PORT?.length && (isNaN(process.env.DEEZER_API_PORT) || Number(process.env.DEEZER_API_PORT) > 65535 || Number(process.env.DEEZER_API_PORT) < 1)) throw new SyntaxError("provided 'env#DEEZER_API_PORT' Variable is not a valid Port-Number (must be between 1 and 65535");
         if(!process.env.DEEZER_API_DOMAIN?.length) throw new SyntaxError("Missing correct 'env#DEEZER_API_DOMAIN' input");
@@ -126,12 +125,12 @@ export class APIClient {
                 },
                 data: {
                     deezerToken: null,
-                    deezerId: null,
                     deezerName: null,
                     deezerImage: null,
                 }
             })
         },
+        
         saveDeezerAccount: async (deezerData, discordUserId) => {
             const deezerImage = this.client.DeezUtils.track.getUserImage(deezerData);
             return await this.client.db.userData.upsert({
@@ -177,6 +176,7 @@ export class APIClient {
                 }
             });
         },
+
         /**
          * @param {string} access_token 
          * @param {boolean} [transformStrings] 
@@ -187,7 +187,9 @@ export class APIClient {
             if (typeof access_token !== "string" || !access_token.length) throw new SyntaxError("No Valid access token provided");
             /** @type {DeezerResponseUserData} */
             const res = await this.makeRequest(`user/me?${this.parseAccessToken(access_token)}`)
+            
             res.accessToken = access_token;
+            
             if(res && typeof res == "object" && transformStrings) for(const [k, v] of Object.entries(res)) res[k] = String(v)
             return res;
         },
@@ -353,12 +355,10 @@ export class APIClient {
                 if(all) return await this.fetchAll(`artist/${ID}/top`, undefined, undefined, access_token);
                 return await this.makeRequest(`artist/${ID}/top?limit=${limit && typeof limit == "number" && limit < 101 && limit > 0 ? limit : this.searchLimit}&${this.parseAccessToken(access_token)}`);
             },
-
             track: async (ID, all, access_token) => {
                 if(!access_token && typeof all == "string") access_token = all;
                 return await this.makeRequest(`track/${ID}?${this.parseAccessToken(access_token)}`);
             },
-
             playlist: async (ID, all = true, access_token) => {
                 const res = await this.makeRequest(`playlist/${ID}?${this.parseAccessToken(access_token)}`);
                 if(all && (!(res?.tracks?.data||res?.tracks||[])?.length || (res?.tracks?.data||res?.tracks||[]).length < 100)) {
@@ -553,7 +553,7 @@ export class APIClient {
                     if (!deezerResponseData) throw new Error('Found no User-Data from Deezer.com');
                     
                     /** @type {(import("discord.js").User & { guilds: string[] }) | { id:string, username: string, guilds: string[] } } */
-                    const discordUser = this.client.users.cache.get(request.user.id) || await this.client.users.fetch(request.user.id).catch(console.warn) || request.user || {};
+                    const discordUser = await this.client.users.fetch(request.user.id).catch(console.warn) || request.user || {};
                     if(discordUser && !discordUser.guilds) discordUser.guilds = request.user.guilds
                     
                     /**

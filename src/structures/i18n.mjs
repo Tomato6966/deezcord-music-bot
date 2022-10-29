@@ -1,3 +1,4 @@
+import { Locale } from "discord.js";
 import i18n from "i18n";
 /* // valid localizations for discord.com
   EnglishUS     <-> en-US
@@ -72,4 +73,15 @@ export function inlineLocalization(locale, name, desc) {
 export function inlineLocale(locale, text, ...params) {
     i18n.setLocale(locale)
     return i18n.__(text,  ...params);
+}
+
+export function inlineChoicesLocale(text) {
+  const o = {};
+  i18n.getLocales().forEach(locale => {
+    o[Locale[locale] || locale] = inlineLocale(locale, text);
+  })
+  return o;
+}
+export function inlineDescriptionLocalization(name, text) {
+  return i18n.getLocales().map(locale => inlineLocalization(Locale[locale] || locale, name, text))
 }

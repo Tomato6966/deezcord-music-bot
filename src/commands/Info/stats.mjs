@@ -9,9 +9,9 @@ export default {
     category: "info",
     async execute(client, interaction) {
         const thisStats = await client.DeezUtils.bot.receiveBotInfo();
-        console.log(thisStats);
         /** @type {thisStats[]} */
         const totalData = await client.cluster.broadcastEval("DeezUtils.bot.receiveBotInfo()", { timeout: 10000 }).catch(() => null) || [thisStats];
+        
         await interaction.reply({
             ephemeral: true,
             embeds: [
@@ -25,17 +25,17 @@ export default {
                         text: `${interaction.guild.name} - Cluster #${client.cluster.id} (Shard: #${interaction.guild.shardId})`,
                         iconURL: interaction.guild.iconURL()
                     })
-                    .addField(`Clusters`, `>>> \`\`\`yml\n${client.cluster.info.CLUSTER_COUNT}\n\`\`\``, true)
-                    .addField(`Shards`, `>>> \`\`\`yml\n${client.cluster.info.TOTAL_SHARDS}\n\`\`\``, true)
-                    .addField(`Ping`, `>>> \`\`\`yml\n${client.ws.ping}ms\n\`\`\``, true)
-                    .addField(`Uptime`, `>>> ${inlineLocale(client.getGuildLocale(interaction.guild), `info.uptime.execute.content`, {
+                    .addField(inlineLocale(interaction.guildLocale, `info.stats.execute.names.cluster`), `>>> \`\`\`yml\n${client.cluster.info.CLUSTER_COUNT}\n\`\`\``, true)
+                    .addField(inlineLocale(interaction.guildLocale, `info.stats.execute.names.shards`), `>>> \`\`\`yml\n${client.cluster.info.TOTAL_SHARDS}\n\`\`\``, true)
+                    .addField(inlineLocale(interaction.guildLocale, `info.stats.execute.names.ping`), `>>> \`\`\`yml\n${client.ws.ping}ms\n\`\`\``, true)
+                    .addField(inlineLocale(interaction.guildLocale, `info.stats.execute.names.uptime`), `>>> ${inlineLocale(interaction.guildLocale, `info.uptime.execute.content`, {
                         time: Math.floor((Date.now() + client.uptime) / 1000),
                     })}`)
-                    .addField(`Guilds`, `>>> \`\`\`yml\n${totalData.map(x => x.guilds).reduce((a,b) => a + b, 0)}\n\`\`\``, true)
-                    .addField(`Members`, `>>> \`\`\`yml\n${totalData.map(x => x.members).reduce((a,b) => a + b, 0)}\n\`\`\``, true)
-                    .addField(`Players`, `>>> \`\`\`yml\n${totalData.map(x => x.players).reduce((a,b) => a + b, 0)}\n\`\`\``, true)
-                    .addField(`Ram`, `>>> \`\`\`yml\n${totalData.map(x => x.ram?.heapUsed).reduce((a,b) => a + b, 0)}mb / ${totalData.map(x => x.ram?.rss).reduce((a,b) => a + b, 0)}mb\n\`\`\``, true)
-                    .addField(`Cpu`, `>>> \`\`\`yml\n${thisStats.CPUUsage}%\n\`\`\``, true)
+                    .addField(inlineLocale(interaction.guildLocale, `info.stats.execute.names.guilds`), `>>> \`\`\`yml\n${totalData.map(x => x.guilds).reduce((a,b) => a + b, 0)}\n\`\`\``, true)
+                    .addField(inlineLocale(interaction.guildLocale, `info.stats.execute.names.members`), `>>> \`\`\`yml\n${totalData.map(x => x.members).reduce((a,b) => a + b, 0)}\n\`\`\``, true)
+                    .addField(inlineLocale(interaction.guildLocale, `info.stats.execute.names.players`), `>>> \`\`\`yml\n${totalData.map(x => x.players).reduce((a,b) => a + b, 0)}\n\`\`\``, true)
+                    .addField(inlineLocale(interaction.guildLocale, `info.stats.execute.names.ram`), `>>> \`\`\`yml\n${totalData.map(x => x.ram?.heapUsed).reduce((a,b) => a + b, 0)}mb / ${totalData.map(x => x.ram?.rss).reduce((a,b) => a + b, 0)}mb\n\`\`\``, true)
+                    .addField(inlineLocale(interaction.guildLocale, `info.stats.execute.names.cpu`), `>>> \`\`\`yml\n${thisStats.CPUUsage}%\n\`\`\``, true)
                 ]
         });
     }

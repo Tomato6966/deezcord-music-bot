@@ -15,8 +15,8 @@ export default {
         return interaction.reply({
             embeds: [
                 new Embed()
-                    .setTitle(inlineLocale(client.getGuildLocale(interaction.guild), `account.logout.execute.embedTitle`))
-                    .setDescription(inlineLocale(client.getGuildLocale(interaction.guild), `account.logout.execute.embedDescription`))
+                    .setTitle(inlineLocale(interaction.guildLocale, `account.logout.execute.embedTitle`))
+                    .setDescription(inlineLocale(interaction.guildLocale, `account.logout.execute.embedDescription`))
             ],
             ephemeral: true
         })

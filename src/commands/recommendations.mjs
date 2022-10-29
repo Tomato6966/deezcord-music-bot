@@ -1,7 +1,7 @@
 import { ActionRowBuilder, SelectMenuBuilder } from "@discordjs/builders";
 import { TrackUtils } from "erela.js";
 import { optionTypes } from "../structures/BotClient.mjs";
-import { i18n, inlineLocale, inlineLocalization } from "../structures/i18n.mjs";
+import { i18n, inlineChoicesLocale, inlineLocale, inlineLocalization } from "../structures/i18n.mjs";
 import { ButtonBuilder, ButtonStyle, parseEmoji, Utils } from "discord.js";
 import { handleResSearchFilter } from "./play.mjs";
 
@@ -41,8 +41,16 @@ export default {
             required: false,
             type: optionTypes.stringchoices,
             choices: [
-                {name: "True", value: "true" },
-                {name: "False", value: "false" },
+                {
+                    name: "Yes", 
+                    name_localizations: inlineChoicesLocale("general.words.yes"),
+                    value: "true"
+                },
+                {
+                    name: "No", 
+                    name_localizations: inlineChoicesLocale("general.words.no"),
+                    value: "false"
+                },
             ]
         }, 
         {
@@ -69,7 +77,7 @@ export default {
         if(!accessToken || !deezerId) {
             return await interaction.reply({
                 ephemeral: true,
-                content: inlineLocale(client.getGuildLocale(interaction.guild), "general.errors.usernotloggedin", {
+                content: inlineLocale(interaction.guildLocale, "general.errors.usernotloggedin", {
                     user: `<@${interaction.user.id}>`,
                     command: client.commands.find(c => c.name == "login")?.mention || "\`/account login\`",
                 })
@@ -89,7 +97,7 @@ export default {
 
         await interaction.reply({
             ephemeral: true,
-            content: inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.recommendations.execute.searching`)
+            content: inlineLocale(interaction.guildLocale, `musicrequest.recommendations.execute.searching`)
         });
               
         let searchingTracks = null;
@@ -116,7 +124,7 @@ export default {
         // if song is not readable
         if(searchingTracks?.tracks?.[0]?.readable === false || searchingTracks.data?.readable === false) {
             return await interaction.editReply({ 
-                content: inlineLocale(client.getGuildLocale(interaction.guild), `general.errors.notplayable`, {
+                content: inlineLocale(interaction.guildLocale, `general.errors.notplayable`, {
                     title: searchingTracks.tracks[0]?.title || searchingTracks.data?.title,
                     link: searchingTracks.tracks[0]?.uri || searchingTracks.data?.link,
                 })
@@ -126,18 +134,18 @@ export default {
         const response = searchingTracks ? { data: searchingTracks, loadType, tracks: searchingTracks?.tracks || searchingTracks } : await client.DeezCord.search(query, interaction.user, player.node);
         if(!response.tracks?.length) return interaction.editReply({ 
             ephemeral: true, 
-            content: inlineLocale(client.getGuildLocale(interaction.guild), `general.errors.notracksfound`)
+            content: inlineLocale(interaction.guildLocale, `general.errors.notracksfound`)
         });
         let pick = false;
         const fetchTime = measureTimer.end();
         if(loadType == "TRACKS_FOUND" && pickSearchResult) {
             const msg = await interaction.editReply({
-                content: inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.pickwishedsong`),
+                content: inlineLocale(interaction.guildLocale, `musicrequest.play.execute.pickwishedsong`),
                 components: [
                     new ActionRowBuilder().addComponents([
                         new SelectMenuBuilder()
                         .setCustomId(`${interaction.user.id}_searchpick`)
-                        .setPlaceholder(inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.selectsong`))
+                        .setPlaceholder(inlineLocale(interaction.guildLocale, `musicrequest.play.execute.selectsong`))
                         .addOptions(client.DeezUtils.array.removeDuplicates(response.tracks, "identifier").slice(0, 25).map(v => {
                             return {
                                 label: `${v.title || v.name}`.substring(0, 100), 
@@ -147,7 +155,7 @@ export default {
                         }))
                     ]),
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Danger).setLabel(inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.cancelbutton`)).setCustomId("cancel")
+                        new ButtonBuilder().setStyle(ButtonStyle.Danger).setLabel(inlineLocale(interaction.guildLocale, `musicrequest.play.execute.cancelbutton`)).setCustomId("cancel")
                     ])
                 ],
             });
@@ -155,7 +163,7 @@ export default {
                 const col = msg.createMessageComponentCollector({ filter: x => x.user.id === interaction.user.id, max: 1, time: 60000 });
                 col.on("collect", async (i) => {
                     if(i.customId === "cancel") {
-                        await i.update({ content: inlineLocale(client.getGuildLocale(interaction.guild), `musicrequest.play.execute.cancelledresponse`), components: [] }).catch(() => null);
+                        await i.update({ content: inlineLocale(interaction.guildLocale, `general.phrases.requestCanceled`), components: [] }).catch(() => null);
                         return r(false);
                     } 
                     return r({ interaction: i, track: i.values[0] });

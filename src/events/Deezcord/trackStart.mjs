@@ -1,6 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder } from "@discordjs/builders";
 import { ButtonStyle, parseEmoji } from "discord.js";
 import { Embed } from "../../structures/Embed.mjs";
+import * as configData from "../../data/ConfigData.mjs";
 
 /** 
  * @param {import("../../structures/BotClient.mjs").BotClient} client
@@ -39,7 +40,7 @@ export default async (client, player, track) => {
 
 
     // send now playing message
-    const channel = guild.channels.cache.get(player.textChannel) || await client.channels.fetch(player.textChannel).catch(() => null);
+    const channel = client.channels.cache.get(player.textChannel);
     let msg = null;
     if(channel) {
         const NpEmbed = new Embed().setThumbnail(track.thumbnail)
@@ -55,11 +56,13 @@ export default async (client, player, track) => {
             iconURL: authorData?.image ? `${authorData?.image}` : "https://cdn.discordapp.com/avatars/1032998523123290182/83b2c200dbc11dd5e0a96dc83d600b17.webp?size=256",
             url: authorData?.link ? `${authorData?.link}` : "https://cdn.discordapp.com/avatars/1032998523123290182/83b2c200dbc11dd5e0a96dc83d600b17.webp?size=256"
         })
-
-        if(track.playlistData) {
-            if(track.autoplayCount) {
-                NpEmbed.addField(`📑 Playing of ${track.requester?.tag ?? track.requester?.username ?? 'users'}'s autoplay-recommendations`, `> It's their \`#${track.autoplayCount} autoplayed track\` in the current Session`)
-            } else NpEmbed.addField(`📑 Playing of Playlist`, `> [\`${track.playlistData.name}\`](${track.playlistData.link})`, true)
+        
+        
+        if(track.autoplayCount) {
+            const name = track.requester?.tag ?? track.requester?.username ?? 'users';
+            NpEmbed.addField(track.flowTrack ? `📑 Playing of ${name}'s autoplay Flow` : `📑 Playing of ${name}'s autoplay-recommendations`, `> It's their \`#${track.autoplayCount} autoplayed track\` in the current Session`)
+        } else if(track.playlistData) {
+            NpEmbed.addField(`📑 Playing of Playlist`, `> [\`${track.playlistData.name}\`](${track.playlistData.link})`, true)
         } 
         if(track.albumData) {
             NpEmbed.addField(`Track's album:`, `> [\`${track.albumData.name}\`](${track.albumData.link})`, true)
@@ -72,18 +75,35 @@ export default async (client, player, track) => {
         }
         let secondEmbed = null;
         
-        const addedViaAutoplay = player.get("addedviaautoplay")
+        const addedViaAutoplay = player.get("addedviaautoplay_flow") || player.get("addedviaautoplay");
+        const addedViaFlow = player.get("addedviaautoplay_flow") ? true : false;
         if(addedViaAutoplay) {
+            player.set("addedviaautoplay_flow", undefined);
+            player.set("addedviaautoplay", undefined)
+            const { deezerId, deezerName, deezerImage } = await client.db.userData.findFirst({
+                where: { userId: track.requester?.id }
+            }).catch(() => null) || {};
+            const shortenlink = (link) => {
+                link = link.replace("www.", "");
+                if(link.endsWith("/")) link = link.substring(0, link.length - 1);
+                return link;
+            }
+            const deezerLink = `https://www.deezer.com/profile/${deezerId}`;
+
+            const mapFN = (track, index, extra) => `\`${index+(extra ? 1 : 0)}.\` [\`${client.DeezUtils.time.durationFormatted(track.duration, true)}\`] - ${track.authorData?.link ? `[**${track.authorData.name || track.author}**](${shortenlink(track.authorData.link)})` : `**${track.author}**`}: [${track.title}](${shortenlink(track.uri)})`;
             const icon = track.requester?.avatar && track.requester?.id ? client.rest.cdn.avatar(track.requester?.id, track.requester?.avatar, undefined, undefined, true) : this.client.rest.cdn.DefaultAvatar((track.requester?.discriminator || 6969) % 5);
             secondEmbed = new Embed()
                 .setAuthor({
-                    name: track.requester?.tag || undefined,
-                    iconURL: icon || undefined,
-                    url: client.configData.inviteURL
+                    name: deezerName || undefined,
+                    iconURL: deezerImage || configData.deezerLogo,
+                    url: deezerLink
                 })
                 .setThumbnail(icon || undefined)
-                .addField(`Added ${addedViaAutoplay.length} Tracks via Autoplay`, `> By <@${track.requester.id}>'s recommendations`)
-                .addField(`Tracklist`, `>>> ${addedViaAutoplay.map((track, index) => `\`${index+1}.\` [\`${client.DeezUtils.time.durationFormatted(track.duration, true)}\`] - ${track.authorData?.link ? `[**${track.authorData.name || track.author}**](${track.authorData.link})` : `**${track.author}**`}: [${track.title}](${track.uri})`).join("\n\n")}`)
+                .addField(`Added ${addedViaAutoplay.length} Tracks via Autoplay`, 
+                addedViaFlow ? `> By <@${track.requester.id}>'s Flow-Tracks` : 
+                `> By <@${track.requester.id}>'s recommendations`)
+                .addField(`Current Song`, `>>> ${addedViaAutoplay.slice(0, 1).map((v, i) => mapFN(v, i, false)).join("\n")}`)
+                .addField(`Upcoming tracks - List`, `>>> ${addedViaAutoplay.slice(1, addedViaAutoplay.length).map((v, i) => mapFN(v, i, true)).join("\n\n")}`)
         }
         //NpEmbed.setDescription(`🎶 [**${track.title}**](${track.uri})\n> **Duration:** \` ${client.DeezUtils.time.durationFormatted(track.duration, true)} \`\n> **Requester:** <@${track.requester.id ?? track.requester}>`);
         msg = await channel.send({ 
@@ -91,8 +111,8 @@ export default async (client, player, track) => {
             components: [
                 new ActionRowBuilder().addComponents([
                     new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Link").setURL(track.uri),
-                    track.playlistData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Playlist-Link").setURL(track.playlistData?.link) : undefined,
-                    track.albumData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Album-Link").setURL(track.albumData?.link) : undefined,
+                    // track.playlistData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Playlist-Link").setURL(track.playlistData?.link) : undefined,
+                    // track.albumData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Album-Link").setURL(track.albumData?.link) : undefined,
                 ].filter(Boolean))
             ]
         }).catch(console.warn);
@@ -108,8 +128,7 @@ export default async (client, player, track) => {
             player.queue.current.deezerLyrics = deezerLyrics;
             track.deezerLyrics = deezerLyrics;
         } 
-    }
-    if(!track.geniusLyrics) { // else try to get from genius Lyrics
+    } else if(!track.geniusLyrics) { // else try to get from genius Lyrics
         const geniusLyrics = await client.DeezUtils.track.getLyricsOfGenius(track)
         if(geniusLyrics) {
             player.queue.current.geniusLyrics = geniusLyrics;

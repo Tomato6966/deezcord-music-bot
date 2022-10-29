@@ -7,4 +7,5 @@ export default {
     apiUrl: /^https?:\/\/\w+(\.\w+)*(:[0-9]+)?(\/.*)?$/,
 
     Ipv4Address: /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?!$)|$)){4}$/,
+    botMention: new RegExp(`^<@!?${process.env.DISCORD_CLIENT_ID}>\\s*`),
 }

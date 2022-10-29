@@ -9,7 +9,7 @@ export default {
     async execute(client, interaction) {
         await interaction.reply({
             ephemeral: true,
-            content: inlineLocale(client.getGuildLocale(interaction.guild), `info.uptime.execute.content`, {
+            content: inlineLocale(interaction.guildLocale, `info.uptime.execute.content`, {
                 time: Math.floor((Date.now() + client.uptime) / 1000),
             }) 
         });

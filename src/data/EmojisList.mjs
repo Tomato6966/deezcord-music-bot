@@ -8,7 +8,8 @@ export default {
     ping: createEmojiObject("🏓"),
     uptime: createEmojiObject("🕐"),
     deezer: createEmojiObject("<:Deezer:1035104072396722196>"),
-    deezcord: createEmojiObject("<:Deezcord:1034421754577309756>")
+    deezcord: createEmojiObject("<:Deezcord:1034421754577309756>"),
+    cooldown: createEmojiObject("🕛"),
 }
 
 function createEmojiObject(str) {

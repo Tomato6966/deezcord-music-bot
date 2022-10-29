@@ -16,16 +16,16 @@ export default {
         return interaction.reply({
             embeds: [
                 new Embed()
-                    .setTitle(inlineLocale(client.getGuildLocale(interaction.guild), `account.login.execute.embedTitle`))
-                    .setDescription(inlineLocale(client.getGuildLocale(interaction.guild), `account.login.execute.embedDescription`))
+                    .setTitle(inlineLocale(interaction.guildLocale, `account.login.execute.embedTitle`))
+                    .setDescription(inlineLocale(interaction.guildLocale, `account.login.execute.embedDescription`))
                     .setFooter({
-                        text: inlineLocale(client.getGuildLocale(interaction.guild), `account.login.execute.embedFooter`),
+                        text: inlineLocale(interaction.guildLocale, `account.login.execute.embedFooter`),
                     })
             ],
             components: [
                 new ActionRowBuilder().addComponents([
                     new ButtonBuilder()
-                        .setLabel(inlineLocale(client.getGuildLocale(interaction.guild), `account.login.execute.embedTitle`))
+                        .setLabel(inlineLocale(interaction.guildLocale, `account.login.execute.embedTitle`))
                         .setURL(url)
                         .setStyle(ButtonStyle.Link),
                 ])

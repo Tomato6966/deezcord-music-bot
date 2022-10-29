@@ -2,11 +2,11 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 generator client {
   provider        = "prisma-client-js"
-  // previewFeatures = ["fullTextSearch"]
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
-  provider = env("DATABASE_PROVIDER")
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -45,8 +45,6 @@ enum Languages {
 
 
 
-
-
 // User Data (vote system?)
 model UserData {
   userId              String   @id
@@ -77,7 +75,6 @@ model GuildSettings {
   ephemeralNowPlaying Boolean           @default(true)
   extraData           Json? // can be anything inside a JSON.stringify({});
   DjSettings          DJSettings?
-  DisabledCommands    DisabledCommands?
 }
 
 // DJ Settings per Guild
@@ -89,19 +86,6 @@ model DJSettings {
   djonlycommands String[]      @default(["bassboost", "bettermusiceq", "clearfilters", "echo", "karaoke", "lowpass", "nightcore", "pitch", "rate", "pop", "speed", "rotating", "resume", "rewind", "seek", "shuffle", "skip", "stop", "stoploop", "unshuffle", "volume", "autoplay", "clearqueue", "forward", "jump", "leave", "loop", "move", "pause", "playskip", "playtop", "removedupes", "replay", "tremolo"])
   extraData      Json? // can be anything inside a JSON.stringify({});
 }
-
-// each guild can disable / enable Commands
-model DisabledCommands {
-  guild         GuildSettings @relation(fields: [guildId], references: [guildId])
-  guildId       String        @id
-  commands      String[]
-  slashCommands String[]
-}
-
-
-
-
-
 
 // for saving lyrics in db
 model Lyrics {

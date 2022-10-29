@@ -10,9 +10,11 @@ import { inlineLocale } from "../../../structures/i18n.mjs";
 export default async (client, interaction) => {
     if(interaction.guildId && !interaction.guild) return;
 
-    interaction.user = interaction.user ?? client.users.cache.get(interaction.userId) ?? await client.users.fetch(interaction.userId).catch(() => null);
-    interaction.member = interaction.member ?? interaction.guild.members.cache.get(interaction.user.id) ?? await interaction.guild.members.fetch(interaction.user.id).catch(() => null)
+    interaction.user = interaction.user ?? await client.users.fetch(interaction.userId).catch(() => null);
+    interaction.member = interaction.member ?? await interaction.guild.members.fetch(interaction.user.id).catch(() => null)
     interaction.attachments = new Collection();
+    
+    interaction.guildLocale = client.getGuildLocale(interaction.guildId);
         
     // here we can execute messageCreate functions...
     if(interaction.isUserContextMenuCommand() || interaction.isMessageContextMenuCommand()) return contextMenuHandler(client, interaction);

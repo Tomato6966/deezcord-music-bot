@@ -26,4 +26,5 @@ export default async (client) => {
     }).then(x => {
         x.filter(v => client.guilds.cache.has(v.guildId)).forEach(v => client.DeezCache.locales.set(v.guildId, v.language || EnglishUS));
     });
+    client.regex.botMention = new RegExp(`^<@!?${process.env.DISCORD_CLIENT_ID}>\\s*`);
 }

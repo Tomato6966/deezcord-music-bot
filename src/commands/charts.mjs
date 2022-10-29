@@ -97,21 +97,35 @@ export default {
                 return {
                     label: x.name,
                     value: `${client.deezerURLtoID(x.link)}`.replaceAll(" ", ""),
-                    description: `Top 100 Listend Songs in ${x.name}`,
+                    description: inlineLocale(interaction.guildLocale, "musicrequest.charts.execute.countryPickerDescription", {
+                        country: x.name
+                    }),
                     emoji: x.emoji ? parseEmoji(x.emoji) : undefined
                 }
             }).sort((a,b) => a.label.localeCompare(b.label)), 25)
             let msg = await interaction.reply({
                 ephemeral: true,
-                content: `Please select your wished Country based Charts-Playlist`,
+                content: inlineLocale(interaction.guildLocale, "musicrequest.charts.execute.pleaseSelectCountry", {
+                    country: x.name
+                }),
                 components: [
                     ...options.map((x, i) => {
                         return new ActionRowBuilder().addComponents(new SelectMenuBuilder().setCustomId("picksongs"+i).setPlaceholder(`Select a Country ${i*25}-${i*25 + x.length}`).setOptions(x))
                     }),
                     new ActionRowBuilder().addComponents([
-                        new ButtonBuilder().setStyle(ButtonStyle.Primary).setCustomId(client.deezerURLtoID(topChartsPlaylists.others["World Wide"].link)).setLabel("OR: " + topChartsPlaylists.others["World Wide"].name).setEmoji(parseEmoji(topChartsPlaylists.others["World Wide"].emoji)),
-                        new ButtonBuilder().setStyle(ButtonStyle.Primary).setCustomId(client.deezerURLtoID(topChartsPlaylists.others["Song Catcher"].link)).setLabel("OR: " + topChartsPlaylists.others["Song Catcher"].name).setEmoji(parseEmoji(topChartsPlaylists.others["Song Catcher"].emoji)),
-                        new ButtonBuilder().setStyle(ButtonStyle.Danger).setCustomId("cancel").setLabel("Cancel")
+                        new ButtonBuilder().setStyle(ButtonStyle.Primary)
+                            .setCustomId(client.deezerURLtoID(topChartsPlaylists.others["World Wide"].link))
+                            .setLabel(`${inlineLocale(interaction.guildLocale, "general.words.or")}: ${topChartsPlaylists.others["World Wide"].name}`)
+                            .setEmoji(parseEmoji(topChartsPlaylists.others["World Wide"].emoji)),
+
+                        new ButtonBuilder().setStyle(ButtonStyle.Primary)
+                            .setCustomId(client.deezerURLtoID(topChartsPlaylists.others["Song Catcher"].link))
+                            .setLabel(`${inlineLocale(interaction.guildLocale, "general.words.or")}: ${topChartsPlaylists.others["Song Catcher"].name}`)
+                            .setEmoji(parseEmoji(topChartsPlaylists.others["Song Catcher"].emoji)),
+
+                        new ButtonBuilder()
+                            .setStyle(ButtonStyle.Danger).setCustomId("cancel")
+                            .setLabel(inlineLocale(interaction.guildLocale, "general.words.cancel"))
                     ])
                 ].slice(0, 5)
             });
@@ -119,7 +133,7 @@ export default {
                 const col = msg.createMessageComponentCollector({ filter: x => x.user.id === interaction.user.id, max: 1, time: 60000 });
                 col.on("collect", async (i) => {
                     if(i.customId === "cancel") {
-                        await i.update({ content: "Cancelled", components: [] }).catch(() => null);
+                        await i.update({ content: inlineLocale(interaction.guildLocale, "general.phrases.requestCanceled"), components: [] }).catch(() => null);
                         return r(false);
                     } 
                     return r({ interaction: i, track: i.isButton() ? i.customId : i.values[0] });
@@ -136,8 +150,6 @@ export default {
 
             const fetchTime = measureTimer.end();
             return handleChartsPlaylist(client, interaction, res, player, { fetchTime, ...data, created, previousQueue, skipSong, addSongToTop })
-
-            return 
         } else if(chartCountryPlaylist && !takeSpecific) {
             const takes = {
                 "worldwide": "World Wide",
@@ -146,7 +158,9 @@ export default {
             const data = topChartsPlaylists.others[takes[chartCountryPlaylist]] || topChartsPlaylists.others["World Wide"];
             await interaction.reply({
                 ephemeral: true,
-                content: `Now searching for the ${data.name} Charts Tracks`
+                content: inlineLocale(interaction.guildLocale, "musicrequest.charts.execute.searchingForChartTracks", {
+                    chartTracksName: data.name
+                })
             });
             const measureTimer = new client.DeezUtils.time.measureTime();
             const res = await client.DeezApi.deezer.fetch.playlist(client.deezerURLtoID(data.link), true, access_token).then(v => finishFetcher(client, v, "playlist", interaction.user)).catch(errorCatcher);

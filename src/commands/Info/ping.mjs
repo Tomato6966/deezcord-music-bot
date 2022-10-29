@@ -9,7 +9,7 @@ export default {
     async execute(client, interaction) {
         await interaction.reply({
             ephemeral: true,
-            content: inlineLocale(client.getGuildLocale(interaction.guild), `info.ping.execute.content`, {
+            content: inlineLocale(interaction.guildLocale, `info.ping.execute.content`, {
                 wsPing: client.ws.ping
             })
         });

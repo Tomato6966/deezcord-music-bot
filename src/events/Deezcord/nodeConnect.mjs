@@ -8,6 +8,7 @@ export default async (client, node) => {
     if(node.reconnectAttempts > 1) node.reconnectAttempts = 1;
 }
 
+
 // all DeezCord Events
 // nodeCreate
 // nodeDestroy

@@ -21,7 +21,7 @@ export default {
             embed.addField("Deezer profile ID", `> \`${deezerId}\``)
             embed.addField("Deezer profile Display-Name", `> \`${deezerName}\``)
             if(deezerImage) embed.setThumbnail(deezerImage)
-        } else embed.setDescription(inlineLocale(client.getGuildLocale(interaction.guild), "general.errors.usernotloggedin", {
+        } else embed.setDescription(inlineLocale(interaction.guildLocale, "general.errors.usernotloggedin", {
             user: interaction.targetUser?.tag ? `**${interaction.targetUser?.tag}**` : `<@${interaction.targetId}>`,
             command: client.commands.find(c => c.name == "login")?.mention || "\`/account login\`",
         }));

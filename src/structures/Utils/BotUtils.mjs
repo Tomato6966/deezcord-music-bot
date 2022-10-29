@@ -4,9 +4,11 @@ export class DeezCordBotUtils {
     /** @param {import("../BotClient.mjs").BotClient} client */
     constructor(client) {
         this.client = client;
+        this.botinfoCache = null;
     }
     async receiveBotInfo () {
         try {
+            if(this.botinfoCache && this.botinfoCache.validUntil >= Date.now()) return this.botinfoCache;
             const cluster = this.client.cluster.id;
             const shards = this.client.cluster.ids.map(d => `#${d.id}`).join(", ");
             const guilds = this.client.guilds.cache.size;
@@ -25,7 +27,10 @@ export class DeezCordBotUtils {
             const CPUUsage = await this.receiveCPUUsage();
             const players = this.client.DeezCord.players.size;
             const uptime = this.client.uptime;
-            return { cluster, shards, guilds, members, ram, CPUUsage, players, uptime, ping, dbPing, memory };
+            this.botinfoCache = { 
+                cluster, shards, guilds, members, ram, CPUUsage, players, uptime, ping, dbPing, memory, validUntil: Date.now() + 120000
+            };
+            return this.botinfoCache;
         } catch (e) {
             console.error(e);
             return { cluster: client.cluster.id, e }

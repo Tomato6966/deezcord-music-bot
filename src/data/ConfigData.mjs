@@ -18,3 +18,6 @@ export const deleteMentionInfoAfter = 30000;
 
 
 export const addTracksPerAutoplayFetchAmount = 5; // how many tracks to add after each autoplay recommendations fetch (maximum)
+
+
+export const deezerLogo = "https://cdn.discordapp.com/emojis/1018174807092760586.webp?size=128&quality=lossless";

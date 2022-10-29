@@ -81,5 +81,37 @@
 		"recommendations": {
 			"description": "Play/Enqueue recommended tracks/albums/releases"
 		}
+	},
+	"queuesettings": {
+		"autoplay": {
+			"description": "Toggle autoplaying recommendations",
+			"options": {
+				"add_tracks_per_fetch": "How many tracks to add, per each Autoplay-fetch. (Default: 5)",
+				"tracks_requesting_type": "Do you want to get the Tracks from your FLOW / Recommendatios?",
+				"stringoptions": {
+					"flow": "Deezer Flow AI (New)",
+					"recommendations": "Recommendations (Default)"
+				}
+			}
+		}
+	},
+	"songmanipulation": {
+		"seek": {
+			"description": "Seek the current Song",
+			"options": {
+				"forward_amount": "For how many seconds, do you want to seek forwards? (Default 20) [Overwrites rewind]",
+				"seek_amount": "To which second to seek to? [Overwrites forward & rewind]",
+				"rewind_amount": "For how many seconds, do you want to seek backwards?",
+				"replay_song": "Do you want to replay the song? [Overwrites all]"
+			}
+		},
+		"autoplay": {
+			"options": {
+				"forward_amount": "songmanipulation.autoplay.options.forward_amount",
+				"seek_amount": "songmanipulation.autoplay.options.seek_amount",
+				"rewind_amount": "songmanipulation.autoplay.options.rewind_amount",
+				"replay_song": "songmanipulation.autoplay.options.replay_song"
+			}
+		}
 	}
 }

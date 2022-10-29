@@ -133,7 +133,7 @@ export function isOnCooldown(client, command, ctx) {
                 embeds: [
                     new Embed()
                     .setColor(resolveColor("#ff0000"))
-                    .addField(`${Emoji(ctx).Cooldown.str} Ayo, Commandcooldown`, `> You can use this Command \`${client.DeezUtils.time.onlySecondDuration(commandCooldown - Date.now())}\``)
+                    .addField(`${client.DeezEmojis.cooldown.str} Ayo, Commandcooldown`, `> You can use this Command \`${client.DeezUtils.time.onlySecondDuration(commandCooldown - Date.now())}\``)
                 ],
             }).catch(() => null), true;
         }
@@ -149,7 +149,7 @@ export function isOnCooldown(client, command, ctx) {
                 embeds: [
                     new Embed()
                     .setColor(resolveColor("#ff0000"))
-                    .addField(`${Emoji(ctx).Cooldown.str} Ayo, Guildcooldown`, `> This Guild can use this Command \`${client.DeezUtils.time.onlySecondDuration(commandCooldown - Date.now())}\``)
+                    .addField(`${client.DeezEmojis.cooldown.str} Ayo, Guildcooldown`, `> This Guild can use this Command \`${client.DeezUtils.time.onlySecondDuration(commandCooldown - Date.now())}\``)
                 ],
             }).catch(() => null), true;
         }
@@ -165,7 +165,7 @@ export function isOnCooldown(client, command, ctx) {
             embeds: [
                 new Embed()
                 .setColor(resolveColor("#ff0000"))
-                .addField(`${Emoji(ctx).Cooldown.str} Ayo, Slowdown`, `> You only get to use ${maximumCoolDownCommands.amount} Commands per ${maximumCoolDownCommands.time / 1000} Seconds`)
+                .addField(`${client.DeezEmojis.cooldown.str} Ayo, Slowdown`, `> You only get to use ${maximumCoolDownCommands.amount} Commands per ${maximumCoolDownCommands.time / 1000} Seconds`)
             ],
         }).catch(() => null), true;
     }

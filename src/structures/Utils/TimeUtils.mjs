@@ -129,9 +129,9 @@ export class DeezCordTimeUtils {
             value -= res * cur;
             return [...acc, res];
         }, []).map((v, i, a) => i <= 1 && v === 0 ? undefined : [
-            i === 4 ? "." : "", // prefix for ms
-            inputAsMs && !displayMs && i === a.length - 1 ? `${v < 10 ? `00${v}` : v < 100 ? `0${v}` : v}` : `${v < 10 ? `0${v}` : v}`, // format time to (days, hrs, mins): 00 or ms: 001
-            i === 1 || i === 2 ? ":" : i === 0 ? " Days, " : "" // suffix for days, hhs, mins
+            /* prefix */ i === 4 ? "." : "", // prefix for ms
+            /*  time  */ inputAsMs && !displayMs && i === a.length - 1 ? `${v < 10 ? `00${v}` : v < 100 ? `0${v}` : v}` : `${v < 10 ? `0${v}` : v}`, // format time to (days, hrs, mins): 00 or ms: 001
+            /* suffix */ [" Days, ", ":", ":", "", ""][i] // suffix for days, hhs, mins
         ].join("")).filter(Boolean).slice(0, (inputAsMs && !displayMs ? -1 : 5)).join("") 
     }
     /**
