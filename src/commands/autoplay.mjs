@@ -45,8 +45,6 @@ export default {
             where: { userId : interaction.user.id }, select: { deezerToken: true, deezerId: true }
         }).catch(() => {}) || {};
 
-        if(!client.DeezUtils.track.isDjAllowed(interaction, interaction.member, "autoplay", player));
-
         if(!accessToken || !deezerId) {
             return await interaction.reply({
                 ephemeral: true,
@@ -62,6 +60,8 @@ export default {
 
         const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction, interaction.member, false, { playermustexist: true });
         if(!player) return;
+
+        if(!client.DeezUtils.track.isDjAllowed(interaction, interaction.member, "autoplay", player));
 
         const addTracksPerFetch = Number(interaction.options.getNumber("add_tracks_per_fetch"));
         const useFlowInstead = interaction.options.getString("tracks_requesting_type") === "flow";
