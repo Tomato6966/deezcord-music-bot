@@ -57,6 +57,8 @@ export default {
         const { player } = await client.DeezUtils.track.createPlayer(interaction, interaction.member, false, { playermustexist: true });
         if(!player) return;
         
+        if(!client.DeezUtils.track.isDjAllowed(interaction, interaction.member, "seek", player));
+
         const shouldReplay = interaction.options.getString("replay_song") && interaction.options.getString("replay_song") == "True";
         
         const trackTimeInSec = Math.floor(player.queue.current.duration / 1000)

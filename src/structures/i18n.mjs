@@ -1,3 +1,4 @@
+import { Languages } from "@prisma/client";
 import { Locale } from "discord.js";
 import i18n from "i18n";
 /* // valid localizations for discord.com
@@ -34,11 +35,7 @@ import i18n from "i18n";
 */
 export function init() {
     i18n.configure({
-        locales: [
-            "EnglishUS",
-            "EnglishGB",
-            "German",
-        ],
+        locales: Object.keys(Languages),
         defaultLocale: "EnglishUS",
         directory: `${process.cwd()}/src/data/locales`,
         retryInDefaultLocale: true,

@@ -1,7 +1,8 @@
 import { ActionRowBuilder, ButtonBuilder } from "@discordjs/builders";
-import { ButtonStyle, parseEmoji } from "discord.js";
+import { ButtonStyle, GuildAuditLogs, parseEmoji } from "discord.js";
 import { Embed } from "../../structures/Embed.mjs";
 import * as configData from "../../data/ConfigData.mjs";
+import { inlineLocale } from "../../structures/i18n.mjs";
 
 /** 
  * @param {import("../../structures/BotClient.mjs").BotClient} client
@@ -38,13 +39,14 @@ export default async (client, player, track) => {
     }
     // track.deezerLyrics || track.geniusLyrics;
 
+    const guildLocale = client.getGuildLocale(player.guild)
 
     // send now playing message
     const channel = client.channels.cache.get(player.textChannel);
     let msg = null;
     if(channel) {
         const NpEmbed = new Embed().setThumbnail(track.thumbnail)
-        NpEmbed.addField(`🎶 **${track.title}**`, `>>> **Duration:** \` ${client.DeezUtils.time.durationFormatted(track.duration, true)} \`\n**Requester:** <@${track.requester.id ?? track.requester}>`)
+        NpEmbed.addField(`🎶 **${track.title}**`, `>>> **${inlineLocale(guildLocale, "general.words.duration")}:** \` ${client.DeezUtils.time.durationFormatted(track.duration, true)} \`\n**${inlineLocale(guildLocale, "general.words.requester")}:** <@${track.requester.id ?? track.requester}>`)
         
         const authorData = await client.DeezUtils.track.fetchAuthorData(track.authorData, track?.requester?.accessToken);
         // update queue datas
@@ -60,17 +62,19 @@ export default async (client, player, track) => {
         
         if(track.autoplayCount) {
             const name = track.requester?.tag ?? track.requester?.username ?? 'users';
-            NpEmbed.addField(track.flowTrack ? `📑 Playing of ${name}'s autoplay Flow` : `📑 Playing of ${name}'s autoplay-recommendations`, `> It's their \`#${track.autoplayCount} autoplayed track\` in the current Session`)
+            NpEmbed.addField(track.flowTrack ? 
+                inlineLocale(guildLocale, "trackstart.autoplayflow", { name }) : inlineLocale(guildLocale, "trackstart.autoplayrecommendation", { name }), 
+                inlineLocale(guildLocale, "trackstart.requester", { autoplayCount: track.autoplayCount }))
         } else if(track.playlistData) {
-            NpEmbed.addField(`📑 Playing of Playlist`, `> [\`${track.playlistData.name}\`](${track.playlistData.link})`, true)
+            NpEmbed.addField(inlineLocale(guildLocale, "trackstart.playingplaylist"), `> [\`${track.playlistData.name}\`](${track.playlistData.link})`, true)
         } 
         if(track.albumData) {
-            NpEmbed.addField(`Track's album:`, `> [\`${track.albumData.name}\`](${track.albumData.link})`, true)
+            NpEmbed.addField(`${inlineLocale(guildLocale, "trackQueryAdding.tracksalbum")}:`, `> [\`${track.albumData.name}\`](${track.albumData.link})`, true)
         }
 
         if(track.fetchTime) {
             NpEmbed.setFooter({
-                text: `Took ${track.fetchTime}ms until playing the Song.`
+                text: inlineLocale(guildLocale, "trackstart.tooktime", { time: track.fetchTime })
             })
         }
         let secondEmbed = null;
@@ -99,20 +103,16 @@ export default async (client, player, track) => {
                     url: deezerLink
                 })
                 .setThumbnail(icon || undefined)
-                .addField(`Added ${addedViaAutoplay.length} Tracks via Autoplay`, 
-                addedViaFlow ? `> By <@${track.requester.id}>'s Flow-Tracks` : 
-                `> By <@${track.requester.id}>'s recommendations`)
-                .addField(`Current Song`, `>>> ${addedViaAutoplay.slice(0, 1).map((v, i) => mapFN(v, i, false)).join("\n")}`)
-                .addField(`Upcoming tracks - List`, `>>> ${addedViaAutoplay.slice(1, addedViaAutoplay.length).map((v, i) => mapFN(v, i, true)).join("\n\n")}`)
+                .addField(inlineLocale(guildLocale, "trackstart.addedautoplay", { amount: addedViaAutoplay.length }), 
+                addedViaFlow ? inlineLocale(guildLocale, "trackstart.byflowtracks", { ping: `<@${track.requester.id}>` }) : inlineLocale(guildLocale, "trackstart.byflowtracks", { ping: `<@${track.requester.id}>` }))
+                .addField(inlineLocale(guildLocale, "trackstart.currentsong"), `>>> ${addedViaAutoplay.slice(0, 1).map((v, i) => mapFN(v, i, false)).join("\n")}`)
+                .addField(inlineLocale(guildLocale, "trackstart.upcomingsongs"), `>>> ${addedViaAutoplay.slice(1, addedViaAutoplay.length).map((v, i) => mapFN(v, i, true)).join("\n\n")}`)
         }
-        //NpEmbed.setDescription(`🎶 [**${track.title}**](${track.uri})\n> **Duration:** \` ${client.DeezUtils.time.durationFormatted(track.duration, true)} \`\n> **Requester:** <@${track.requester.id ?? track.requester}>`);
         msg = await channel.send({ 
             embeds: [ NpEmbed, secondEmbed ].filter(Boolean),
             components: [
                 new ActionRowBuilder().addComponents([
                     new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Link").setURL(track.uri),
-                    // track.playlistData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Playlist-Link").setURL(track.playlistData?.link) : undefined,
-                    // track.albumData?.link ? new ButtonBuilder().setStyle(ButtonStyle.Link).setEmoji(client.DeezEmojis.deezer.parsed).setLabel("Album-Link").setURL(track.albumData?.link) : undefined,
                 ].filter(Boolean))
             ]
         }).catch(console.warn);

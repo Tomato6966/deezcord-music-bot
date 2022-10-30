@@ -45,6 +45,8 @@ export default {
             where: { userId : interaction.user.id }, select: { deezerToken: true, deezerId: true }
         }).catch(() => {}) || {};
 
+        if(!client.DeezUtils.track.isDjAllowed(interaction, interaction.member, "autoplay", player));
+
         if(!accessToken || !deezerId) {
             return await interaction.reply({
                 ephemeral: true,

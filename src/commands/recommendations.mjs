@@ -3,16 +3,7 @@ import { TrackUtils } from "erela.js";
 import { optionTypes } from "../structures/BotClient.mjs";
 import { i18n, inlineChoicesLocale, inlineLocale, inlineLocalization } from "../structures/i18n.mjs";
 import { ButtonBuilder, ButtonStyle, parseEmoji, Utils } from "discord.js";
-import { handleResSearchFilter } from "./play.mjs";
-
-const fetchKeysForRecommendations = {
-    releases: "album",
-    mixes: "mix",
-    albums: "album",
-    playlists: "playlist",
-    artists: "artist",
-    tracks: "track",
-}
+import { handleResSearchFilter, optionKeyToFetch } from "./play.mjs";
 
 const errorCatcher = (e) => { console.warn(e); return null; };
 
@@ -122,6 +113,8 @@ export default {
         const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction, interaction.member, true);
         if(!player) return;
 
+        if(!client.DeezUtils.track.isDjAllowed(interaction, interaction.member, "recommendations", player));
+
         const skipSong = interaction.options.getString("queueaction") && interaction.options.getString("queueaction") === "skip";
         const addSongToTop = interaction.options.getString("queueaction") && interaction.options.getString("queueaction") === "addontop";
         const searchFilter = interaction.options.getString("query_search_filter")?.replace?.("genre_mix", "mixes/genre");
@@ -141,7 +134,7 @@ export default {
             // end the timer
             measureTimer.end();
             // return the util function
-            return handleResSearchFilter(client, interaction, res, fetchKeysForRecommendations[searchFilter], skipSong, addSongToTop, accessToken)
+            return handleResSearchFilter(client, interaction, res, optionKeyToFetch[searchFilter], skipSong, addSongToTop, accessToken)
         } else { // else search for a track
             searchingTracks = await client.DeezApi.user.recommendations.tracks(deezerId, accessToken, 50).then(x => {
                 return { data: x, tracks: (x?.data || [])
@@ -234,7 +227,7 @@ export default {
             });
             if(!player.paused && !player.playing) player.pause(false);
 
-            return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response.data, response.tracks || [], response.loadType, false, player))}).catch(console.warn);
+            return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response.data, response.tracks || [], response.loadType, false, player, { guildLocale: interaction.guildLocale }))}).catch(console.warn);
         } else {
             // add fetchTime, only if song is the next song
             if(skipSong) response.tracks[0].fetchTime = fetchTime;
@@ -243,7 +236,7 @@ export default {
             else player.queue.splice(0, 0, ...(loadAllTracks ? response.tracks : [response.tracks[0]]));
             if(skipSong) player.stop();
 
-            return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response.data, response.tracks || [], response.loadType, true, player, { skipSong, addSongToTop }))}).catch(console.warn);
+            return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response.data, response.tracks || [], response.loadType, true, player, { skipSong, addSongToTop, guildLocale: interaction.guildLocale }))}).catch(console.warn);
         }
     }
 }

@@ -113,5 +113,22 @@
 				"replay_song": "songmanipulation.autoplay.options.replay_song"
 			}
 		}
+	},
+	"general": {
+		"words": {
+			"Skip": "Skip",
+			"yes": "Yes",
+			"no": "No",
+			"Tracks": "Tracks",
+			"Artists": "Artists",
+			"Playlists": "Playlists",
+			"Albums": "Albums",
+			"GenreMixes": "Genre Mixes",
+			"Podcasts": "Podcasts",
+			"ReleasedAlbums": "Released Albums"
+		},
+		"phrases": {
+			"addontop": "Add on Top"
+		}
 	}
 }

@@ -136,14 +136,16 @@ export class BotClient extends Client {
         Object.entries(this.DeezEmojis).forEach(([k, v]) => o[`${k}Emoji`] = v.str);
         return o;
     }
-    /** @param {Guild} guild */
+    /** @param {Guild | string} guild or guildId */
     getGuildLocale(guild) {
-        if(this.DeezCache.locales.has(guild.id)) return this.DeezCache.locales.get(guild.id);
+        const id = typeof guild === "string" ? guild : guild?.id || guild.toString();
+        if(!id) return Locales.EnglishUS;
+        if(this.DeezCache.locales.has(id)) return this.DeezCache.locales.get(id);
         // if not in cache, set it from db in cache, and then return default ("EnglishUS");  
         const locale = this.db.guildSettings.findFirst({
-            where: { guildId: guild.id }, select: { language: true }
-        }).then(x => this.DeezCache.locales.set(guild.id, x?.language || Locales.EnglishUS))
-        .catch(() => this.DeezCache.locales.set(guild.id, Locales.EnglishUS))
+            where: { guildId: id }, select: { language: true }
+        }).then(x => this.DeezCache.locales.set(id, x?.language || Locales.EnglishUS))
+        .catch(() => this.DeezCache.locales.set(id, Locales.EnglishUS))
         return Locales.EnglishUS;
     }
     translate (locale, text, param) {

@@ -13,14 +13,16 @@ const loadTypes = {
     "radio": "MIXES_LOADED",
     "mixes/genre": "MIXES_LOADED",
 }
-const searchFilterMethods = {
-    "artist": "artists",
-    "playlist": "playlists",
-    "album": "albums",
-    "radio": "mixes", // "mixes"
-    "mixes/genre": "mixes",
+export const optionKeyToFetch = {
+    releases: "album",
+    mixes: "mix",
+    "genre_mix": "mix",
+    "mixes/genre": "mix",
+    albums: "album",
+    playlists: "playlist",
+    artists: "artist",
+    tracks: "track",
 }
-
 const errorCatcher = (e) => { console.warn(e); return null; };
 
 /** @type {import("../data/DeezCordTypes.mjs").CommandExport} */ 
@@ -127,12 +129,13 @@ export default {
         const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction, interaction.member, true);
         if(!player) return;
 
+        if(!client.DeezUtils.track.isDjAllowed(interaction, interaction.member, "play", player));
+
         let query = interaction.options.getString("query");
         const skipSong = interaction.options.getString("queueaction") && interaction.options.getString("queueaction") === "skip";
         const addSongToTop = interaction.options.getString("queueaction") && interaction.options.getString("queueaction") === "addontop";
         const searchFilter = interaction.options.getString("query_search_filter")?.replace?.("genre_mix", "mixes/genre");
         const pickSearchResult = interaction.options.getString("pick_searchresult") && interaction.options.getString("pick_searchresult") === "true"
-
         const { deezerToken: accessToken, deezerId } = await client.db.userData.findFirst({
             where: { userId : interaction.user.id }, select: { deezerToken: true, deezerId: true }
         }).catch(() => {}) || {};
@@ -174,12 +177,12 @@ export default {
                     query: client.regex.GeneralURL.test(query) ? `<${query}>` : `${query}`,
                 })
             })
-        } else if(searchFilter && searchFilterMethods[searchFilter] && searchFilter !== "track") { // search something, but not a track
-            const res = await client.DeezApi.deezer.search[`${searchFilterMethods[searchFilter]}`](query, 25, accessToken);
+        } else if(searchFilter && searchFilter && searchFilter !== "track") { // search something, but not a track
+            const res = await client.DeezApi.deezer.search[searchFilter](query, 25, accessToken);
             // end the timer
             measureTimer.end();
             // return the util function
-            return handleResSearchFilter(client, interaction, res, searchFilter, skipSong, addSongToTop, accessToken)
+            return handleResSearchFilter(client, interaction, res, optionKeyToFetch[searchFilter], skipSong, addSongToTop, accessToken)
         } else { // else search for a track
             searchingTracks = await client.DeezApi.deezer.search.tracks(query, 25, accessToken).then(x => {
                 return { data: x, tracks: (x?.data || [])
@@ -272,7 +275,7 @@ export default {
             });
             if(!player.paused && !player.playing) player.pause(false);
 
-            return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response.data, response.tracks || [], response.loadType, false, player))}).catch(console.warn);
+            return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response.data, response.tracks || [], response.loadType, false, player, { guildLocale: interaction.guildLocale }))}).catch(console.warn);
         } else {
             // add fetchTime, only if song is the next song
             if(skipSong) response.tracks[0].fetchTime = fetchTime;
@@ -281,7 +284,7 @@ export default {
             else player.queue.splice(0, 0, ...(loadAllTracks ? response.tracks : [response.tracks[0]]));
             if(skipSong) player.stop();
 
-            return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response.data, response.tracks || [], response.loadType, true, player, { skipSong, addSongToTop }))}).catch(console.warn);
+            return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response.data, response.tracks || [], response.loadType, true, player, { skipSong, addSongToTop, guildLocale: interaction.guildLocale }))}).catch(console.warn);
         }
     }
 }
@@ -373,6 +376,7 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
         });
         const measureTimer = new client.DeezUtils.time.measureTime();
 
+
         const data = await client.DeezApi.deezer.fetch[type == "mixes/genre" ? "mix" : type](id, true, accessToken);
         if(data.tracks.length) {
             
@@ -400,7 +404,7 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
                 //if(!player.queue.current.uri && contentURL) player.queue.current.uri = contentURL;
                 if(!player.paused && !player.playing) player.pause(false);
                 
-                return await i.editReply({...(await client.DeezUtils.track.transformMessageData(data, responsedTracks, type, false, player))}).catch(console.warn);
+                return await i.editReply({...(await client.DeezUtils.track.transformMessageData(data, responsedTracks, type, false, player, { guildLocale: interaction.guildLocale }))}).catch(console.warn);
 
             } else {
                 if(skipSong) responsedTracks[0].fetchTime = fetchTime;
@@ -409,7 +413,7 @@ export async function handleResSearchFilter(client, interaction, res, type, skip
                 else player.queue.splice(0, 0, ...responsedTracks);
                 if(skipSong) player.stop();
 
-                return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(data, responsedTracks, type, true, player, { skipSong, addSongToTop }))}).catch(console.warn);
+                return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(data, responsedTracks, type, true, player, { skipSong, addSongToTop, guildLocale: interaction.guildLocale }))}).catch(console.warn);
             }
         } else {
             i.editReply({

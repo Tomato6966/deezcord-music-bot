@@ -1,5 +1,5 @@
 import { optionTypes } from "../structures/BotClient.mjs";
-import { inlineLocale } from "../structures/i18n.mjs";
+import { inlineDescriptionLocalization, inlineLocale } from "../structures/i18n.mjs";
 
 /** @type {import("../data/DeezCordTypes.mjs").CommandExport} */ 
 export default {
@@ -26,6 +26,8 @@ export default {
         const { player } = await client.DeezUtils.track.createPlayer(interaction, interaction.member, false, { playermustexist: true });
         if(!player) return;
         
+        if(!client.DeezUtils.track.isDjAllowed(interaction, interaction.member, "skip", player));
+
         if(!player.queue.size && !client.DeezUtils.track.autoplayAble(player)) {
             return interaction.reply({
                 ephemeral: true,

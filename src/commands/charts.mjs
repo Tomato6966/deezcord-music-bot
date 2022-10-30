@@ -4,7 +4,7 @@ import { TrackUtils } from "erela.js";
 import { topChartsPlaylists } from "../data/ChartPlaylists.mjs";
 import { optionTypes } from "../structures/BotClient.mjs";
 import { i18n, inlineChoicesLocale, inlineLocale, inlineLocalization } from "../structures/i18n.mjs";
-import { finishFetcher, handleResSearchFilter } from "./play.mjs";
+import { finishFetcher, handleResSearchFilter, optionKeyToFetch } from "./play.mjs";
 
 const errorCatcher = (e) => { console.warn(e); return null; };
 
@@ -109,6 +109,8 @@ export default {
         const { player, created, previousQueue } = await client.DeezUtils.track.createPlayer(interaction, interaction.member, true);
         if(!player) return;
 
+        if(!client.DeezUtils.track.isDjAllowed(interaction, interaction.member, "charts", player));
+
         const searchFilter = interaction.options.getString("query_search_filter");
         const limit = interaction.options.getNumber("limit") && isNaN(interaction.options.getNumber("limit")) ? Number(interaction.options.getNumber("limit")) : 100;
         const skipSong = interaction.options.getString("queueaction") && interaction.options.getString("queueaction") === "skip";
@@ -198,10 +200,9 @@ export default {
         } else {
             await interaction.reply({
                 ephemeral: true,
-                content: `Now searching the charts${searchFilter ? `for \`${searchFilter}\`` : ``}`
+                content: searchFilter ? inlineLocale(interaction.guildLocale, "musicrequest.charts.execute.searchingforchartsgeneral") : inlineLocale(interaction.guildLocale, "musicrequest.charts.execute.searchingforchartsfilter", { query: searchFilter })
             });
         }
-
 
         let searchingTracks = [];
         
@@ -216,7 +217,7 @@ export default {
         else if(searchFilter) {
             const res = await client.DeezApi.deezer.charts[searchFilter](limit > 25 ? 25 : limit, access_token);
             measureTimer.end();
-            return handleResSearchFilter(client, interaction, res, searchFilter?.endsWith("s") ? searchFilter.substring(0, searchFilter.length - 1) : searchFilter, skipSong, addSongToTop)
+            return handleResSearchFilter(client, interaction, res, optionKeyToFetch[searchFilter], skipSong, addSongToTop)
         }
         else { // search all ?
             searchingTracks = await client.DeezApi.deezer.charts.tracks(limit, access_token).then(x => {
@@ -230,7 +231,7 @@ export default {
         const response = searchingTracks ? { data: searchingTracks, loadType: `CHARTS_LOADED`, tracks: searchingTracks?.tracks || searchingTracks } : null;
         if(!response?.tracks?.length) return interaction.editReply({
             ephemeral: true,
-            content: `${client.DeezEmojis.error.str} No Tracks found`
+            content: inlineLocale(interaction.guildLocale, "general.errors.notracksfound")
         });
 
         // if a player was created, or the previous queue was empty, or there was no player before
@@ -250,7 +251,7 @@ export default {
             });
             if(!player.paused && !player.playing) player.pause(false);
             
-            return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response.data, response.tracks || [], response.loadType, false, player))}).catch(console.warn);
+            return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response.data, response.tracks || [], response.loadType, false, player, { guildLocale: interaction.guildLocale }))}).catch(console.warn);
         } else {
             // add fetchTime, only if song is the next song
             if(skipSong) response.tracks[0].fetchTime = fetchTime;
@@ -259,7 +260,7 @@ export default {
             else player.queue.splice(0, 0, ...response.tracks);
             if(skipSong) player.stop();
             
-            return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response.data, response.tracks || [], response.loadType, true, player, { skipSong, addSongToTop }))}).catch(console.warn);
+            return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response.data, response.tracks || [], response.loadType, true, player, { skipSong, addSongToTop, guildLocale: interaction.guildLocale }))}).catch(console.warn);
         }
     }
 }
@@ -276,7 +277,7 @@ export async function handleChartsPlaylist(client, interaction, response, player
     const { name, link, fetchTime, created, previousQueue, skipSong, addSongToTop } = chartsPlData;
     if(!response.tracks) return interaction.editReply({
         ephemeral: true,
-        content: `${client.DeezEmojis.error.str} No Tracks found for the chart playlist: \`${name}\`\n> ${link}`
+        content: inlineLocale(interaction.guildLocale, "musicrequest.charts.execute.notracksplaylistfound", { name, link })
     });
     // declare that it's a playlist
     response.isPlaylist = true;
@@ -298,7 +299,7 @@ export async function handleChartsPlaylist(client, interaction, response, player
         });
         if(!player.paused && !player.playing) player.pause(false);
 
-        return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response, response.tracks || [], "CHARTS_LOADED", false, player))}).catch(console.warn);
+        return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response, response.tracks || [], "CHARTS_LOADED", false, player, { guildLocale: interaction.guildLocale }))}).catch(console.warn);
     } else {
         // add fetchTime, only if song is the next song
         if(skipSong) response.tracks[0].fetchTime = fetchTime;
@@ -307,6 +308,6 @@ export async function handleChartsPlaylist(client, interaction, response, player
         else player.queue.splice(0, 0, ...response.tracks);
         if(skipSong) player.stop();
 
-        return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response, response.tracks || [], "CHARTS_LOADED", true, player, { skipSong, addSongToTop }))}).catch(console.warn);
+        return await interaction.editReply({...(await client.DeezUtils.track.transformMessageData(response, response.tracks || [], "CHARTS_LOADED", true, player, { skipSong, addSongToTop, guildLocale: interaction.guildLocale }))}).catch(console.warn);
     }
 }
