@@ -53,14 +53,16 @@ export class BotClient extends Client {
             guild: new Collection(),
             global: new Collection()
         };
-
         this.allCommands = [];
         this.logger = new Logger({ prefix: "DEEZCORD" });
+
         this.DeezCache = {
+            timeouts: new Collection(),
             loginCache: new Collection(),
             fetchedApplication: [],
             locales: new Collection(),
         }
+
         this.init();
     }
     async init() {
@@ -696,7 +698,6 @@ export function getDefaultClientOptions() {
             roles: [],
             repliedUser: true,
         }
-        
     };
 }
 
