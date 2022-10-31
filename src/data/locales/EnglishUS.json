@@ -218,7 +218,7 @@
 	"queuemanagement": {
 		"skip": {
 			"description": "Skip the current or multiple Track(s)",
-			"options": { 
+			"options": {
 				"skip_to": "To which #track to skip to? (Default: #1, input just the Number)"
 			},
 			"execute": {
@@ -233,28 +233,22 @@
 		"playlistloaded": "{{{playlistEmoji}}} Playlist loaded",
 		"addedplaylist": "{{{playlistEmoji}}} Added playlist to the queue",
 		"playlistloadedskip": "{{{skipEmoji}}} Playlist loaded and skipping to it",
-		
 		"mixloaded": "{{{genremixEmoji}}} Genres-Mix Loaded",
 		"addedmix": "{{{genremixEmoji}}} Added genres-mix to the queue",
 		"mixloadedskip": "{{{skipEmoji}}} Genre-Mix loaded and skipping to it",
-		
 		"albumloaded": "{{{albumEmoji}}} Album loaded",
 		"addedalbum": "{{{albumEmoji}}} Added album to the queue",
 		"albumloadedskip": "{{{skipEmoji}}} Album loaded and skipping to it",
-
 		"artistloaded": "{{{artistEmoji}}} Artist's tracks loaded",
 		"addedartist": "{{{artistEmoji}}} Added artist's tracks to the queue",
 		"artistloadedskip": "{{{skipEmoji}}} Artist's tracks loaded and skipping to it",
-
 		"todaychartsplaylistloaded": "{{{deezerEmoji}}} Today's chart playlist loaded",
 		"addedtodaychartsplaylist": "{{{deezerEmoji}}} Added today's chart playlist to the queue",
 		"todaychartsplaylistloadedskip": "{{{deezerEmoji}}} Today's chart playlist loaded and skipping to it",
 		"avgtrackrank": "Avg. Track-Ranking",
-
 		"todaychartsloaded": "{{{deezerEmoji}}} Today's chart loaded",
 		"addedtodaycharts": "{{{deezerEmoji}}} Added today's chart to the queue",
 		"todaychartsloadedskip": "{{{deezerEmoji}}} Today's chart loaded and skipping to it",
-
 		"trackloaded": "{{{trackEmoji}}} Track loaded",
 		"addedtrack": "{{{trackEmoji}}} Added track to the queue",
 		"trackloadedskip": "{{{skipEmoji}}} Track loaded and skipping to it",
@@ -271,6 +265,7 @@
 		"byflowtracks": "> By {{{ping}}}'s Flow-Tracks",
 		"byrecommendations": "> By {{{ping}}}'s recommendations",
 		"currentsong": "Current Song",
-		"upcomingsongs": "Upcoming tracks - List"
+		"upcomingsongs": "Upcoming tracks - List",
+		"requester": "trackstart.requester"
 	}
 }
