@@ -213,6 +213,10 @@
 			"execute": {
 				"searching": "Now searching for your recommendations"
 			}
+		},
+		"filters": {
+			"description": "Add Audio Filters upon your current Song",
+			"execute": { }
 		}
 	},
 	"queuemanagement": {
