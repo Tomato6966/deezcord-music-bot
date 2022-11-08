@@ -10,7 +10,7 @@ lavalink:
       soundcloud: false
       twitch: false
       vimeo: false
-      http: false
+      http: true
       local: false
     bufferDurationMs: 250 # The duration of the NAS buffer. Higher values fare better against longer GC pauses
     frameBufferDurationMs: 5000 # How many milliseconds of audio to keep buffered
@@ -41,7 +41,7 @@ lavalink:
   plugins:
     - dependency: "me.rohank05:lavalink-filter-plugin:0.0.1" # replace x.x.x with the latest release tag!
       repository: "https://jitpack.io"
-    - dependency: "com.github.TopiSenpai.LavaSrc:lavasrc-plugin:3.0.6"
+    - dependency: "com.github.TopiSenpai.LavaSrc:lavasrc-plugin:3.1.4"
       repository: "https://jitpack.io"
 
 plugins:
