@@ -22,7 +22,7 @@ export default async (client, message) => {
     };
     cool.set(message.channelId, true);
     setTimeout(() => cool.delete(message.channelId), client.configData.mentionInfoCooldown);
-
+    const guildLocale = client.getGuildLocale(message.guildId);
     const hasCommand = client.commands.find(c => c.name === message.content?.split?.(/ +/g)?.[1]?.trim?.()?.toLowerCase?.());
     return message.reply({
         content: inlineLocale(guildLocale, "general.errors.useslashcmds", {
